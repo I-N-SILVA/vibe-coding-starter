@@ -1,399 +1,351 @@
-// @ts-nocheck
+'use client';
 
-import Header from '@/components/shared/Header';
-import Footer from '@/components/shared/Footer';
-import { LandingHeaderMenuItem } from '@/components/landing';
-import { LandingPrimaryImageCtaSection } from '@/components/landing';
-import { LandingSocialProof } from '@/components/landing';
-import { LandingFeatureList } from '@/components/landing';
-import { LandingProductSteps } from '@/components/landing';
-import { LandingProductFeature } from '@/components/landing';
-import { LandingTestimonialReadMoreWrapper } from '@/components/landing';
-import { LandingTestimonialGrid } from '@/components/landing';
-import { LandingSaleCtaSection } from '@/components/landing';
-import { LandingFaqCollapsibleSection } from '@/components/landing';
-import { LandingFooter } from '@/components/landing';
-import { LandingFooterColumn } from '@/components/landing';
-import { LandingFooterLink } from '@/components/landing';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Button,
+} from '@/components/plyaz';
 import Image from 'next/image';
-import { Button } from '@/components/shared/ui/button';
-import Link from 'next/link';
-import { CreditCard, Lock, Shield, TrendingUp, Users, Zap } from 'lucide-react';
 
-export default function Page() {
+/**
+ * PLYAZ Landing Page
+ * Professional, minimal, high-impact entry point
+ */
+
+export default function LandingPage() {
+  const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
-    <>
-      <Header className="mb-4" />
+    <div className="min-h-screen bg-surface-elevated">
+      {/* Top Navigation with Logo */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 md:py-4 bg-surface-elevated/80 backdrop-blur-lg border-b border-secondary-main/5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <a href="/" className="flex items-center gap-2 md:gap-3 group">
+            <Image
+              src="/static/branding/logo-circle.png"
+              alt="Plyaz"
+              width={32}
+              height={32}
+              className="transition-transform duration-300 group-hover:scale-110 md:w-9 md:h-9"
+            />
+            <span className="text-sm font-bold tracking-[0.2em] text-secondary-main uppercase">
+              PLYAZ
+            </span>
+          </a>
 
-      <LandingPrimaryImageCtaSection
-        title="A simpler way to manage your money"
-        description="Take charge of your finances with Mevolut. Your money, clear and simple."
-        imageSrc="/static/images/1.jpg"
-        imageAlt="Dashboard Preview"
-        imagePosition="right"
-        imageShadow="hard"
-        textPosition="left"
-        withBackground={false}
-        variant="primary"
-        minHeight={350}
-      >
-        <Button size="xl" asChild>
-          <Link href="/dashboard">Dashboard</Link>
-        </Button>
-        <Button size="xl" variant="outlinePrimary" asChild>
-          <Link href="/pricing">Pricing</Link>
-        </Button>
-        <LandingSocialProof
-          className="mt-6 w-full"
-          avatarItems={[
-            {
-              imageSrc: '/static/images/people/1.webp',
-              name: 'Sarah Johnson',
-            },
-            {
-              imageSrc: '/static/images/people/2.webp',
-              name: 'Michael Chen',
-            },
-            {
-              imageSrc: '/static/images/people/3.webp',
-              name: 'Emily Rodriguez',
-            },
-          ]}
-          numberOfUsers={1100}
-          suffixText="happy users"
-        />
-      </LandingPrimaryImageCtaSection>
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-secondary-main/50">
+            <a href="/about" className="hover:text-accent-main transition-colors">About</a>
+            <a href="/league/public/matches" className="hover:text-accent-main transition-colors">Matches</a>
+            <a href="/contact" className="hover:text-accent-main transition-colors">Contact</a>
+            <a href="/login" className="hover:text-accent-main transition-colors">Sign In</a>
+            <a
+              href="/league/create"
+              className="px-5 py-2 bg-accent-main text-white font-bold rounded-full text-xs tracking-widest hover:bg-accent-dark transition-colors"
+            >
+              START A LEAGUE
+            </a>
+          </div>
 
-      <div className="container-wide p-12 w-full flex flex-wrap items-center justify-center gap-6 dark:invert">
-        <span className="w-full text-center text-sm opacity-70 dark:invert">
-          As seen on
-        </span>
-        <Image
-          src="/static/images/outlets/tech-crunch.svg"
-          alt="TechCrunch"
-          width={300}
-          height={300}
-          className="w-auto h-6"
-        />
-        <Image
-          src="/static/images/outlets/the-new-york-times.svg"
-          alt="The New York Times"
-          width={300}
-          height={300}
-          className="w-auto h-8"
-        />
-        <Image
-          src="/static/images/outlets/cnn.svg"
-          alt="CNN"
-          width={300}
-          height={300}
-          className="w-auto h-7"
-        />
-        <Image
-          src="/static/images/outlets/the-verge.svg"
-          alt="The Verge"
-          width={300}
-          height={300}
-          className="w-auto h-7"
-        />
-      </div>
+          {/* Mobile Hamburger */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 -mr-2 rounded-lg hover:bg-secondary-main/5 transition-colors"
+            aria-label="Toggle menu"
+          >
+            <div className="w-6 h-5 flex flex-col justify-between">
+              <span className={`block h-0.5 w-6 bg-secondary-main transition-all duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-[9px]' : ''}`} />
+              <span className={`block h-0.5 w-6 bg-secondary-main transition-all duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`} />
+              <span className={`block h-0.5 w-6 bg-secondary-main transition-all duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-[9px]' : ''}`} />
+            </div>
+          </button>
+        </div>
+      </nav>
 
-      <LandingFeatureList
-        id="features"
-        title="Everything you need to manage your money"
-        description="Simple, powerful tools to help you take control of your finances."
-        featureItems={[
-          {
-            title: 'See your spending, simply',
-            description:
-              'Track every transaction automatically. Get instant insights into where your money goes with beautiful, easy-to-understand charts and reports.',
-            icon: <TrendingUp className="w-8 h-8" />,
-          },
-          {
-            title: 'Send and receive money instantly',
-            description:
-              'Transfer money to friends and family in seconds. No fees, no waiting. Just fast, secure payments whenever you need them.',
-            icon: <Zap className="w-8 h-8" />,
-          },
-          {
-            title: 'Save money automatically',
-            description:
-              'Set savings goals and watch your money grow. Our smart algorithms help you save without thinking about it, building your financial future effortlessly.',
-            icon: <CreditCard className="w-8 h-8" />,
-          },
-          {
-            title: 'Bank-level security',
-            description:
-              'Your money and data are protected with 256-bit encryption. We use the same security standards as major banks to keep your information safe.',
-            icon: <Shield className="w-8 h-8" />,
-          },
-          {
-            title: 'Multi-account management',
-            description:
-              'Connect all your bank accounts in one place. Get a complete view of your finances and manage everything from a single dashboard.',
-            icon: <Users className="w-8 h-8" />,
-          },
-          {
-            title: 'Privacy guaranteed',
-            description:
-              "We never sell your data. Your financial information stays private and secure. You're in complete control of who sees what.",
-            icon: <Lock className="w-8 h-8" />,
-          },
-        ]}
-        withBackground
-        withBackgroundGlow
-        variant="primary"
-        backgroundGlowVariant="primary"
-      />
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-surface-elevated/98 backdrop-blur-xl md:hidden flex flex-col items-center justify-center"
+          >
+            <nav className="flex flex-col items-center gap-6 text-center">
+              {[
+                { label: 'About', href: '/about' },
+                { label: 'Matches', href: '/league/public/matches' },
+                { label: 'Teams', href: '/league/public/teams' },
+                { label: 'Contact', href: '/contact' },
+                { label: 'Sign In', href: '/login' },
+              ].map((link, i) => (
+                <motion.a
+                  key={link.href}
+                  href={link.href}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="text-2xl font-bold tracking-wider text-secondary-main hover:text-accent-main transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </motion.a>
+              ))}
+              <motion.a
+                href="/league/create"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-4 px-8 py-4 bg-accent-main text-white font-bold rounded-full text-sm tracking-widest hover:bg-accent-dark transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                START A LEAGUE
+              </motion.a>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <LandingProductSteps
-        title="How it Works"
-        description="Get started with Mevolut in three simple steps. No complicated setup, no hidden fees."
-        display="grid"
-        withBackground={false}
-        variant="primary"
-      >
-        <LandingProductFeature
-          title="1. Sign up in minutes"
-          description="Create your account quickly and securely. Just enter your email, set a password, and you're ready to go. No lengthy forms or waiting periods."
-          imageSrc="/static/images/2.jpg"
-          imageAlt="Sign up process"
-          imagePosition="center"
-          imageShadow="soft"
-          zoomOnHover
-          minHeight={350}
-          withBackground={false}
-          withBackgroundGlow={false}
-          variant="primary"
-          backgroundGlowVariant="primary"
-        />
-        <LandingProductFeature
-          title="2. Connect your bank accounts"
-          description="Link your existing bank accounts safely using our secure connection. We support thousands of banks and credit unions across the country."
-          imageSrc="/static/images/3.jpg"
-          imageAlt="Connect banks"
-          imagePosition="center"
-          imageShadow="soft"
-          zoomOnHover
-          minHeight={350}
-          withBackground={false}
-          withBackgroundGlow={false}
-          variant="primary"
-          backgroundGlowVariant="primary"
-        />
-        <LandingProductFeature
-          title="3. Start managing your money"
-          description="View all your accounts in one place. Track spending, set budgets, and achieve your financial goals with powerful insights and automation."
-          imageSrc="/static/images/4.jpg"
-          imageAlt="Manage money"
-          imagePosition="center"
-          imageShadow="soft"
-          zoomOnHover
-          minHeight={350}
-          withBackground={false}
-          withBackgroundGlow={false}
-          variant="primary"
-          backgroundGlowVariant="primary"
-        />
-      </LandingProductSteps>
+      {/* Hero Section */}
+      <section className="relative px-4 pt-32 pb-32 md:pt-48 md:pb-64 overflow-hidden bg-primary-main">
+        {/* Massive Background Text for Depth */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden opacity-[0.03]">
+          <span className="text-[40vw] font-black tracking-tighter text-white leading-none whitespace-nowrap">
+            ELEVATE
+          </span>
+        </div>
 
-      <LandingProductFeature
-        id="security"
-        title="Your money is safe with us"
-        descriptionComponent={
-          <>
-            <p className="mb-6">
-              We take security seriously. Your financial data is protected with
-              industry-leading encryption and security measures.{' '}
+        {/* Dynamic Background Elements */}
+        <div className="absolute top-0 left-0 w-full h-full -z-0 overflow-hidden pointer-events-none">
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 5, 0],
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-[-20%] right-[-10%] w-[70%] h-[90%] bg-accent-main/10 rounded-full blur-[140px]"
+          />
+          <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[60%] bg-white/5 rounded-full blur-[100px]" />
+
+          {/* Subtle Grid Pattern */}
+          <div className="absolute inset-0 opacity-[0.05]"
+            style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="flex flex-col items-center text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-12"
+            >
+              <span className="w-2 h-2 rounded-full bg-accent-main animate-pulse" />
+              <span className="text-[10px] font-black tracking-[0.2em] text-white/60 uppercase">
+                The New Standard of Competition
+              </span>
+            </motion.div>
+
+            <div className="relative mb-12">
+              <motion.h1
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                className="text-7xl md:text-[11rem] font-black tracking-tight text-white leading-[0.85] uppercase"
+              >
+                Keep <br />
+                <span className="relative inline-block">
+                  Football
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: '100%' }}
+                    transition={{ delay: 1, duration: 1, ease: 'easeInOut' }}
+                    className="absolute bottom-4 left-0 h-4 bg-accent-main/30 -z-10"
+                  />
+                </span> <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-main to-accent-dark italic tracking-tighter">
+                  Dreams
+                </span> <br />
+                Alive
+              </motion.h1>
+
+              {/* Decorative side text */}
+              <div className="hidden xl:block absolute -right-24 top-1/2 -translate-y-1/2 rotate-90 origin-center">
+                <span className="text-[10px] font-black tracking-[0.5em] text-white/20 uppercase whitespace-nowrap">
+                  EST. TWENTY TWENTY FIVE — PLYAZ NETWORK
+                </span>
+              </div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.8 }}
+              className="max-w-2xl mx-auto"
+            >
+              <p className="text-lg md:text-2xl text-white/50 mb-12 leading-relaxed">
+                10,000+ players are released each year. <br className="hidden md:block" />
+                <span className="font-bold text-white">PLYAZ</span> bridges the gap, turning every dropout into a comeback.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                <Button
+                  size="lg"
+                  className="h-16 px-12 text-lg font-black bg-accent-main hover:bg-accent-dark text-white rounded-none skew-x-[-12deg] transition-all duration-300 hover:scale-105 shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] active:translate-y-1 active:shadow-none"
+                  onClick={() => window.open('https://community.plyaz.co.uk/', '_blank')}
+                >
+                  <span className="skew-x-[12deg]">JOIN THE NETWORK</span>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="h-16 px-12 text-lg font-black border-2 border-white/10 text-white hover:bg-white hover:text-black rounded-none skew-x-[-12deg] transition-all duration-300"
+                  onClick={() => router.push('/league')}
+                >
+                  <span className="skew-x-[12deg]">EXPLORE LEAGUES</span>
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2 }}
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4"
+        >
+          <div className="w-px h-12 bg-gradient-to-b from-accent-main to-transparent" />
+        </motion.div>
+      </section>
+
+      {/* Partners Section */}
+      <section className="py-12 border-y border-secondary-main/5 bg-surface-main/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-center text-xs font-bold tracking-[0.3em] text-secondary-main/30 uppercase mb-8">
+            Our Partners
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+            <Image src="/static/branding/rise-logo.png" alt="Rise" width={100} height={40} className="h-8 object-contain" />
+            <Image src="/static/branding/arden-logo.png" alt="Arden University" width={120} height={40} className="h-10 object-contain" />
+            <Image src="/static/branding/gs-logo.png" alt="Grant Sports" width={100} height={40} className="h-8 object-contain" />
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="relative py-24 px-6 overflow-hidden">
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { label: "Matches Played", value: "2,400+", suffix: "Elite Games" },
+              { label: "Players Connected", value: "1,200+", suffix: "Active Talents" },
+              { label: "Leagues Managed", value: "48", suffix: "Global Reach" }
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true }}
+                className="glass-panel p-8 rounded-[2rem] text-center group hover:bg-surface-main transition-colors duration-500"
+              >
+                <div className="text-4xl font-bold text-primary-main mb-2">
+                  {stat.value}
+                </div>
+                <div className="text-sm font-bold tracking-widest text-accent-main uppercase mb-4 opacity-70">
+                  {stat.label}
+                </div>
+                <div className="text-xs text-secondary-main/40 font-medium">
+                  {stat.suffix}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+        <div className="absolute inset-0 bg-secondary-main -skew-y-3 origin-right h-[120%] -translate-y-1/2 -z-20 opacity-5" />
+      </section>
+
+      {/* Trust Section */}
+      <section className="py-32 px-6">
+        <div className="max-w-5xl mx-auto text-center">
+          <h3 className="text-3xl font-bold text-primary-main mb-8 tracking-tight">
+            Aligned with the football community
+          </h3>
+          <p className="text-xl text-secondary-main/50 mb-16 max-w-2xl mx-auto leading-relaxed">
+            PLYAZ complements the work of academies, player-care teams, and community trusts — extending support beyond release and keeping players connected to the game.
+          </p>
+          <Button
+            size="lg"
+            className="h-14 px-10 text-lg font-bold bg-primary-main text-white hover:bg-black rounded-full mb-20"
+            onClick={() => window.open('https://community.plyaz.co.uk/', '_blank')}
+          >
+            JOIN US FOR FREE
+          </Button>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
+            {[
+              { title: "Spotlight", desc: "Fans and partners fuel the comeback with targeted support.", num: "01" },
+              { title: "Support", desc: "Fans and partners fuel the comeback with targeted support.", num: "02" },
+              { title: "Success", desc: "Success pays forward—players advance, backers gain rewards.", num: "03" }
+            ].map((item, i) => (
+              <div key={i} className="relative p-8 rounded-3xl bg-secondary-main/5 border border-secondary-main/5">
+                <span className="absolute top-4 right-6 text-5xl font-black text-secondary-main/10">{item.num}</span>
+                <h4 className="text-xl font-bold mb-4">{item.title}</h4>
+                <p className="text-secondary-main/50 text-sm leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <footer className="py-24 px-6 border-t border-secondary-main/5">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div className="col-span-1 md:col-span-1">
+            <Image src="/static/branding/logo.png" alt="Plyaz Logo" width={100} height={40} className="mb-6" />
+            <p className="text-sm text-secondary-main/40 leading-relaxed">
+              The future of sports. <br /> Turn your game into gain.
             </p>
-            <ul className="space-y-3 mb-8">
-              <li className="flex items-start">
-                <Shield className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
-                <span>
-                  <strong>256-bit encryption: </strong>
-                  Bank-level security protects all your data
-                </span>
-              </li>
-              <li className="flex items-start">
-                <Shield className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
-                <span>
-                  <strong>FDIC insurance: </strong>
-                  Your deposits are insured up to $250,000
-                </span>
-              </li>
-              <li className="flex items-start">
-                <Shield className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
-                <span>
-                  <strong>Privacy guaranteed: </strong>
-                  We never sell your personal information
-                </span>
-              </li>
+          </div>
+
+          <div>
+            <h5 className="font-bold mb-6 text-xs tracking-widest uppercase text-secondary-main/30">Platform</h5>
+            <ul className="space-y-4 text-sm font-medium">
+              <li><a href="https://plyaz.net/#how-it-works" className="hover:text-accent-main transition-colors">How it works</a></li>
+              <li><a href="https://plyaz.net/insights" className="hover:text-accent-main transition-colors">Insights</a></li>
+              <li><a href="https://community.plyaz.co.uk/" className="hover:text-accent-main transition-colors">Join us</a></li>
             </ul>
-          </>
-        }
-        imageSrc="/static/images/5.jpg"
-        imageAlt="Security features"
-        imagePosition="right"
-        imageShadow="hard"
-        textPosition="left"
-        withBackground
-        withBackgroundGlow
-        variant="primary"
-        backgroundGlowVariant="primary"
-        imagePerspective="bottom"
-        zoomOnHover
-        minHeight={350}
-      />
+          </div>
 
-      <LandingTestimonialReadMoreWrapper>
-        <LandingTestimonialGrid
-          title="Loved by thousands of users"
-          description="See what our customers have to say about managing their finances with Mevolut."
-          testimonialItems={[
-            {
-              name: 'Sarah Anderson',
-              text: 'Mevolut made budgeting so much easier for me. I can finally see where my money goes each month and make smarter decisions about my spending.',
-              handle: '@sarahanderson',
-              imageSrc: '/static/images/people/4.webp',
-              url: '#',
-              verified: true,
-            },
-            {
-              name: 'John Bennett',
-              text: "Mevolut helped me finally understand where my money goes each month. Now I feel in control of my finances and I'm actually saving money for the first time.",
-              handle: '@johnbennett',
-              imageSrc: '/static/images/people/5.webp',
-              url: '#',
-              verified: true,
-            },
-            {
-              name: 'Maria Garcia',
-              text: "The automatic savings feature is a game changer. I've saved more in three months with Mevolut than I did all last year trying to do it manually.",
-              handle: '@mariagarcia',
-              imageSrc: '/static/images/people/6.webp',
-              url: '#',
-            },
-            {
-              name: 'David Kim',
-              text: 'I love how simple everything is. No confusing menus or complicated features. Just straightforward money management that actually works.',
-              handle: '@davidkim',
-              imageSrc: '/static/images/people/7.webp',
-              url: '#',
-              verified: true,
-            },
-            {
-              name: 'Emily Rodriguez',
-              text: 'Being able to see all my accounts in one place has been incredible. I finally have a complete picture of my financial situation and can plan accordingly.',
-              handle: '@emilyrodriguez',
-              imageSrc: '/static/images/people/8.webp',
-              url: '#',
-            },
-            {
-              name: 'Michael Thompson',
-              text: "The security features give me peace of mind. I know my financial data is protected and my privacy is respected. That's worth everything to me.",
-              handle: '@michaelthompson',
-              imageSrc: '/static/images/people/9.webp',
-              url: '#',
-              verified: true,
-            },
-            {
-              name: 'Jessica Lee',
-              text: 'Mevolut has completely changed how I think about money. The insights and reports help me make better financial decisions every single day.',
-              handle: '@jessicalee',
-              imageSrc: '/static/images/people/10.webp',
-              url: '#',
-            },
-            {
-              name: 'Robert Martinez',
-              text: "I was skeptical at first, but Mevolut has exceeded all my expectations. It's intuitive, powerful, and has genuinely improved my financial health.",
-              handle: '@robertmartinez',
-              imageSrc: '/static/images/people/11.webp',
-              url: '#',
-              verified: true,
-            },
-            {
-              name: 'Amanda Chen',
-              text: 'The instant money transfers are so convenient. I can split bills with friends or send money to family in seconds. No more waiting days for transfers.',
-              handle: '@amandachen',
-              imageSrc: '/static/images/people/12.webp',
-              url: '#',
-            },
-          ]}
-          withBackground={false}
-          variant="primary"
-        />
-      </LandingTestimonialReadMoreWrapper>
+          <div>
+            <h5 className="font-bold mb-6 text-xs tracking-widest uppercase text-secondary-main/30">Social</h5>
+            <ul className="space-y-4 text-sm font-medium">
+              <li><a href="https://x.com/Plyaz_" className="hover:text-accent-main transition-colors">Twitter (X)</a></li>
+              <li><a href="https://www.linkedin.com/company/plyaz" className="hover:text-accent-main transition-colors">LinkedIn</a></li>
+              <li><a href="https://www.instagram.com/plyaz_/" className="hover:text-accent-main transition-colors">Instagram</a></li>
+            </ul>
+          </div>
 
-      <LandingSaleCtaSection
-        id="pricing"
-        title="Simple, fair pricing"
-        description="No hidden fees. No surprises. Just transparent pricing that makes sense for everyone."
-        withBackground
-        withBackgroundGlow
-        variant="primary"
-        backgroundGlowVariant="primary"
-      >
-        <Button size="xl" asChild>
-          <Link href="/plans">See Plans</Link>
-        </Button>
-      </LandingSaleCtaSection>
-
-      <LandingFaqCollapsibleSection
-        id="faq"
-        title="Frequently Asked Questions"
-        description="Got questions? We've got answers. Find everything you need to know about Mevolut."
-        faqItems={[
-          {
-            question: 'Is Mevolut free to use?',
-            answer:
-              'Yes! Mevolut offers a free plan with essential features. We also have premium plans with advanced features for users who need more functionality. There are no hidden fees or surprise charges.',
-          },
-          {
-            question: 'How secure is my financial data?',
-            answer:
-              'Your security is our top priority. We use 256-bit encryption, the same level of security used by major banks. Your data is protected with multiple layers of security, and we never sell your personal information to third parties.',
-          },
-          {
-            question: 'Which banks can I connect to Mevolut?',
-            answer:
-              'Mevolut supports thousands of banks and credit unions across the United States. We work with all major banks and most regional institutions. If you have questions about a specific bank, please contact our support team.',
-          },
-          {
-            question: 'Can I use Mevolut on my phone?',
-            answer:
-              'Absolutely! Mevolut works seamlessly on all devices including smartphones, tablets, and desktop computers. Access your finances anytime, anywhere with our responsive web app.',
-          },
-          {
-            question: 'How does automatic saving work?',
-            answer:
-              "Our smart algorithms analyze your spending patterns and income to automatically set aside small amounts you won't miss. You can customize your savings goals and rules, and we'll handle the rest automatically.",
-          },
-          {
-            question: 'What if I need help or have questions?',
-            answer:
-              'Our customer support team is here to help! You can reach us via email, live chat, or phone. We also have a comprehensive help center with guides and tutorials to help you get the most out of Mevolut.',
-          },
-        ]}
-        withBackground={false}
-        withBackgroundGlow={false}
-        variant="primary"
-        backgroundGlowVariant="primary"
-      />
-
-      <LandingSaleCtaSection
-        title="Ready to take control? Join Mevolut today."
-        description="Start managing your money smarter. Sign up free and see the difference in minutes."
-        withBackground
-        withBackgroundGlow
-        variant="primary"
-        backgroundGlowVariant="primary"
-      >
-        <Button size="xl" asChild>
-          <Link href="/signup">Sign Up Free</Link>
-        </Button>
-      </LandingSaleCtaSection>
-
-      <Footer className="mt-8" />
-    </>
+          <div>
+            <h5 className="font-bold mb-6 text-xs tracking-widest uppercase text-secondary-main/30">Legal</h5>
+            <ul className="space-y-4 text-sm font-medium text-secondary-main/40">
+              <li><a href="https://plyaz.net/legal/privacy-policy" className="hover:text-secondary-main transition-colors">Privacy Policy</a></li>
+              <li><a href="https://plyaz.net/legal/terms-of-service" className="hover:text-secondary-main transition-colors">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-secondary-main/5 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] font-bold tracking-[0.2em] text-secondary-main/20 uppercase">
+          <p>© 2025 PLYAZ. ALL RIGHTS RESERVED.</p>
+          <div className="flex gap-8">
+            <a href="mailto:help@plyaz.co.uk">CONTACT</a>
+            <a href="https://plyaz.gitbook.io/plyaz_25/">DESC</a>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }

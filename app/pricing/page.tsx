@@ -1,221 +1,169 @@
 'use client';
-import { useState } from 'react';
-import { cn } from '@/lib/utils';
 
-import { CheckIcon } from '@/components/icons/PricingCheckIcon';
-import { RadioGroup, RadioGroupItem } from '@/components/shared/ui/radio-group';
-import { Label } from '@/components/shared/ui/label';
-import { Button } from '@/components/shared/ui/button';
-import {
-  pricingFrequencies as frequencies,
-  pricingTiers as tiers,
-} from '@/data/config/pricingData';
-import { Header } from '@/components/shared/Header';
-import Footer from '@/components/shared/Footer';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/plyaz';
+import Image from 'next/image';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
+};
+
+const TIERS = [
+  {
+    name: 'Academy Free',
+    price: '£0',
+    desc: 'Perfect for small tournaments or individual team tracking.',
+    features: [
+      'Up to 4 Teams',
+      'Full Squad Management',
+      'Real-time Scorecards',
+      'Basic League Standings',
+      'Public Player Profiles',
+    ],
+    cta: 'Start for Free',
+    featured: false,
+  },
+  {
+    name: 'Pro League',
+    price: '£29',
+    priceSuffix: '/mo',
+    desc: 'The complete toolkit for professional league organizers.',
+    features: [
+      'Unlimited Teams',
+      'Referee Pilot Panel',
+      'Fixture Auto-Scheduler',
+      'Custom Point Rules',
+      'Player Analytics & Heatmaps',
+      'Priority Support',
+    ],
+    cta: 'Go Pro Now',
+    featured: true,
+  },
+  {
+    name: 'Enterprise / Assocation',
+    price: 'Custom',
+    desc: 'White-labeled solutions for large associations and governing bodies.',
+    features: [
+      'Multiple Multi-tenant Orgs',
+      'Custom Domain Embedding',
+      'Scout Network Integration',
+      'Dedicated Account Manager',
+      'API Access',
+    ],
+    cta: 'Contact Sales',
+    featured: false,
+  },
+];
 
 export default function PricingPage() {
-  const [frequency, setFrequency] = useState(frequencies[0]);
-
-  const bannerText = '';
-
   return (
-    <>
-      <Header />
+    <div className="min-h-screen bg-white">
+      <nav className="px-6 py-6 flex justify-between items-center border-b border-gray-50 bg-white sticky top-0 z-50">
+        <a href="/" className="flex items-center gap-2">
+          <Image src="/static/branding/logo-circle.png" alt="Plyaz" width={28} height={28} />
+          <span className="text-xs font-bold tracking-[0.2em] uppercase">PLYAZ</span>
+        </a>
+        <div className="flex gap-6">
+          <a href="/login" className="text-xs font-bold tracking-widest uppercase text-gray-400 hover:text-orange-500 transition-colors pt-3">Sign In</a>
+          <Button variant="primary" size="sm" onClick={() => window.location.href = '/league/create'}>Start League</Button>
+        </div>
+      </nav>
 
-      <div className="flex flex-col w-full items-center fancy-overlay">
-        <div className="w-full flex flex-col items-center mt-20">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8 flex flex-col items-center">
-            <div className="w-full lg:w-auto mx-auto max-w-4xl lg:text-center">
-              <h1 className="text-4xl font-semibold leading-tight md:leading-tight max-w-xs sm:max-w-none md:text-6xl fancy-heading">
-                Pricing
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-4 text-lg leading-relaxed max-w-lg">
-                Choose the plan that's right for you. We offer a free plan for
-                those who are just starting out, and a paid plan for those who
-                need more features.
-              </p>
-            </div>
+      <section className="px-6 py-24 md:py-32 bg-gray-900 text-white relative overflow-hidden text-center border-b border-gray-800">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[80%] bg-orange-500 rounded-full blur-[200px]" />
+        </div>
+        <div className="max-w-4xl mx-auto relative z-10">
+          <motion.div initial="hidden" animate="show" variants={fadeUp}>
+            <p className="text-xs font-bold tracking-[0.4em] text-orange-400 uppercase mb-6">Pricing</p>
+            <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-8 leading-[0.9]">
+              INVEST IN THE <br />
+              <span className="text-orange-500 italic">NEXT LEVEL</span>
+            </h1>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
+              Start for free and scale as your competition grows.
+              Professional grade management for any size.
+            </p>
+          </motion.div>
+        </div>
+      </section>
 
-            {bannerText ? (
-              <div className="w-full lg:w-auto flex justify-center my-4">
-                <p className="w-full px-4 py-3 text-xs bg-primary-100 text-black dark:bg-primary-300/30 dark:text-white/80 rounded-xl">
-                  {bannerText}
+      <section className="px-6 py-24 md:py-32 bg-gray-50">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+          {TIERS.map((tier, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              viewport={{ once: true }}
+              className={`p-8 md:p-10 rounded-3xl flex flex-col h-full ${tier.featured
+                  ? 'bg-gray-900 text-white shadow-2xl shadow-orange-500/10 ring-4 ring-orange-500/20'
+                  : 'bg-white border border-gray-100'
+                }`}
+            >
+              <div className="mb-10">
+                <h3 className={`text-xs font-bold tracking-widest uppercase mb-6 ${tier.featured ? 'text-orange-500' : 'text-gray-400'}`}>
+                  {tier.name}
+                </h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-5xl font-black">{tier.price}</span>
+                  {tier.priceSuffix && <span className={`text-sm ${tier.featured ? 'text-gray-400' : 'text-gray-400'}`}>{tier.priceSuffix}</span>}
+                </div>
+                <p className={`mt-4 text-sm leading-relaxed ${tier.featured ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {tier.desc}
                 </p>
               </div>
-            ) : null}
 
-            {frequencies.length > 1 ? (
-              <div className="mt-16 flex justify-center">
-                <RadioGroup
-                  defaultValue={frequency.value}
-                  onValueChange={(value: string) => {
-                    setFrequency(frequencies.find((f) => f.value === value)!);
-                  }}
-                  className="grid gap-x-1 rounded-full p-1 text-center text-xs font-semibold leading-5 bg-white dark:bg-black ring-1 ring-inset ring-gray-200/30 dark:ring-gray-800"
-                  style={{
-                    gridTemplateColumns: `repeat(${frequencies.length}, minmax(0, 1fr))`,
-                  }}
-                >
-                  <Label className="sr-only">Payment frequency</Label>
-                  {frequencies.map((option) => (
-                    <Label
-                      className={cn(
-                        frequency.value === option.value
-                          ? 'bg-primary-500/90 text-white dark:bg-primary-900/70 dark:text-white/70'
-                          : 'bg-transparent text-gray-500 hover:bg-primary-500/10',
-                        'cursor-pointer rounded-full px-2.5 py-2 transition-all',
-                      )}
-                      key={option.value}
-                      htmlFor={option.value}
-                    >
-                      {option.label}
+              <ul className="space-y-4 mb-10 flex-1">
+                {tier.features.map((f) => (
+                  <li key={f} className="flex gap-3 text-sm font-medium">
+                    <span className="text-orange-500 font-bold">✓</span>
+                    <span className={tier.featured ? 'text-gray-300' : 'text-gray-600'}>{f}</span>
+                  </li>
+                ))}
+              </ul>
 
-                      <RadioGroupItem
-                        value={option.value}
-                        id={option.value}
-                        className="hidden"
-                      />
-                    </Label>
-                  ))}
-                </RadioGroup>
-              </div>
-            ) : (
-              <div className="mt-12" aria-hidden="true"></div>
-            )}
+              <Button
+                variant={tier.featured ? 'primary' : 'secondary'}
+                fullWidth
+                onClick={() => window.location.href = tier.price === 'Custom' ? '/contact' : '/login'}
+                className="h-14 font-black uppercase tracking-widest text-xs"
+              >
+                {tier.cta}
+              </Button>
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
-            <div
-              className={cn(
-                'isolate mx-auto mt-4 mb-28 grid max-w-md grid-cols-1 gap-8 lg:mx-0 lg:max-w-none',
-                tiers.length === 2 ? 'lg:grid-cols-2' : '',
-                tiers.length === 3 ? 'lg:grid-cols-3' : '',
-              )}
-            >
-              {tiers.map((tier) => (
-                <div
-                  key={tier.id}
-                  className={cn(
-                    tier.featured
-                      ? '!bg-gray-900 ring-gray-900 dark:!bg-gray-100 dark:ring-gray-100'
-                      : 'bg-white dark:bg-gray-900/80 ring-gray-300/70 dark:ring-gray-700',
-                    'max-w-xs ring-1 rounded-3xl p-8 xl:p-10',
-                    tier.highlighted ? 'fancy-glass-contrast' : '',
-                  )}
-                >
-                  <h3
-                    id={tier.id}
-                    className={cn(
-                      tier.featured ? 'text-white dark:text-black' : '',
-                      'text-2xl font-bold tracking-tight',
-                    )}
-                  >
-                    {tier.name}
-                  </h3>
-                  <p
-                    className={cn(
-                      tier.featured
-                        ? 'text-gray-300 dark:text-gray-500'
-                        : 'text-gray-600 dark:text-gray-400',
-                      'mt-4 text-sm leading-6',
-                    )}
-                  >
-                    {tier.description}
-                  </p>
-                  <p className="mt-6 flex items-baseline gap-x-1">
-                    <span
-                      className={cn(
-                        tier.featured ? 'text-white dark:text-black' : '',
-                        'text-4xl font-bold tracking-tight',
-                        tier.discountPrice &&
-                          tier.discountPrice[frequency.value]
-                          ? 'line-through'
-                          : '',
-                      )}
-                    >
-                      {typeof tier.price === 'string'
-                        ? tier.price
-                        : tier.price[frequency.value]}
-                    </span>
+      <section className="px-6 py-24 bg-white">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10 p-10 rounded-3xl bg-orange-50 border border-orange-100">
+          <div className="text-center md:text-left">
+            <h3 className="text-xl font-bold mb-2">Non-profit or Community Charity?</h3>
+            <p className="text-sm text-gray-500">We offer specialized discounts and free Pro access for qualified community organizations.</p>
+          </div>
+          <Button variant="secondary" onClick={() => window.location.href = '/contact'}>Apply Now</Button>
+        </div>
+      </section>
 
-                    <span
-                      className={cn(
-                        tier.featured ? 'text-white dark:text-black' : '',
-                      )}
-                    >
-                      {typeof tier.discountPrice === 'string'
-                        ? tier.discountPrice
-                        : tier.discountPrice[frequency.value]}
-                    </span>
-
-                    {typeof tier.price !== 'string' ? (
-                      <span
-                        className={cn(
-                          tier.featured
-                            ? 'text-gray-300 dark:text-gray-500'
-                            : 'dark:text-gray-400 text-gray-600',
-                          'text-sm font-semibold leading-6',
-                        )}
-                      >
-                        {frequency.priceSuffix}
-                      </span>
-                    ) : null}
-                  </p>
-                  <a
-                    href={tier.href}
-                    aria-describedby={tier.id}
-                    className={cn(
-                      'flex mt-6 shadow-sm hover:opacity-80 transition-opacity',
-                      tier.soldOut ? 'pointer-events-none' : '',
-                    )}
-                  >
-                    <Button
-                      size="lg"
-                      disabled={tier.soldOut}
-                      className={cn(
-                        'w-full',
-                        tier.featured || tier.soldOut ? 'grayscale' : '',
-                        !tier.highlighted && !tier.featured
-                          ? 'bg-gray-100 dark:bg-gray-600'
-                          : '',
-                      )}
-                      variant={tier.highlighted ? 'default' : 'outline'}
-                    >
-                      {tier.soldOut ? 'Sold out' : tier.cta}
-                    </Button>
-                  </a>
-
-                  <ul
-                    className={cn(
-                      tier.featured
-                        ? 'text-gray-300 dark:text-gray-500'
-                        : 'text-gray-700 dark:text-gray-400',
-                      'mt-8 space-y-3 text-sm leading-6 xl:mt-10',
-                    )}
-                  >
-                    {tier.features.map((feature) => (
-                      <li key={feature} className="flex gap-x-3">
-                        <CheckIcon
-                          className={cn(
-                            tier.featured ? 'text-white dark:text-black' : '',
-                            tier.highlighted
-                              ? 'text-primary-500'
-                              : 'text-gray-500',
-
-                            'h-6 w-5 flex-none',
-                          )}
-                          aria-hidden="true"
-                        />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+      <footer className="px-6 py-24 bg-gray-50 mt-12">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
+          <div className="flex items-center gap-2">
+            <Image src="/static/branding/logo-circle.png" alt="Plyaz" width={24} height={24} />
+            <span className="text-xs font-bold tracking-[0.2em] uppercase text-gray-400">PLYAZ &copy; 2025</span>
+          </div>
+          <div className="flex gap-8">
+            {['Features', 'FAQ', 'Terms', 'Privacy'].map((item) => (
+              <a key={item} href={`/${item.toLowerCase()}`} className="text-[10px] font-bold tracking-widest uppercase text-gray-400 hover:text-orange-500 transition-colors">
+                {item}
+              </a>
+            ))}
           </div>
         </div>
-      </div>
-
-      <Footer />
-    </>
+      </footer>
+    </div>
   );
 }

@@ -9,23 +9,21 @@ export default function Status() {
       <div className="w-full flex flex-col items-center my-12">
         <section className="w-full p-6 container-narrow">
           <h1 className="text-4xl font-semibold leading-tight md:leading-tight max-w-xs sm:max-w-none md:text-6xl fancy-heading">
-            System Status
+            Platform Status
           </h1>
 
           <p className="mt-6 md:text-xl">
-            At Mevolut, we prioritize the availability and security of your
-            financial tools. Our system status page provides real-time updates
-            on the operational status of our platform, including services
-            related to managing your money, tracking expenses, sending money,
-            and growing your savings. We are committed to maintaining a seamless
-            experience so you can manage your finances easily and confidently.
+            At PLYAZ, we prioritize the availability and reliability of your
+            competition toolset. Our status page provides real-time updates
+            on the operational health of our platform, including live scoring,
+            management portals, and fan-facing scoreboards. We are committed
+            to maintaining zero-downtime during your peak match hours.
           </p>
 
           <p className="mt-6 md:text-xl">
-            If you encounter any issues or have questions about our system, our
-            team is here to support you. Stay informed with the latest updates
-            to ensure you always have access to your finances when you need them
-            most.
+            If you encounter any issues during a live match session, our
+            support team is on standby to assist you. Trust PLYAZ to deliver the
+            pulse of the game without interruption.
           </p>
         </section>
       </div>

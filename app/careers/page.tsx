@@ -9,22 +9,21 @@ export default function Careers() {
       <div className="w-full flex flex-col items-center my-12">
         <section className="w-full p-6 container-narrow">
           <h1 className="text-4xl font-semibold leading-tight md:leading-tight max-w-xs sm:max-w-none md:text-6xl fancy-heading">
-            Join the Mevolut Team
+            Join the PLYAZ Team
           </h1>
 
           <p className="mt-6 md:text-xl">
-            At Mevolut, we're on a mission to make personal finance
-            straightforward and accessible for everyone. We're looking for
-            passionate, innovative individuals to help us revolutionize how
-            people manage their money. If you're eager to make an impact and
-            thrive in a dynamic environment, we want to hear from you.
+            Are you passionate about the pulse of the game? At PLYAZ, we're building
+            the future of competition management, and we're looking for talented
+            individuals to join us on our journey.
           </p>
 
           <p className="mt-6 md:text-xl">
-            Explore opportunities to grow your career with a company dedicated
-            to safety, simplicity, and customer success. Bring your ideas,
-            skills, and enthusiasm — together, we can build something
-            extraordinary.
+            We're a team of innovators, dreamers, and doers, all working together
+            to revolutionize how leagues are managed and experienced. If you're
+            ready to make a real impact and help us shape the world of sport, we
+            want to hear from you. Explore our open positions and join the PLYAZ
+            family today!
           </p>
         </section>
       </div>

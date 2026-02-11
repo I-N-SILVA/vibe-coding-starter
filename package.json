@@ -1,6 +1,6 @@
 {
-  "name": "Mevolut",
-  "description": "Manage your money the easy way with Mevolut. Track expenses, send money, and grow your savings – safely and simply. Sign up free today!",
+  "name": "plyaz",
+  "description": "Professional-grade league and tournament management. Track scores, manage teams, and engage fans with PLYAZ.",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -48,8 +48,11 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@shipixen/pliny": "^2.3.4",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.95.3",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
+    "@tanstack/react-query": "^5.90.20",
     "@tanstack/react-table": "^8.21.3",
     "@types/react-dom": "^19.2.1",
     "@vercel/analytics": "^1.5.0",

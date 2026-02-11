@@ -13,10 +13,11 @@ export default function Cookies() {
           </h1>
 
           <p className="mt-6 md:text-xl">
-            At Mevolut, we use cookies to enhance your experience, personalize
+            At PLYAZ, we use cookies to enhance your experience, personalize
             content, and analyze website traffic. Cookies help us understand how
             visitors interact with our platform, enabling us to improve our
-            services and ensure a safer, more efficient experience for you.
+            league management tools and ensure a safer, more efficient
+            experience for you.
           </p>
 
           <p className="mt-6 md:text-xl">

@@ -13,9 +13,12 @@ const eslintConfig = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
     rules: {
-      '@typescript-eslint/no-unused-vars': 'off',
+      // Maintainability rules
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
       'react/no-unescaped-entities': 'off',
     },
   },

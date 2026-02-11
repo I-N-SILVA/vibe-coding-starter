@@ -1,4 +1,4 @@
-import { Nunito_Sans } from 'next/font/google';
+import { Playfair_Display } from 'next/font/google';
 import { siteConfig } from '@/data/config/site.settings';
 import { ThemeProviders } from './theme-providers';
 import { Metadata } from 'next';
@@ -8,17 +8,16 @@ import { colors } from '@/data/config/colors.js';
 import '@/css/globals.css';
 import { SearchProvider } from '@/components/shared/SearchProvider';
 import { AnalyticsWrapper } from '@/components/shared/Analytics';
+import { QueryProvider, ToastProvider } from '@/components/providers';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ClientShortcuts } from '@/components/shared/ClientShortcuts';
+import { PWARegistration } from '@/components/shared/PWARegistration';
+import { AuthProviderWrapper } from '@/components/providers/AuthProviderWrapper';
 
-const displayFont = Nunito_Sans({
+const displayFont = Playfair_Display({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-space-display',
-});
-
-const baseFont = Nunito_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-space-default',
 });
 
 const globalColors = colors;
@@ -38,6 +37,7 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.title}`,
   },
   description: siteConfig.description,
+  manifest: '/manifest.json',
   openGraph: {
     title: siteConfig.title,
     description: siteConfig.description,
@@ -79,10 +79,14 @@ export default function RootLayout({
   return (
     <html
       lang={siteConfig.language}
-      className={`${baseFont.variable} ${displayFont.variable} scroll-smooth`}
+      className={`${displayFont.variable} scroll-smooth`}
       suppressHydrationWarning
     >
       <head>
+        <link
+          href="https://api.fontshare.com/v2/css?f[]=general-sans@200,300,400,500,600,700&display=swap"
+          rel="stylesheet"
+        />
         <style>
           {`
           :root, :before, :after {
@@ -90,56 +94,29 @@ export default function RootLayout({
           }
         `}
         </style>
-
-        <link
-          rel="apple-touch-icon"
-          sizes="76x76"
-          href="/static/favicons/apple-touch-icon.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="/static/favicons/favicon-32x32.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/static/favicons/favicon-16x16.png"
-        />
-        <link rel="manifest" href="/static/favicons/manifest.webmanifest" />
-        <link
-          rel="mask-icon"
-          href="/static/favicons/safari-pinned-tab.svg"
-          color="#5bbad5"
-        />
-        <meta name="generator" content="Shipixen" />
-        <meta name="msapplication-TileColor" content="#000000" />
-        <meta
-          name="theme-color"
-          media="(prefers-color-scheme: light)"
-          content="#fff"
-        />
-        <meta
-          name="theme-color"
-          media="(prefers-color-scheme: dark)"
-          content="#000"
-        />
-        <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
+        <link rel="icon" type="image/png" sizes="112x112" href="/favicon.png" />
+        <link rel="icon" type="image/png" href="/static/branding/logo-circle.png" />
+        <link rel="apple-touch-icon" href="/static/branding/logo-circle.png" />
+        <meta name="description" content="10,000+ players are released each year. PLYAZ keeps their journeys alive. Elite tournament management and real-time statistics." />
       </head>
 
-      <body className="flex flex-col bg-white text-black antialiased dark:bg-gray-950 dark:text-white min-h-screen">
+      <body className="min-h-screen bg-surface-elevated text-secondary-main antialiased selection:bg-accent-lighter/30">
         <ThemeProviders>
-          <AnalyticsWrapper />
+          <QueryProvider>
+            <ToastProvider>
+              <ErrorBoundary>
+                <AnalyticsWrapper />
+                <ClientShortcuts />
+                <PWARegistration />
 
-          <div className="w-full flex flex-col justify-between items-center font-sans">
-            <SearchProvider>
-              <main className="w-full flex flex-col items-center mb-auto">
-                {children}
-              </main>
-            </SearchProvider>
-          </div>
+                <SearchProvider>
+                  <AuthProviderWrapper>
+                    {children}
+                  </AuthProviderWrapper>
+                </SearchProvider>
+              </ErrorBoundary>
+            </ToastProvider>
+          </QueryProvider>
         </ThemeProviders>
       </body>
     </html>

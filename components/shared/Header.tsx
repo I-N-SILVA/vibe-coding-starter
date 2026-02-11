@@ -11,14 +11,7 @@ export const Header = ({ className }: { className?: string }) => {
       variant="primary"
       logoComponent={
         <div className="flex items-center text-primary-500 dark:text-primary-500 gap-3">
-          <Image
-            src="/static/images/logo.png"
-            alt="Mevolut logo"
-            width={200}
-            height={200}
-            className="h-8 w-8 rounded-full"
-          />
-          <span className="font-bold text-lg">Mevolut</span>
+          <span className="font-bold text-lg tracking-widest">PLYAZ</span>
         </div>
       }
     >
@@ -30,7 +23,7 @@ export const Header = ({ className }: { className?: string }) => {
         {'Security'}
       </LandingHeaderMenuItem>
       <LandingHeaderMenuItem href="/help">{'Help'}</LandingHeaderMenuItem>
-      <LandingHeaderMenuItem type="button" href="/dashboard">
+      <LandingHeaderMenuItem type="button" href="/league">
         Dashboard
       </LandingHeaderMenuItem>
 

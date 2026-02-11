@@ -1,18 +1,38 @@
-/* Configure colors at https://shipixen.com/color-theme-explorer-shadcn */
+/* PLYAZ League Manager - Color Configuration
+ * Updated to premium monochromatic with vibrant accents.
+ */
 const colors = {
   primary: {
-    lighter: '#fde047',
-    light: '#facc15',
-    main: '#eab308',
-    dark: '#ca8a04',
-    darker: '#a16207',
+    lighter: '#262626',
+    light: '#171717',
+    main: '#000000',
+    dark: '#000000',
+    darker: '#000000',
   },
   secondary: {
-    lighter: '#6ee7b7',
-    light: '#34d399',
-    main: '#10b981',
-    dark: '#059669',
-    darker: '#047857',
+    lighter: '#F8F8F8',
+    light: '#F5F5F5',
+    main: '#262626',
+    dark: '#171717',
+    darker: '#000000',
+  },
+  accent: {
+    lighter: '#FF9B6D',
+    light: '#FF7A3D',
+    main: '#FF5C1A',
+    dark: '#E64A00',
+    darker: '#B33900',
+  },
+  surface: {
+    main: '#FFFFFF',
+    elevated: '#F9FAFB',
+    glass: 'rgba(255, 255, 255, 0.7)',
+  },
+  status: {
+    live: '#FF5C1A',
+    upcoming: '#737373',
+    completed: '#10B981',
+    cancelled: '#EF4444',
   },
 };
 
