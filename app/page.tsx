@@ -109,116 +109,203 @@ export default function LandingPage() {
       </AnimatePresence>
 
       {/* Hero Section */}
-      {/* Hero Section */}
-      <section className="relative px-4 pt-24 pb-0 md:pt-32 md:pb-0 overflow-hidden bg-primary-main min-h-[90vh] flex flex-col justify-end">
-        {/* Dynamic Background Elements */}
-        <div className="absolute top-0 left-0 w-full h-full -z-0 overflow-hidden pointer-events-none">
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.1, 0.15, 0.1],
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-[-20%] right-[-10%] w-[80vw] h-[80vw] bg-accent-main/10 rounded-full blur-[140px]"
-          />
-          <div className="absolute inset-0 opacity-[0.03]"
-            style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '60px 60px' }}
-          />
-        </div>
+      <section className="relative overflow-hidden bg-primary-main min-h-screen flex items-end">
+        {/* === ATMOSPHERE LAYERS === */}
 
-        <div className="max-w-[95rem] mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pb-12 md:pb-20">
+        {/* Base grid texture */}
+        <div
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+            backgroundSize: '80px 80px',
+          }}
+        />
 
-          {/* Main Content Area */}
-          <div className="lg:col-span-7 flex flex-col justify-center relative z-20 pt-10 md:pt-0">
+        {/* Diagonal accent slash */}
+        <motion.div
+          initial={{ scaleY: 0 }}
+          animate={{ scaleY: 1 }}
+          transition={{ duration: 1.2, delay: 0.3, ease: 'circOut' as const }}
+          className="absolute top-0 right-[18%] w-[2px] h-full bg-gradient-to-b from-transparent via-accent-main/30 to-transparent origin-top pointer-events-none hidden lg:block"
+        />
+
+        {/* Warm radial glow — top-right, behind player */}
+        <motion.div
+          animate={{ scale: [1, 1.15, 1], opacity: [0.12, 0.18, 0.12] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' as const }}
+          className="absolute top-[-15%] right-[-5%] w-[70vw] h-[70vw] rounded-full bg-accent-main/15 blur-[160px] pointer-events-none"
+        />
+
+        {/* Cool counter-glow — bottom-left */}
+        <div className="absolute bottom-[-20%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-white/[0.02] blur-[120px] pointer-events-none" />
+
+        {/* Horizontal rule accent */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 1.5, delay: 0.8, ease: 'circOut' as const }}
+          className="absolute bottom-[28%] left-0 w-[40%] h-[1px] bg-gradient-to-r from-accent-main/40 to-transparent origin-left pointer-events-none hidden lg:block"
+        />
+
+        {/* === CONTENT === */}
+        <div className="relative z-10 w-full max-w-[90rem] mx-auto px-5 md:px-10 pb-16 md:pb-24 pt-28 md:pt-36">
+          <div className="grid grid-cols-1 lg:grid-cols-12 items-end gap-0">
+
+            {/* LEFT — Text block */}
+            <div className="lg:col-span-7 xl:col-span-6 relative z-20 flex flex-col">
+
+              {/* Pill badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-white/10 bg-white/[0.04] backdrop-blur-md w-fit mb-10"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-main opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-main shadow-[0_0_8px_rgba(255,92,26,0.6)]" />
+                </span>
+                <span className="text-[11px] font-bold tracking-[0.22em] text-white/70 uppercase">
+                  The New Standard
+                </span>
+              </motion.div>
+
+              {/* Headline */}
+              <div className="overflow-hidden mb-4">
+                <motion.h1
+                  initial={{ y: '110%' }}
+                  animate={{ y: 0 }}
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                  className="text-[clamp(3.5rem,13vw,10rem)] lg:text-[clamp(6rem,8.5vw,9.5rem)] leading-[0.85] font-black tracking-[-0.04em] text-white"
+                >
+                  KEEP
+                </motion.h1>
+              </div>
+              <div className="overflow-hidden mb-4">
+                <motion.h1
+                  initial={{ y: '110%' }}
+                  animate={{ y: 0 }}
+                  transition={{ duration: 0.9, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  className="text-[clamp(3.5rem,13vw,10rem)] lg:text-[clamp(6rem,8.5vw,9.5rem)] leading-[0.85] font-black tracking-[-0.04em]"
+                >
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-main via-accent-light to-white/90">
+                    DREAMS
+                  </span>
+                </motion.h1>
+              </div>
+              <div className="overflow-hidden mb-10 md:mb-12">
+                <motion.h1
+                  initial={{ y: '110%' }}
+                  animate={{ y: 0 }}
+                  transition={{ duration: 0.9, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
+                  className="text-[clamp(3.5rem,13vw,10rem)] lg:text-[clamp(6rem,8.5vw,9.5rem)] leading-[0.85] font-black tracking-[-0.04em] text-white"
+                >
+                  ALIVE
+                </motion.h1>
+              </div>
+
+              {/* Sub-copy */}
+              <motion.p
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.55 }}
+                className="text-base md:text-xl text-white/50 max-w-lg leading-relaxed mb-10 md:mb-12 font-medium"
+              >
+                10,000+ players released. One platform to catch them.{' '}
+                <br className="hidden md:block" />
+                <span className="text-white font-bold">PLYAZ</span>{' '}
+                <span className="text-white/50">turns &ldquo;game over&rdquo; into &ldquo;game on.&rdquo;</span>
+              </motion.p>
+
+              {/* CTAs */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+                className="flex flex-col sm:flex-row gap-4 mb-14 md:mb-16"
+              >
+                <Button
+                  size="lg"
+                  className="group relative h-14 px-9 text-sm font-black tracking-wider bg-accent-main hover:bg-accent-dark text-white rounded-xl overflow-hidden transition-all duration-300 shadow-[0_0_40px_rgba(255,92,26,0.25)] hover:shadow-[0_0_60px_rgba(255,92,26,0.4)]"
+                  onClick={() => window.open('https://community.plyaz.co.uk/', '_blank')}
+                >
+                  <span className="relative z-10">JOIN THE NETWORK</span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-accent-dark to-accent-main opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Button>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="h-14 px-9 text-sm font-black tracking-wider border border-white/15 bg-white/[0.04] text-white hover:bg-white hover:text-primary-main rounded-xl backdrop-blur-sm transition-all duration-300"
+                  onClick={() => router.push('/league')}
+                >
+                  EXPLORE LEAGUES
+                </Button>
+              </motion.div>
+
+              {/* Social proof strip */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 1 }}
+                className="flex items-center gap-8 text-white/30"
+              >
+                {[
+                  { val: '2,400+', label: 'Matches' },
+                  { val: '1,200+', label: 'Players' },
+                  { val: '48', label: 'Leagues' },
+                ].map((s, i) => (
+                  <div key={i} className="flex flex-col">
+                    <span className="text-lg md:text-xl font-black text-white/80 tabular-nums">{s.val}</span>
+                    <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/30">{s.label}</span>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+
+            {/* RIGHT — Player image (desktop) */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 w-fit backdrop-blur-sm"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.2, delay: 0.25, ease: 'easeOut' as const }}
+              className="hidden lg:flex lg:col-span-5 xl:col-span-6 relative justify-end items-end h-[92vh] -mb-24 pointer-events-none select-none"
             >
-              <span className="w-2 h-2 rounded-full bg-accent-main animate-pulse shadow-[0_0_10px_rgba(249,115,22,0.5)]" />
-              <span className="text-xs font-black tracking-[0.2em] text-white/80 uppercase">
-                The New Standard
-              </span>
+              {/* Glow behind player */}
+              <div className="absolute bottom-[15%] right-[10%] w-[80%] h-[60%] bg-gradient-to-t from-accent-main/20 via-accent-main/5 to-transparent blur-[80px] rounded-full" />
+
+              {/* Player */}
+              <div className="relative w-full h-full">
+                <Image
+                  src="/static/branding/footballer.png"
+                  alt="Elite Athlete"
+                  fill
+                  className="object-contain object-bottom drop-shadow-[0_30px_60px_rgba(0,0,0,0.6)]"
+                  priority
+                  sizes="(max-width: 1024px) 0vw, 50vw"
+                />
+              </div>
+
+              {/* Bottom edge fade so player blends into section boundary */}
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary-main to-transparent z-10" />
             </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "circOut" }}
-              className="text-[15vw] lg:text-[11rem] leading-[0.8] font-black tracking-tighter text-white mb-8 mix-blend-overlay md:mix-blend-normal"
-            >
-              KEEP <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-main to-white">DREAMS</span> <br />
-              ALIVE
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 0.5 }}
-              className="text-lg md:text-2xl text-white/60 mb-10 max-w-xl leading-relaxed font-medium"
-            >
-              10,000+ players released. One platform to catch them. <br />
-              <span className="text-white font-bold">PLYAZ</span> turns "game over" into "game on."
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-              className="flex flex-col sm:flex-row gap-5"
-            >
-              <Button
-                size="lg"
-                className="h-16 px-10 text-xl font-black bg-accent-main hover:bg-accent-dark text-white rounded-2xl shadow-[0_0_30px_rgba(249,115,22,0.3)] hover:shadow-[0_0_50px_rgba(249,115,22,0.5)] transition-all duration-300"
-                onClick={() => window.open('https://community.plyaz.co.uk/', '_blank')}
-              >
-                JOIN THE NETWORK
-              </Button>
-              <Button
-                size="lg"
-                variant="secondary"
-                className="h-16 px-10 text-xl font-black border border-white/20 bg-white/5 text-white hover:bg-white hover:text-primary-main rounded-2xl backdrop-blur-sm transition-all duration-300"
-                onClick={() => router.push('/league')}
-              >
-                EXPLORE LEAGUES
-              </Button>
-            </motion.div>
-          </div>
-
-          {/* Player Image Layer - Overlapping and Huge */}
-          <motion.div
-            initial={{ opacity: 0, x: 50, scale: 0.9 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-            className="hidden lg:block lg:col-span-5 relative h-[90vh] -mb-32 z-10 pointer-events-none"
-          >
-            {/* Glow Effect behind player */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[80%] bg-gradient-to-b from-accent-main/20 to-transparent blur-3xl -z-10 rounded-full mix-blend-screen" />
-
-            <Image
-              src="/static/branding/footballer.png"
-              alt="Elite Athlete"
-              fill
-              className="object-contain object-bottom drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </motion.div>
-
-          {/* Mobile Player Image */}
-          <div className="lg:hidden w-full h-[50vh] relative mt-[-10vh] z-0 opacity-40 grayscale-[50%] mask-image-b">
-            <Image
-              src="/static/branding/footballer.png"
-              alt="Elite Athlete"
-              fill
-              className="object-contain object-bottom"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-primary-main via-transparent to-transparent" />
+            {/* Mobile player (background wash) */}
+            <div className="lg:hidden absolute inset-0 z-0 pointer-events-none">
+              <Image
+                src="/static/branding/footballer.png"
+                alt="Elite Athlete"
+                fill
+                className="object-contain object-right-bottom opacity-20 grayscale-[40%]"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary-main via-primary-main/90 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary-main via-transparent to-primary-main/80" />
+            </div>
           </div>
         </div>
+
+        {/* Bottom edge glow line */}
+        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-accent-main/40 to-transparent z-20" />
       </section>
 
       {/* Partners Section */}
