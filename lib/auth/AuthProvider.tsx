@@ -70,14 +70,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const initAuth = async () => {
             try {
-                const { data: { user: authUser } } = await supabase.auth.getUser();
+                console.log('[Auth] Initializing session...');
+                const { data: { user: authUser } } = await Promise.race([
+                    supabase.auth.getUser(),
+                    new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Auth init timed out')), 10000))
+                ]);
                 if (authUser) {
+                    console.log('[Auth] Session found for:', authUser.email);
                     const prof = await fetchProfile(authUser.id);
                     setUser({ id: authUser.id, email: authUser.email || '', profile: prof });
                     setProfile(prof);
+                } else {
+                    console.log('[Auth] No active session');
                 }
-            } catch {
-                // No auth session
+            } catch (err) {
+                console.error('[Auth] Initialization error:', err);
             } finally {
                 setIsLoading(false);
             }
