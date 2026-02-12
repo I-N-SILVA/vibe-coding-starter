@@ -39,8 +39,13 @@ export default function LoginPage() {
         role: 'organizer' as any,
     });
     const [message, setMessage] = useState('');
+    const [envCheck, setEnvCheck] = useState({ hasUrl: true, hasKey: true });
 
     useEffect(() => {
+        const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const hasKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        setEnvCheck({ hasUrl, hasKey });
+
         if (user && !authLoading) {
             router.push('/league');
         }
@@ -72,7 +77,7 @@ export default function LoginPage() {
                 setMessage(error);
                 setIsLoading(false);
             } else {
-                // AuthProvider will handle the redirect via the useEffect above
+                // AuthProvider will handle the redirect via the useEffect
             }
         } else if (mode === 'forgot') {
             // TODO: Implement forgot password in AuthProvider
@@ -170,9 +175,16 @@ export default function LoginPage() {
                                 )}
 
                                 {message && (
-                                    <p className={`text-sm text-center py-2 px-3 rounded-lg ${message.includes('sent') ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                                    <p className={`text-sm text-center py-2 px-3 rounded-lg ${message.includes('successful') || message.includes('sent') ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                                         {message}
                                     </p>
+                                )}
+
+                                {(!envCheck.hasUrl || !envCheck.hasKey) && (
+                                    <div className="bg-red-50 border border-red-100 rounded-lg p-4 text-xs text-red-600">
+                                        <p className="font-bold mb-1">Configuration Error</p>
+                                        <p>Supabase environment variables are missing. Please add <strong>NEXT_PUBLIC_SUPABASE_URL</strong> and <strong>NEXT_PUBLIC_SUPABASE_ANON_KEY</strong> to your Vercel project settings.</p>
+                                    </div>
                                 )}
 
                                 <Button

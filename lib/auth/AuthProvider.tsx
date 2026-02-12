@@ -42,6 +42,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const supabase = createClient();
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+            const hasKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+            console.log('[Auth] Supabase Config Check:', { hasUrl, hasKey });
+        }
+    }, []);
+
     // Fetch profile from Supabase
     const fetchProfile = useCallback(async (userId: string) => {
         try {
@@ -95,20 +103,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Sign In
     const signIn = async (email: string, password: string) => {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        return { error: error?.message || null };
+        try {
+            console.log('[Auth] Attempting sign in for:', email);
+            const { error } = await Promise.race([
+                supabase.auth.signInWithPassword({ email, password }),
+                new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Sign in timed out')), 15000))
+            ]);
+            if (error) console.error('[Auth] Sign in error:', error);
+            return { error: error?.message || null };
+        } catch (err: any) {
+            console.error('[Auth] Sign in exception:', err);
+            return { error: err.message || 'An unexpected error occurred' };
+        }
     };
 
     // Sign Up
     const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'fan') => {
-        const { error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: { full_name: fullName, role },
-            },
-        });
-        return { error: error?.message || null };
+        try {
+            console.log('[Auth] Attempting sign up for:', email);
+            const { error } = await Promise.race([
+                supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: { full_name: fullName, role },
+                    },
+                }),
+                new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Sign up timed out')), 15000))
+            ]);
+            if (error) console.error('[Auth] Sign up error:', error);
+            return { error: error?.message || null };
+        } catch (err: any) {
+            console.error('[Auth] Sign up exception:', err);
+            return { error: err.message || 'An unexpected error occurred' };
+        }
     };
 
     // Sign Out
