@@ -11,3 +11,6 @@ export type { TeamCardProps } from './TeamCard';
 
 export { PlayerCard } from './PlayerCard';
 export type { PlayerCardProps } from './PlayerCard';
+
+export { UltimatePlayerCard } from './UltimatePlayerCard';
+export type { UltimatePlayerCardProps } from './UltimatePlayerCard';

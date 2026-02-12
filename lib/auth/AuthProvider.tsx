@@ -30,29 +30,6 @@ interface AuthContextType {
 }
 
 // ============================================
-// DEMO MODE
-// ============================================
-
-const DEMO_USER: AuthUser = {
-    id: 'demo-user-001',
-    email: 'admin@plyaz.net',
-    profile: {
-        id: 'demo-user-001',
-        full_name: 'Demo Admin',
-        avatar_url: null,
-        role: 'admin',
-        organization_id: 'demo-org-001',
-        phone: null,
-        bio: null,
-        position: null,
-        jersey_number: null,
-        nationality: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-    },
-};
-
-// ============================================
 // CONTEXT
 // ============================================
 
@@ -64,7 +41,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     const supabase = createClient();
-    const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL && !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder');
 
     // Fetch profile from Supabase
     const fetchProfile = useCallback(async (userId: string) => {
@@ -84,15 +60,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Initialize auth state
     useEffect(() => {
-        if (!hasSupabase) {
-            // Demo mode — automatically authenticate as admin
-            setUser(DEMO_USER);
-            setProfile(DEMO_USER.profile);
-            setIsLoading(false);
-            return;
-        }
-
-        // Real Supabase auth
         const initAuth = async () => {
             try {
                 const { data: { user: authUser } } = await supabase.auth.getUser();
@@ -124,28 +91,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         return () => subscription.unsubscribe();
-    }, [hasSupabase, supabase, fetchProfile]);
+    }, [supabase, fetchProfile]);
 
     // Sign In
     const signIn = async (email: string, password: string) => {
-        if (!hasSupabase) {
-            setUser(DEMO_USER);
-            setProfile(DEMO_USER.profile);
-            return { error: null };
-        }
-
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         return { error: error?.message || null };
     };
 
     // Sign Up
     const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'fan') => {
-        if (!hasSupabase) {
-            setUser(DEMO_USER);
-            setProfile(DEMO_USER.profile);
-            return { error: null };
-        }
-
         const { error } = await supabase.auth.signUp({
             email,
             password,
@@ -158,11 +113,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Sign Out
     const signOut = async () => {
-        if (!hasSupabase) {
-            setUser(null);
-            setProfile(null);
-            return;
-        }
         await supabase.auth.signOut();
         setUser(null);
         setProfile(null);
@@ -171,12 +121,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Update Profile
     const updateProfile = async (updates: Partial<Profile>) => {
         if (!user) return { error: 'Not authenticated' };
-        if (!hasSupabase) {
-            const updatedProfile = { ...profile, ...updates } as Profile;
-            setProfile(updatedProfile);
-            setUser({ ...user, profile: updatedProfile });
-            return { error: null };
-        }
 
         const { error } = await supabase
             .from('profiles')

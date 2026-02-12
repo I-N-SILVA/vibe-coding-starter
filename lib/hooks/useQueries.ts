@@ -6,15 +6,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { leagueApi, teamsApi } from '@/lib/api';
 import type {
-    Competition,
-    Match,
-    Team,
-    StandingsEntry,
     CreateCompetitionDto,
     CreateTeamDto,
     CreateMatchDto,
     UpdateScoreDto,
+    AddMatchEventDto,
 } from '@/types';
+import type {
+    CreateOrganizationDto,
+    CreateInviteDto,
+    CreatePlayerDto,
+} from '@/lib/supabase/types';
 
 // ============================================
 // QUERY KEYS
@@ -26,10 +28,37 @@ export const queryKeys = {
     matches: (params?: { status?: string; competitionId?: string }) =>
         ['matches', params] as const,
     match: (id: string) => ['match', id] as const,
+    matchEvents: (matchId: string) => ['matchEvents', matchId] as const,
     teams: (competitionId?: string) => ['teams', competitionId] as const,
     team: (id: string) => ['team', id] as const,
+    players: (teamId: string) => ['players', teamId] as const,
+    player: (teamId: string, playerId: string) => ['player', teamId, playerId] as const,
     standings: (competitionId: string) => ['standings', competitionId] as const,
+    organization: ['organization'] as const,
+    invites: ['invites'] as const,
 };
+
+// ============================================
+// ORGANIZATION HOOKS
+// ============================================
+
+export function useOrganization() {
+    return useQuery({
+        queryKey: queryKeys.organization,
+        queryFn: () => leagueApi.getOrganization(),
+    });
+}
+
+export function useCreateOrganization() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: CreateOrganizationDto) => leagueApi.createOrganization(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.organization });
+        },
+    });
+}
 
 // ============================================
 // COMPETITION HOOKS
@@ -61,6 +90,30 @@ export function useCreateCompetition() {
     });
 }
 
+export function useUpdateCompetition() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Partial<CreateCompetitionDto> }) =>
+            leagueApi.updateCompetition(id, data),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.competition(variables.id) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.competitions });
+        },
+    });
+}
+
+export function useDeleteCompetition() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => leagueApi.deleteCompetition(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.competitions });
+        },
+    });
+}
+
 // ============================================
 // MATCH HOOKS
 // ============================================
@@ -76,8 +129,7 @@ export function useLiveMatches() {
     return useQuery({
         queryKey: queryKeys.matches({ status: 'live' }),
         queryFn: () => leagueApi.getMatches({ status: 'live' }),
-        // Live matches should refresh frequently
-        refetchInterval: 30000, // 30 seconds
+        refetchInterval: 30000,
     });
 }
 
@@ -86,6 +138,17 @@ export function useMatch(id: string) {
         queryKey: queryKeys.match(id),
         queryFn: () => leagueApi.getMatch(id),
         enabled: !!id,
+    });
+}
+
+export function useCreateMatch() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: CreateMatchDto) => leagueApi.createMatch(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.matches() });
+        },
     });
 }
 
@@ -101,13 +164,50 @@ export function useUpdateScore() {
     });
 }
 
-export function useCreateMatch() {
+export function useStartMatch() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreateMatchDto) => leagueApi.createMatch(data),
-        onSuccess: () => {
+        mutationFn: (matchId: string) => leagueApi.startMatch(matchId),
+        onSuccess: (_, matchId) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.match(matchId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.matches() });
+        },
+    });
+}
+
+export function useEndMatch() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (matchId: string) => leagueApi.endMatch(matchId),
+        onSuccess: (_, matchId) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.match(matchId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.matches() });
+        },
+    });
+}
+
+// ============================================
+// MATCH EVENT HOOKS
+// ============================================
+
+export function useMatchEvents(matchId: string) {
+    return useQuery({
+        queryKey: queryKeys.matchEvents(matchId),
+        queryFn: () => leagueApi.getMatchEvents(matchId),
+        enabled: !!matchId,
+    });
+}
+
+export function useAddMatchEvent() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: AddMatchEventDto) => leagueApi.addMatchEvent(data),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.matchEvents(variables.matchId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.match(variables.matchId) });
         },
     });
 }
@@ -142,6 +242,89 @@ export function useCreateTeam() {
     });
 }
 
+export function useUpdateTeam() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Partial<CreateTeamDto> }) =>
+            teamsApi.updateTeam(id, data),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.team(variables.id) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.teams() });
+        },
+    });
+}
+
+export function useDeleteTeam() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => teamsApi.deleteTeam(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.teams() });
+        },
+    });
+}
+
+// ============================================
+// PLAYER HOOKS
+// ============================================
+
+export function usePlayers(teamId: string) {
+    return useQuery({
+        queryKey: queryKeys.players(teamId),
+        queryFn: () => teamsApi.getPlayers(teamId),
+        enabled: !!teamId,
+    });
+}
+
+export function usePlayer(teamId: string, playerId: string) {
+    return useQuery({
+        queryKey: queryKeys.player(teamId, playerId),
+        queryFn: () => teamsApi.getPlayer(teamId, playerId),
+        enabled: !!teamId && !!playerId,
+    });
+}
+
+export function useAddPlayer() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ teamId, data }: { teamId: string; data: CreatePlayerDto }) =>
+            teamsApi.addPlayer(teamId, data as any),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.team(variables.teamId) });
+        },
+    });
+}
+
+export function useUpdatePlayer() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ teamId, playerId, data }: { teamId: string; playerId: string; data: Record<string, any> }) =>
+            teamsApi.updatePlayer(teamId, playerId, data as any),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.player(variables.teamId, variables.playerId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });
+        },
+    });
+}
+
+export function useRemovePlayer() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ teamId, playerId }: { teamId: string; playerId: string }) =>
+            teamsApi.removePlayer(teamId, playerId),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.team(variables.teamId) });
+        },
+    });
+}
+
 // ============================================
 // STANDINGS HOOKS
 // ============================================
@@ -151,5 +334,27 @@ export function useStandings(competitionId: string) {
         queryKey: queryKeys.standings(competitionId),
         queryFn: () => leagueApi.getStandings(competitionId),
         enabled: !!competitionId,
+    });
+}
+
+// ============================================
+// INVITE HOOKS
+// ============================================
+
+export function useInvites() {
+    return useQuery({
+        queryKey: queryKeys.invites,
+        queryFn: () => leagueApi.getInvites(),
+    });
+}
+
+export function useCreateInvite() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: CreateInviteDto) => leagueApi.createInvite(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.invites });
+        },
     });
 }

@@ -10,7 +10,7 @@ export async function updateSession(request: NextRequest) {
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
-        // Gracefully bypass if no keys provided, allowing local dev to work with mock data
+        // Cannot authenticate without Supabase — redirect to a static error or let the error boundary handle it
         return supabaseResponse;
     }
 
@@ -23,7 +23,7 @@ export async function updateSession(request: NextRequest) {
                     return request.cookies.getAll();
                 },
                 setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
+                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
                     supabaseResponse = NextResponse.next({
                         request,
                     });
@@ -43,17 +43,35 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser();
 
-    if (
-        !user &&
-        !request.nextUrl.pathname.startsWith('/login') &&
-        !request.nextUrl.pathname.startsWith('/auth') &&
-        !request.nextUrl.pathname.startsWith('/league/public') && // Allow public views
-        request.nextUrl.pathname !== '/'
-    ) {
-        // no user, potentially respond by redirecting the user to the login page
+    const pathname = request.nextUrl.pathname;
+
+    // Public routes that don't require auth
+    const isPublicRoute =
+        pathname === '/' ||
+        pathname.startsWith('/login') ||
+        pathname.startsWith('/auth') ||
+        pathname.startsWith('/league/public') ||
+        pathname.startsWith('/api/');
+
+    if (!user && !isPublicRoute) {
         const url = request.nextUrl.clone();
         url.pathname = '/login';
         return NextResponse.redirect(url);
+    }
+
+    // If user is authenticated and accessing admin routes, check for organization
+    if (user && pathname.startsWith('/league') && !pathname.startsWith('/league/public') && !pathname.startsWith('/league/create')) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('organization_id')
+            .eq('id', user.id)
+            .single();
+
+        if (!profile?.organization_id) {
+            const url = request.nextUrl.clone();
+            url.pathname = '/league/create';
+            return NextResponse.redirect(url);
+        }
     }
 
     return supabaseResponse;

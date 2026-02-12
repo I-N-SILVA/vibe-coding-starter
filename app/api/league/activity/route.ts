@@ -1,30 +1,35 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { getUserOrgId } from '@/lib/api/helpers';
 
 export async function GET() {
     const supabase = await createClient();
+    const auth = await getUserOrgId(supabase);
 
-    try {
-        // Fetch recent match events with match and team details
-        const { data, error } = await supabase
-            .from('match_events')
-            .select(`
-                *,
-                match:matches(
-                    home_team:teams!home_team_id(name, short_name),
-                    away_team:teams!away_team_id(name, short_name)
-                )
-            `)
-            .order('created_at', { ascending: false })
-            .limit(10);
+    // If not authenticated, return empty — activity is org-scoped
+    if (auth.error) return NextResponse.json([]);
 
-        if (error) {
-            console.warn('Supabase error fetching activity:', error.message);
-            return NextResponse.json([]);
-        }
+    const { data, error } = await supabase
+        .from('match_events')
+        .select(`
+            *,
+            match:matches(
+                organization_id,
+                home_team:teams!home_team_id(name, short_name),
+                away_team:teams!away_team_id(name, short_name)
+            )
+        `)
+        .eq('match.organization_id', auth.orgId)
+        .order('created_at', { ascending: false })
+        .limit(10);
 
-        // Format events for activity display
-        const activity = data.map((event: any) => {
+    if (error) {
+        return NextResponse.json([]);
+    }
+
+    const activity = (data || [])
+        .filter((event: any) => event.match?.home_team && event.match?.away_team)
+        .map((event: any) => {
             const homeName = event.match.home_team.name;
             const awayName = event.match.away_team.name;
 
@@ -58,15 +63,11 @@ export async function GET() {
                 action,
                 detail,
                 time: formatDate(event.created_at),
-                type: event.type
+                type: event.type,
             };
         });
 
-        return NextResponse.json(activity);
-    } catch (error) {
-        console.error('Activity API Error:', error);
-        return NextResponse.json([]);
-    }
+    return NextResponse.json(activity);
 }
 
 function formatDate(dateStr: string) {

@@ -3,13 +3,23 @@
     "Context7": {
       "title": "Context7 AI assistant",
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ]
     },
-
     "Playwright": {
       "title": "Playwright Test Runner",
       "command": "npx @playwright/mcp@latest",
       "env": {}
+    },
+    "Supabase": {
+      "title": "Supabase Management",
+      "command": "npx -y @supabase/mcp-server",
+      "env": {
+        "SUPABASE_URL": "https://fjtizlmvchymtshjykev.supabase.co",
+        "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqdGl6bG12Y2h5bXRzaGp5a2V2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDkwNzcxOCwiZXhwIjoyMDg2NDgzNzE4fQ.QVBgmzQJh6V5up9EMpk0BLFemAnPaJI5Uq28C3PujsE"
+      }
     }
   }
 }

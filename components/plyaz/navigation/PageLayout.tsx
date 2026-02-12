@@ -22,6 +22,7 @@ interface PageLayoutProps {
     onBackClick?: () => void;
     rightAction?: React.ReactNode;
     fullWidth?: boolean;
+    className?: string;
 }
 
 export const PageLayout: React.FC<PageLayoutProps> = ({
@@ -32,6 +33,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
     onBackClick,
     rightAction,
     fullWidth = false,
+    className,
 }) => {
     const router = useRouter();
 
@@ -52,7 +54,8 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
                 transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
                 className={cn(
                     'md:ml-64 pb-20 md:pb-8',
-                    fullWidth ? 'px-0' : 'px-4 md:px-8 py-6 md:py-8 max-w-5xl'
+                    fullWidth ? 'px-0' : 'px-4 md:px-8 py-6 md:py-8 max-w-5xl',
+                    className
                 )}
             >
                 {children}

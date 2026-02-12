@@ -2,19 +2,17 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { getUserOrgId, apiError } from '@/lib/api/helpers';
 
-export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const competitionId = searchParams.get('competitionId');
+type RouteParams = { params: Promise<{ id: string }> };
 
+export async function GET(_request: Request, { params }: RouteParams) {
+    const { id } = await params;
     const supabase = await createClient();
 
-    let query = supabase.from('teams').select('*');
-
-    if (competitionId) {
-        query = query.eq('competition_id', competitionId);
-    }
-
-    const { data, error } = await query.order('name');
+    const { data, error } = await supabase
+        .from('match_events')
+        .select('*')
+        .eq('match_id', id)
+        .order('minute', { ascending: true });
 
     if (error) {
         return apiError(error.message, 500);
@@ -23,7 +21,8 @@ export async function GET(request: Request) {
     return NextResponse.json(data);
 }
 
-export async function POST(request: Request) {
+export async function POST(request: Request, { params }: RouteParams) {
+    const { id } = await params;
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
@@ -31,8 +30,8 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const { data, error } = await supabase
-        .from('teams')
-        .insert([{ ...body, organization_id: auth.orgId }])
+        .from('match_events')
+        .insert([{ ...body, match_id: id }])
         .select()
         .single();
 

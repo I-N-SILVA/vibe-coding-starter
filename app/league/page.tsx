@@ -21,46 +21,6 @@ import {
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
 
-const DEFAULT_LIVE_MATCHES = [
-    {
-        id: '1',
-        homeTeam: { id: '1', name: 'FC United', shortName: 'FCU' },
-        awayTeam: { id: '2', name: 'City Rangers', shortName: 'CRG' },
-        homeScore: 2,
-        awayScore: 1,
-        status: 'live' as const,
-        matchTime: "67'",
-    },
-    {
-        id: '2',
-        homeTeam: { id: '3', name: 'Phoenix FC', shortName: 'PHX' },
-        awayTeam: { id: '4', name: 'Eagles', shortName: 'EGL' },
-        homeScore: 0,
-        awayScore: 0,
-        status: 'live' as const,
-        matchTime: "23'",
-    },
-];
-
-const DEFAULT_UPCOMING_MATCHES = [
-    {
-        id: '3',
-        homeTeam: { id: '5', name: 'Rovers', shortName: 'ROV' },
-        awayTeam: { id: '6', name: 'Athletic', shortName: 'ATH' },
-        status: 'upcoming' as const,
-        matchTime: '3:00 PM',
-        date: 'Today',
-        venue: 'Main Stadium',
-    },
-];
-
-const DEFAULT_RECENT_ACTIVITY = [
-    { id: '1', action: 'Goal scored', detail: 'J. Smith (FC United)', time: '2 min ago' },
-    { id: '2', action: 'Yellow card', detail: 'M. Johnson (City Rangers)', time: '5 min ago' },
-    { id: '3', action: 'Match started', detail: 'Phoenix FC vs Eagles', time: '23 min ago' },
-    { id: '4', action: 'Team created', detail: 'West Ham Juniors', time: '1 hour ago' },
-];
-
 const stagger = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.08 } },
@@ -75,39 +35,47 @@ export default function AdminDashboard() {
     const router = useRouter();
     const [isCreateLeagueOpen, setIsCreateLeagueOpen] = useState(false);
     const [competitions, setCompetitions] = useState<any[]>([]);
-    const [liveMatches, setLiveMatches] = useState<any[]>(DEFAULT_LIVE_MATCHES);
-    const [upcomingMatches] = useState<any[]>(DEFAULT_UPCOMING_MATCHES);
-    const [recentActivity, setRecentActivity] = useState<any[]>(DEFAULT_RECENT_ACTIVITY);
+    const [liveMatches, setLiveMatches] = useState<any[]>([]);
+    const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
+    const [recentActivity, setRecentActivity] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const [complRes, matchesRes, activityRes] = await Promise.all([
+                const [complRes, liveRes, upcomingRes, activityRes] = await Promise.all([
                     fetch('/api/league/competitions'),
                     fetch('/api/league/matches?status=live'),
-                    fetch('/api/league/activity')
+                    fetch('/api/league/matches?status=upcoming'),
+                    fetch('/api/league/activity'),
                 ]);
 
                 if (complRes.ok) {
                     const comps = await complRes.json();
-                    if (comps && Array.isArray(comps)) {
+                    if (Array.isArray(comps)) {
                         setCompetitions(comps);
+                        // If no leagues found, redirect to onboarding after a short delay
+                        if (comps.length === 0) {
+                            setTimeout(() => {
+                                router.push('/onboarding');
+                            }, 1500);
+                        }
                     }
                 }
 
-                if (matchesRes.ok) {
-                    const matches = await matchesRes.json();
-                    if (matches && Array.isArray(matches) && matches.length > 0) {
-                        setLiveMatches(matches);
-                    }
+                if (liveRes.ok) {
+                    const matches = await liveRes.json();
+                    if (Array.isArray(matches)) setLiveMatches(matches);
+                }
+
+                if (upcomingRes.ok) {
+                    const matches = await upcomingRes.json();
+                    if (Array.isArray(matches)) setUpcomingMatches(matches);
                 }
 
                 if (activityRes.ok) {
                     const activity = await activityRes.json();
-                    if (activity && Array.isArray(activity) && activity.length > 0) {
-                        setRecentActivity(activity);
-                    }
+                    if (Array.isArray(activity)) setRecentActivity(activity);
                 }
             } catch (error) {
                 console.error('Failed to fetch dashboard data:', error);

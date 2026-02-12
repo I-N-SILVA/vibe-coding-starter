@@ -12,8 +12,8 @@ export type { CardProps } from './Card';
 export { MatchCard } from './MatchCard';
 export type { MatchCardProps, Team } from './MatchCard';
 
-export { StatCard, TeamCard, PlayerCard } from './cards';
-export type { StatCardProps, TeamCardProps, PlayerCardProps } from './cards';
+export { StatCard, TeamCard, PlayerCard, UltimatePlayerCard } from './cards';
+export type { StatCardProps, TeamCardProps, PlayerCardProps, UltimatePlayerCardProps } from './cards';
 
 // Badges
 export { Badge, StatusBadge } from './Badge';

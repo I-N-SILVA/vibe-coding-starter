@@ -14,6 +14,12 @@ import type {
     AddMatchEventDto,
     MatchEvent,
 } from '@/types';
+import type {
+    Organization,
+    CreateOrganizationDto,
+    Invite,
+    CreateInviteDto,
+} from '@/lib/supabase/types';
 
 export const leagueApi = {
     // ============================================
@@ -84,6 +90,26 @@ export const leagueApi = {
 
     getActivity: () =>
         apiClient.get<any[]>('/api/league/activity'),
+
+    // ============================================
+    // ORGANIZATIONS
+    // ============================================
+
+    getOrganization: () =>
+        apiClient.get<Organization | null>('/api/league/organizations'),
+
+    createOrganization: (data: CreateOrganizationDto) =>
+        apiClient.post<Organization>('/api/league/organizations', data),
+
+    // ============================================
+    // INVITES
+    // ============================================
+
+    getInvites: () =>
+        apiClient.get<Invite[]>('/api/league/invites'),
+
+    createInvite: (data: CreateInviteDto) =>
+        apiClient.post<Invite>('/api/league/invites', data),
 };
 
 export default leagueApi;

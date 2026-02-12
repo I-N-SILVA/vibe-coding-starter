@@ -5,13 +5,16 @@ export function createClient() {
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
-        console.warn('Supabase environment variables are missing. Using mock client.');
-        // Return a mock-compatible interface or just the client if ssr handles it
-        // For now, we return a client with dummy keys to avoid crash, 
-        // but the calls will fail gracefully in the UI logic anyway.
-        return createBrowserClient(
-            'https://placeholder.supabase.co',
-            'placeholder-key'
+        // During build/prerender, env vars may not be available.
+        // Return a client with dummy values — it won't be used for real requests during static generation.
+        if (typeof window === 'undefined') {
+            return createBrowserClient(
+                'https://placeholder.supabase.co',
+                'placeholder-key'
+            );
+        }
+        throw new Error(
+            'Missing Supabase environment variables. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local'
         );
     }
 

@@ -1,42 +1,38 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { DEFAULT_COMPETITIONS } from '@/lib/constants/demo-data';
+import { getUserOrgId, apiError } from '@/lib/api/helpers';
 
 export async function GET() {
     const supabase = await createClient();
 
-    try {
-        const { data, error } = await supabase
-            .from('competitions')
-            .select('*')
-            .order('created_at', { ascending: false });
+    const { data, error } = await supabase
+        .from('competitions')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        if (error) {
-            console.warn('Supabase error, falling back to demo data:', error.message);
-            return NextResponse.json(DEFAULT_COMPETITIONS);
-        }
-
-        return NextResponse.json(data);
-    } catch (error) {
-        console.error('API Error, falling back to demo data:', error);
-        return NextResponse.json(DEFAULT_COMPETITIONS);
+    if (error) {
+        return apiError(error.message, 500);
     }
+
+    return NextResponse.json(data);
 }
 
 export async function POST(request: Request) {
     const supabase = await createClient();
+    const auth = await getUserOrgId(supabase);
+    if (auth.error) return auth.error;
 
-    try {
-        const body = await request.json();
-        const { data, error } = await supabase
-            .from('competitions')
-            .insert([body])
-            .select();
+    const body = await request.json();
 
-        if (error) throw error;
+    const { data, error } = await supabase
+        .from('competitions')
+        .insert([{ ...body, organization_id: auth.orgId }])
+        .select()
+        .single();
 
-        return NextResponse.json(data[0], { status: 201 });
-    } catch (error) {
-        return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+    if (error) {
+        return apiError(error.message, 500);
     }
+
+    return NextResponse.json(data, { status: 201 });
 }
