@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -27,6 +28,7 @@ const ROLES = [
 
 export default function LoginPage() {
     const router = useRouter();
+    const { signIn, signUp, user, isLoading: authLoading } = useAuth();
     const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login');
     const [isLoading, setIsLoading] = useState(false);
     const [form, setForm] = useState({
@@ -34,35 +36,49 @@ export default function LoginPage() {
         password: '',
         fullName: '',
         confirmPassword: '',
-        role: 'fan',
+        role: 'organizer' as any,
     });
     const [message, setMessage] = useState('');
+
+    useEffect(() => {
+        if (user && !authLoading) {
+            router.push('/league');
+        }
+    }, [user, authLoading, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setMessage('');
 
-        setTimeout(() => {
-            if (mode === 'signup' && form.password !== form.confirmPassword) {
+        if (mode === 'signup') {
+            if (form.password !== form.confirmPassword) {
                 setMessage('Passwords do not match');
                 setIsLoading(false);
                 return;
             }
-            if (mode === 'forgot') {
-                setMessage('Reset link sent! Check your email.');
+
+            const { error } = await signUp(form.email, form.password, form.fullName, form.role);
+            if (error) {
+                setMessage(error);
                 setIsLoading(false);
-                return;
-            }
-            // Role-based redirection
-            if (form.role === 'player') {
-                router.push('/league/player/dashboard');
-            } else if (form.role === 'referee') {
-                router.push('/league/referee');
             } else {
-                router.push('/league');
+                setMessage('Registration successful! Please check your email for a confirmation link.');
+                setIsLoading(false);
             }
-        }, 800);
+        } else if (mode === 'login') {
+            const { error } = await signIn(form.email, form.password);
+            if (error) {
+                setMessage(error);
+                setIsLoading(false);
+            } else {
+                // AuthProvider will handle the redirect via the useEffect above
+            }
+        } else if (mode === 'forgot') {
+            // TODO: Implement forgot password in AuthProvider
+            setMessage('Forgot password is not implemented yet.');
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -199,11 +215,11 @@ export default function LoginPage() {
                         )}
                     </div>
 
-                    {/* Demo hint */}
-                    <div className="mt-8 p-4 rounded-xl bg-orange-50 border border-orange-100 text-center">
-                        <p className="text-[10px] font-bold tracking-widest uppercase text-orange-400 mb-1">Demo Mode</p>
-                        <p className="text-xs text-orange-600">
-                            Any credentials will sign you in as admin. Connect Supabase for real auth.
+                    {/* Auth Hint */}
+                    <div className="mt-8 p-4 rounded-xl bg-primary-main/5 border border-primary-main/10 text-center">
+                        <p className="text-[10px] font-bold tracking-widest uppercase text-primary-main mb-1">Account Required</p>
+                        <p className="text-xs text-secondary-main/60">
+                            Sign up to create your organization and manage leagues.
                         </p>
                     </div>
                 </motion.div>

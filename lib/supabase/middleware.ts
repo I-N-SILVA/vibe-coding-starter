@@ -69,7 +69,7 @@ export async function updateSession(request: NextRequest) {
 
         if (!profile?.organization_id) {
             const url = request.nextUrl.clone();
-            url.pathname = '/league/create';
+            url.pathname = '/onboarding';
             return NextResponse.redirect(url);
         }
     }
