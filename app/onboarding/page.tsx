@@ -3,12 +3,12 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import {
     Card,
     CardContent,
     Button,
     Input,
-    NavIcons,
 } from '@/components/plyaz';
 
 export default function OnboardingPage() {
@@ -24,7 +24,7 @@ export default function OnboardingPage() {
             setStep(2);
             // Auto-generate slug from name if empty
             if (!slug) {
-                setSlug(name.toLowerCase().replace(/[^a-z0-0]/g, '-').replace(/-+/g, '-'));
+                setSlug(name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'));
             }
         }
     };
