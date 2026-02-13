@@ -70,9 +70,13 @@ export default function OnboardingPage() {
             >
                 <div className="flex justify-center mb-8">
                     <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-primary-main rounded-xl flex items-center justify-center transform rotate-12">
-                            <NavIcons.Trophy className="text-white w-6 h-6" />
-                        </div>
+                        <Image
+                            src="/static/branding/logo-circle.png"
+                            alt="PLYAZ"
+                            width={40}
+                            height={40}
+                            className="rounded-xl"
+                        />
                         <span className="text-2xl font-bold tracking-tight text-primary-main">PLYAZ</span>
                     </div>
                 </div>
