@@ -60,17 +60,23 @@ export async function updateSession(request: NextRequest) {
     }
 
     // If user is authenticated and accessing admin routes, check for organization
+    // Skip this check for onboarding page to avoid redirect loop
     if (user && pathname.startsWith('/league') && !pathname.startsWith('/league/public') && !pathname.startsWith('/league/create')) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('organization_id')
-            .eq('id', user.id)
-            .single();
+        try {
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('organization_id')
+                .eq('id', user.id)
+                .single();
 
-        if (!profile?.organization_id) {
-            const url = request.nextUrl.clone();
-            url.pathname = '/onboarding';
-            return NextResponse.redirect(url);
+            if (!error && !profile?.organization_id) {
+                const url = request.nextUrl.clone();
+                url.pathname = '/onboarding';
+                return NextResponse.redirect(url);
+            }
+        } catch (e) {
+            // If profile check fails, let the page handle it
+            console.error('Middleware profile check failed:', e);
         }
     }
 
