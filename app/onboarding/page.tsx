@@ -41,14 +41,22 @@ export default function OnboardingPage() {
                 body: JSON.stringify({ name, slug }),
             });
 
+            const data = await res.json();
+            
             if (!res.ok) {
-                const data = await res.json();
                 throw new Error(data.error || 'Failed to create organization');
             }
 
+            console.log('[Onboarding] Organization created:', data);
+            
+            // Force a small delay to ensure profile is updated before redirect
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
             // Success! Redirect to dashboard
             router.push('/league');
+            router.refresh();
         } catch (err: any) {
+            console.error('[Onboarding] Error:', err);
             setError(err.message);
         } finally {
             setIsSubmitting(false);
