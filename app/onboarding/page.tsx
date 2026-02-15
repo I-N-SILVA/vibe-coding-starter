@@ -13,45 +13,61 @@ import {
 
 export default function OnboardingPage() {
     const router = useRouter();
-    const [step, setStep] = useState(1);
-    const [name, setName] = useState('');
-    const [slug, setSlug] = useState('');
+    const [leagueName, setLeagueName] = useState('');
+    const [leagueType, setLeagueType] = useState('league');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleNext = () => {
-        if (step === 1 && name.trim()) {
-            setStep(2);
-            // Auto-generate slug from name if empty
-            if (!slug) {
-                setSlug(name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'));
-            }
-        }
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!leagueName.trim()) return;
+
         setIsSubmitting(true);
         setError(null);
 
         try {
-            const res = await fetch('/api/league/organizations', {
+            // Derive organization name and slug from league name
+            const orgName = leagueName;
+            const orgSlug = leagueName.toLowerCase()
+                .replace(/[^a-z0-9]/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+
+            // 1. Create Organization
+            const orgRes = await fetch('/api/league/organizations', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, slug }),
+                body: JSON.stringify({ name: orgName, slug: orgSlug }),
             });
 
-            const data = await res.json();
-            
-            if (!res.ok) {
+            if (!orgRes.ok) {
+                const data = await orgRes.json();
                 throw new Error(data.error || 'Failed to create organization');
             }
 
-            console.log('[Onboarding] Organization created:', data);
-            
-            // Force a small delay to ensure profile is updated before redirect
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
+            const orgData = await orgRes.json();
+            console.log('[Onboarding] Organization created:', orgData);
+
+            // 2. Create Initial League
+            const leagueRes = await fetch('/api/league/competitions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: leagueName,
+                    type: leagueType,
+                    status: 'draft'
+                }),
+            });
+
+            if (!leagueRes.ok) {
+                const data = await leagueRes.json();
+                console.error('Failed to create initial league:', data.error);
+                // We still redirect because the org was created successfully
+            }
+
+            // Force a small delay to ensure profile is updated before redirect (from remote)
+            await new Promise(resolve => setTimeout(resolve, 800));
+
             // Success! Redirect to dashboard
             router.push('/league');
             router.refresh();
@@ -91,93 +107,62 @@ export default function OnboardingPage() {
 
                 <Card className="border-secondary-main/10 shadow-xl overflow-hidden">
                     <CardContent className="p-8">
-                        <AnimatePresence mode="wait">
-                            {step === 1 ? (
-                                <motion.div
-                                    key="step1"
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <h1 className="text-2xl font-bold text-primary-main mb-2">Welcome to PLYAZ</h1>
-                                    <p className="text-secondary-main/50 text-sm mb-8">
-                                        Let's start by setting up your organization. This will be the home for all your leagues and tournaments.
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4 }}
+                        >
+                            <h1 className="text-2xl font-black text-primary-main mb-2">Create Your First League</h1>
+                            <p className="text-secondary-main/50 text-sm mb-8">
+                                Welcome to PLYAZ! Let&apos;s get your first competition set up and launch your organization.
+                            </p>
+
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <Input
+                                    label="League Name"
+                                    placeholder="e.g., Sunday Premier League"
+                                    value={leagueName}
+                                    onChange={(e) => setLeagueName(e.target.value)}
+                                    autoFocus
+                                    required
+                                />
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase tracking-widest text-secondary-main/40">Competition Type</label>
+                                    <select
+                                        className="w-full h-12 px-4 rounded-xl bg-gray-50 border border-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-main/20 transition-all appearance-none"
+                                        value={leagueType}
+                                        onChange={(e) => setLeagueType(e.target.value)}
+                                    >
+                                        <option value="league">League (Round Robin)</option>
+                                        <option value="knockout">Cup (Knockout)</option>
+                                        <option value="group_knockout">Group Stage + Knockout</option>
+                                    </select>
+                                </div>
+
+                                {error && (
+                                    <p className="text-xs text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 italic">
+                                        {error}
                                     </p>
+                                )}
 
-                                    <div className="space-y-6">
-                                        <Input
-                                            label="Organization Name"
-                                            placeholder="e.g., Gotham Soccer Association"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            autoFocus
-                                        />
-                                        <Button
-                                            fullWidth
-                                            size="lg"
-                                            onClick={handleNext}
-                                            disabled={!name.trim()}
-                                        >
-                                            Continue
-                                        </Button>
-                                    </div>
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="step2"
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    transition={{ duration: 0.3 }}
+                                <Button
+                                    type="submit"
+                                    fullWidth
+                                    size="lg"
+                                    disabled={!leagueName.trim() || isSubmitting}
+                                    isLoading={isSubmitting}
+                                    className="h-14 text-sm font-bold tracking-widest"
                                 >
-                                    <h1 className="text-2xl font-bold text-primary-main mb-2">Final Touches</h1>
-                                    <p className="text-secondary-main/50 text-sm mb-8">
-                                        Choose a unique slug for your organization's URL. You can change this later.
-                                    </p>
-
-                                    <form onSubmit={handleSubmit} className="space-y-6">
-                                        <Input
-                                            label="Organization Slug"
-                                            placeholder="gotham-soccer"
-                                            value={slug}
-                                            onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
-                                            helperText={`Your dashboard will be at plyaz.com/${slug || '...'}`}
-                                        />
-
-                                        {error && (
-                                            <p className="text-xs text-red-500 bg-red-50 p-2 rounded border border-red-100 italic">
-                                                {error}
-                                            </p>
-                                        )}
-
-                                        <div className="flex gap-3 pt-2">
-                                            <Button
-                                                variant="ghost"
-                                                onClick={() => setStep(1)}
-                                                disabled={isSubmitting}
-                                            >
-                                                Back
-                                            </Button>
-                                            <Button
-                                                type="submit"
-                                                fullWidth
-                                                size="lg"
-                                                disabled={!slug.trim() || isSubmitting}
-                                                isLoading={isSubmitting}
-                                            >
-                                                Create Organization
-                                            </Button>
-                                        </div>
-                                    </form>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                    LAUNCH DASHBOARD
+                                </Button>
+                            </form>
+                        </motion.div>
                     </CardContent>
                 </Card>
 
-                <p className="text-center mt-8 text-xs text-secondary-main/30">
-                    Step {step} of 2 • Create your legacy with PLYAZ
+                <p className="text-center mt-8 text-[10px] font-bold tracking-[0.2em] uppercase text-secondary-main/30">
+                    Propelling Talent Forward • PLYAZ
                 </p>
             </motion.div>
         </div>

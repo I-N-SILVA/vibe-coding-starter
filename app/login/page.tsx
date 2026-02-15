@@ -47,7 +47,11 @@ export default function LoginPage() {
         setEnvCheck({ hasUrl, hasKey });
 
         if (user && !authLoading) {
-            router.push('/league');
+            if (user.profile?.organization_id) {
+                router.push('/league');
+            } else {
+                router.push('/onboarding');
+            }
         }
     }, [user, authLoading, router]);
 
