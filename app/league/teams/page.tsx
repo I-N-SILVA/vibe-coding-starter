@@ -35,7 +35,10 @@ export default function AdminTeams() {
     const handleAddTeam = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await createTeamMutation.mutateAsync(newTeam as any);
+            await createTeamMutation.mutateAsync({
+                name: newTeam.name,
+                shortName: newTeam.short_name,
+            });
             setIsAddModalOpen(false);
             setNewTeam({ name: '', short_name: '', competition_id: '' });
         } catch (err) {

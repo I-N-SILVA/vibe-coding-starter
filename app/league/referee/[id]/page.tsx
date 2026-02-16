@@ -12,15 +12,18 @@ import {
 } from '@/components/plyaz';
 import { useLiveMatch } from '@/lib/hooks';
 import { leagueApi, teamsApi } from '@/lib/api';
-import type { Player, MatchEvent, MatchEventType } from '@/types';
+import type { Player, Match, MatchEvent, MatchEventType } from '@/types';
 import { adminNavItems } from '@/lib/constants/navigation';
+
+/** Match data may come in camelCase or snake_case from API */
+type FetchedMatch = Match & Record<string, unknown>;
 
 export default function RefereeController() {
     const params = useParams();
     const router = useRouter();
     const matchId = params.id as string;
 
-    const [initialFetchMatch, setInitialFetchMatch] = useState<any>(null);
+    const [initialFetchMatch, setInitialFetchMatch] = useState<FetchedMatch | null>(null);
     const { match, isLive } = useLiveMatch(initialFetchMatch || {
         id: matchId,
         homeTeam: { id: '', name: 'Home', shortName: 'HOM' },
@@ -28,7 +31,7 @@ export default function RefereeController() {
         homeScore: 0,
         awayScore: 0,
         status: 'scheduled',
-    } as any);
+    } as Match);
 
     const [isMatchStarted, setIsMatchStarted] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -52,7 +55,7 @@ export default function RefereeController() {
     useEffect(() => {
         async function fetchInitialData() {
             try {
-                const matchData = await leagueApi.getMatch(matchId) as any;
+                const matchData = await leagueApi.getMatch(matchId) as FetchedMatch;
                 if (matchData) {
                     setInitialFetchMatch(matchData);
                     setHomeScore(matchData.homeScore ?? matchData.home_score ?? 0);

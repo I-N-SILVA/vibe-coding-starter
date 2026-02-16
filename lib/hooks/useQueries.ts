@@ -289,7 +289,7 @@ export function useAddPlayer() {
 
     return useMutation({
         mutationFn: ({ teamId, data }: { teamId: string; data: CreatePlayerDto }) =>
-            teamsApi.addPlayer(teamId, data as any),
+            teamsApi.addPlayer(teamId, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.team(variables.teamId) });
@@ -301,8 +301,8 @@ export function useUpdatePlayer() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ teamId, playerId, data }: { teamId: string; playerId: string; data: Record<string, any> }) =>
-            teamsApi.updatePlayer(teamId, playerId, data as any),
+        mutationFn: ({ teamId, playerId, data }: { teamId: string; playerId: string; data: Partial<CreatePlayerDto> }) =>
+            teamsApi.updatePlayer(teamId, playerId, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.player(variables.teamId, variables.playerId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });

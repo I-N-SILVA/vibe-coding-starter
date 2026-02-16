@@ -71,17 +71,14 @@ export default function FixtureScheduler() {
                 homeTeamId: data.home_team_id,
                 awayTeamId: data.away_team_id,
                 venue: data.venue,
-                scheduledAt: data.scheduled_at,
-                status: 'upcoming',
-                homeScore: 0,
-                awayScore: 0,
-            } as any); // Type cast if DTO mismatch, but leagueApi handles it
+                scheduledDate: new Date(data.scheduled_at),
+            });
 
             success('Match scheduled successfully!');
             router.push('/league');
-        } catch (err: any) {
+        } catch (err) {
             console.error('Failed to schedule match:', err);
-            showError(err.message || 'Failed to schedule match.');
+            showError(err instanceof Error ? err.message : 'Failed to schedule match.');
         }
     };
 

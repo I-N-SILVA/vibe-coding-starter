@@ -85,7 +85,7 @@ export default function RefereeDashboard() {
 
     const startMatch = () => {
         setIsRunning(true);
-        setMatch((prev) => ({ ...prev, status: 'live' as any, half: '1st Half' }));
+        setMatch((prev) => ({ ...prev, status: 'live', half: '1st Half' }));
     };
 
     const toggleHalf = () => {
@@ -95,7 +95,7 @@ export default function RefereeDashboard() {
         }));
         if (match.half === '2nd Half') {
             setIsRunning(false);
-            setMatch((prev) => ({ ...prev, status: 'completed' as any }));
+            setMatch((prev) => ({ ...prev, status: 'completed' }));
         }
     };
 

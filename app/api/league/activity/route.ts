@@ -2,6 +2,18 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { getUserOrgId } from '@/lib/api/helpers';
 
+interface MatchEventWithJoin {
+    id: string;
+    type: string;
+    player_name?: string;
+    created_at: string;
+    match?: {
+        organization_id: string;
+        home_team: { name: string; short_name: string } | null;
+        away_team: { name: string; short_name: string } | null;
+    } | null;
+}
+
 export async function GET() {
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);
@@ -27,11 +39,11 @@ export async function GET() {
         return NextResponse.json([]);
     }
 
-    const activity = (data || [])
-        .filter((event: any) => event.match?.home_team && event.match?.away_team)
-        .map((event: any) => {
-            const homeName = event.match.home_team.name;
-            const awayName = event.match.away_team.name;
+    const activity = ((data || []) as MatchEventWithJoin[])
+        .filter((event) => event.match?.home_team && event.match?.away_team)
+        .map((event) => {
+            const homeName = event.match!.home_team!.name;
+            const awayName = event.match!.away_team!.name;
 
             let action = '';
             let detail = '';

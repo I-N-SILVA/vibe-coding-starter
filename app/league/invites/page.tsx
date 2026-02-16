@@ -45,7 +45,7 @@ const typeIcons: Record<string, string> = {
 export default function InvitesPage() {
     const [invites] = useState<Invite[]>(DEMO_INVITES);
     const [showCreate, setShowCreate] = useState(false);
-    const [newInvite, setNewInvite] = useState({ email: '', type: 'player' as const });
+    const [newInvite, setNewInvite] = useState<{ email: string; type: Invite['type'] }>({ email: '', type: 'player' });
     const [filter, setFilter] = useState<string>('all');
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -101,7 +101,7 @@ export default function InvitesPage() {
                                             { value: 'referee', label: 'Referee' },
                                         ]}
                                         value={newInvite.type}
-                                        onChange={(e) => setNewInvite({ ...newInvite, type: e.target.value as any })}
+                                        onChange={(e) => setNewInvite({ ...newInvite, type: e.target.value as Invite['type'] })}
                                     />
                                 </div>
                                 <div className="flex gap-3">

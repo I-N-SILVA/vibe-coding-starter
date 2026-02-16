@@ -14,7 +14,7 @@ import {
 import { publicNavItems } from '@/lib/constants/navigation';
 import { subscribeToAllLiveMatches } from '@/lib/supabase/realtime';
 
-const DEMO_MATCHES: any[] = [
+const DEMO_MATCHES: Array<Record<string, unknown>> = [
     {
         id: '1',
         homeTeam: { id: '1', name: 'FC United', shortName: 'FCU' },

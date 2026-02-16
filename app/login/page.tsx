@@ -42,7 +42,9 @@ function LoginForm() {
     const router = useRouter();
     const { signIn, signUp, user, isLoading: authLoading } = useAuth();
     const searchParams = useSearchParams();
-    const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>((searchParams.get('mode') as any) || 'login');
+    const modeParam = searchParams.get('mode');
+    const initialMode: 'login' | 'signup' | 'forgot' = (modeParam === 'login' || modeParam === 'signup' || modeParam === 'forgot') ? modeParam : 'login';
+    const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>(initialMode);
     const [isLoading, setIsLoading] = useState(false);
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [form, setForm] = useState({
@@ -50,7 +52,7 @@ function LoginForm() {
         password: '',
         fullName: '',
         confirmPassword: '',
-        role: 'organizer' as any,
+        role: 'organizer' as 'admin' | 'organizer' | 'referee' | 'manager' | 'player' | 'fan',
     });
     const [message, setMessage] = useState('');
     const [envCheck, setEnvCheck] = useState({ hasUrl: true, hasKey: true });
@@ -59,7 +61,7 @@ function LoginForm() {
     useEffect(() => {
         const urlMode = searchParams.get('mode');
         if (urlMode && (urlMode === 'login' || urlMode === 'signup' || urlMode === 'forgot')) {
-            setMode(urlMode as any);
+            setMode(urlMode as 'login' | 'signup' | 'forgot');
         }
     }, [searchParams]);
 
@@ -224,7 +226,7 @@ function LoginForm() {
                                                         label="Your Role"
                                                         options={ROLES}
                                                         value={form.role}
-                                                        onChange={(e) => setForm({ ...form, role: e.target.value })}
+                                                        onChange={(e) => setForm({ ...form, role: e.target.value as typeof form.role })}
                                                     />
                                                 </>
                                             )}

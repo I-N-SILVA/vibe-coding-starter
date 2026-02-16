@@ -15,7 +15,7 @@ import {
     NavIcons,
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
-import { generateRoundRobin } from '@/lib/utils/fixture-generator';
+import { generateRoundRobin, type GeneratedFixture } from '@/lib/utils/fixture-generator';
 import { useToast } from '@/components/providers';
 
 const MOCK_TEAMS = [
@@ -30,7 +30,7 @@ const MOCK_TEAMS = [
 export default function FixturesPage() {
     const router = useRouter();
     const { success } = useToast();
-    const [fixtures, setFixtures] = useState<any[]>([]);
+    const [fixtures, setFixtures] = useState<GeneratedFixture[]>([]);
     const [format, setFormat] = useState('league');
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
 
@@ -50,8 +50,8 @@ export default function FixturesPage() {
     };
 
     // Group fixtures by round
-    const fixturesByRound = fixtures.reduce<Record<number, any[]>>((acc, match) => {
-        const round = match.round || 1;
+    const fixturesByRound = fixtures.reduce<Record<number, GeneratedFixture[]>>((acc, match) => {
+        const round = 1;
         if (!acc[round]) acc[round] = [];
         acc[round].push(match);
         return acc;
@@ -144,7 +144,7 @@ export default function FixturesPage() {
                                 <div className="flex-1 h-px bg-gray-100" />
                             </div>
                             <div className="grid gap-4">
-                                {matches.map((match: any) => (
+                                {matches.map((match) => (
                                     <MatchCard
                                         key={match.id}
                                         homeTeam={match.homeTeam}

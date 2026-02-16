@@ -5,31 +5,38 @@
 
 type FixtureTeam = { id: string; name: string; short_name?: string | null };
 
+export interface GeneratedFixture {
+    id: string;
+    competitionId: string;
+    homeTeam: FixtureTeam;
+    awayTeam: FixtureTeam;
+    homeScore: number;
+    awayScore: number;
+    status: 'scheduled';
+    scheduledDate: Date;
+    venue: string;
+}
+
 /**
  * Generates Round Robin fixtures for a set of teams
- * @param teams List of participating teams
- * @param startDate Starting date for the fixtures
- * @param intervalDays Days between match days
- * @returns Array of generated matches
  */
 export const generateRoundRobin = (
     teams: FixtureTeam[],
     startDate: Date,
     competitionId: string,
     intervalDays: number = 7
-): any[] => {
+): GeneratedFixture[] => {
     if (teams.length < 2) return [];
 
     const teamsCopy = [...teams];
     if (teamsCopy.length % 2 !== 0) {
-        // Add a "BYE" team if odd number of teams
         teamsCopy.push({ id: 'bye', name: 'BYE', short_name: 'BYE' });
     }
 
     const numTeams = teamsCopy.length;
     const numRounds = numTeams - 1;
     const matchesPerRound = numTeams / 2;
-    const fixtures: any[] = [];
+    const fixtures: GeneratedFixture[] = [];
 
     for (let round = 0; round < numRounds; round++) {
         const roundDate = new Date(startDate);
@@ -69,10 +76,9 @@ export const generateKnockout = (
     teams: FixtureTeam[],
     startDate: Date,
     competitionId: string
-): any[] => {
-    // Shuffle teams for randomization
+): GeneratedFixture[] => {
     const shuffledTeams = [...teams].sort(() => Math.random() - 0.5);
-    const fixtures: any[] = [];
+    const fixtures: GeneratedFixture[] = [];
 
     for (let i = 0; i < shuffledTeams.length; i += 2) {
         if (i + 1 < shuffledTeams.length) {
@@ -87,9 +93,6 @@ export const generateKnockout = (
                 scheduledDate: startDate,
                 venue: 'TBD',
             });
-        } else {
-            // Handle uneven teams (one team gets a bye to next round)
-            // In a real app, you'd mark this as advanced or handle better
         }
     }
 

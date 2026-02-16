@@ -86,9 +86,9 @@ export default function OnboardingPage() {
             // Success! Redirect to dashboard
             router.push('/league');
             router.refresh();
-        } catch (err: any) {
+        } catch (err) {
             console.error('[Onboarding] Error:', err);
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Something went wrong');
         } finally {
             setIsSubmitting(false);
         }

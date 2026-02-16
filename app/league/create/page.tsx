@@ -48,11 +48,11 @@ export default function CreateLeaguePage() {
         },
     });
 
-    const update = (field: string, value: any) => {
+    const update = (field: string, value: string | number | boolean) => {
         setForm((prev) => ({ ...prev, [field]: value }));
     };
 
-    const updateRules = (field: string, value: any) => {
+    const updateRules = (field: string, value: string | number | boolean) => {
         setForm((prev) => ({ ...prev, rules: { ...prev.rules, [field]: value } }));
     };
 

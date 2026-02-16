@@ -93,7 +93,7 @@ export default function FixtureGeneratorPage() {
         fetch('/api/league/teams')
             .then((res) => res.json())
             .then((data) => {
-                const names = data.map((t: any) => t.name || t.shortName);
+                const names = data.map((t: { name?: string; shortName?: string }) => t.name || t.shortName);
                 setTeams(names);
             })
             .catch(() => {

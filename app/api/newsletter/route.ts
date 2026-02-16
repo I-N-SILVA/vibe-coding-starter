@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { log } from '@/lib/logger';
 
 export async function POST(request: Request) {
   try {
@@ -14,14 +15,14 @@ export async function POST(request: Request) {
 
     // In production, this would connect to a mailing service (Mailchimp, ConvertKit, etc.)
     // or store in Supabase. For now, we log and return success.
-    console.log(`Newsletter signup: ${email}`);
+    log.info('Newsletter signup', { email });
 
     return NextResponse.json(
       { success: true, message: 'Successfully subscribed to the newsletter!' },
       { status: 200 }
     );
   } catch (error) {
-    console.error('Newsletter error:', error);
+    log.error('Newsletter subscription failed', { error: String(error) });
     return NextResponse.json(
       { error: 'Failed to subscribe. Please try again.' },
       { status: 500 }
