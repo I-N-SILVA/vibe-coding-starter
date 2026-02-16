@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
 import { createTeamApiSchema } from '@/lib/api/validation';
+import { rateLimit } from '@/lib/api/rate-limit';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -30,6 +31,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+    const limited = rateLimit(request, 10, 60_000);
+    if (limited) return limited;
+
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;

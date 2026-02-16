@@ -61,7 +61,7 @@ export default function OnboardingPage() {
             }
 
             const orgData = await orgRes.json();
-            console.log('[Onboarding] Organization created:', orgData);
+            // Organization created successfully
 
             // 2. Create Initial League
             const leagueRes = await fetch('/api/league/competitions', {
@@ -76,7 +76,7 @@ export default function OnboardingPage() {
 
             if (!leagueRes.ok) {
                 const data = await leagueRes.json();
-                console.error('Failed to create initial league:', data.error);
+                console.warn('Failed to create initial league:', data.error);
                 // We still redirect because the org was created successfully
             }
 
@@ -87,7 +87,7 @@ export default function OnboardingPage() {
             router.push('/league');
             router.refresh();
         } catch (err) {
-            console.error('[Onboarding] Error:', err);
+            console.warn('[Onboarding] Error:', err);
             setError(err instanceof Error ? err.message : 'Something went wrong');
         } finally {
             setIsSubmitting(false);

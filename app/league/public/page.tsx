@@ -14,7 +14,7 @@ import { stagger, fadeUpLarge } from '@/lib/animations';
 
 export default function PublicCompetitions() {
     const router = useRouter();
-    const [competitions, setCompetitions] = useState<any[]>([]);
+    const [competitions, setCompetitions] = useState<Array<{ id: string; name: string; type: string; teamCount?: number; startDate: string }>>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const DEFAULT_COMPS = [

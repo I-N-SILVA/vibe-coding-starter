@@ -170,7 +170,8 @@ export const LandingLeadingPill = ({
     secondaryGlass: `backdrop-blur-sm bg-secondary-300/10 dark:bg-secondary-900/10`,
   };
 
-  const textStyleClasses = {
+  const textStyleClasses: Record<string, string> = {
+    default: '',
     capitalize: 'capitalize',
     uppercase: 'uppercase tracking-wider',
   };

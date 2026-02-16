@@ -46,7 +46,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
             const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
             const hasKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-            console.log('[Auth] Supabase Config Check:', { hasUrl, hasKey });
+            // Supabase config check - visible in dev tools only
+            if (!hasUrl || !hasKey) console.warn('[Auth] Missing Supabase env vars:', { hasUrl, hasKey });
         }
     }, []);
 
@@ -81,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
             } catch (err) {
                 if (process.env.NODE_ENV === 'development') {
-                    console.error('[Auth] Initialization error:', err);
+                    console.warn('[Auth] Initialization error:', err);
                 }
             } finally {
                 setIsLoading(false);

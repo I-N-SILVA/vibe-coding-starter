@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
     Card,
     CardContent,
@@ -118,7 +119,7 @@ function LoginForm() {
         <div className="min-h-screen flex flex-col bg-gray-50">
             {/* Header */}
             <header className="px-4 py-4">
-                <a href="/" className="flex items-center gap-2 w-fit group">
+                <Link href="/" className="flex items-center gap-2 w-fit group">
                     <Image
                         src="/static/branding/logo-circle.png"
                         alt="Plyaz"
@@ -127,7 +128,7 @@ function LoginForm() {
                         className="group-hover:scale-110 transition-transform"
                     />
                     <span className="text-xs font-bold tracking-[0.2em] uppercase">PLYAZ</span>
-                </a>
+                </Link>
             </header>
 
             {/* Form */}

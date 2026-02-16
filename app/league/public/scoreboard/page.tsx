@@ -13,8 +13,22 @@ import {
 } from '@/components/plyaz';
 import { publicNavItems } from '@/lib/constants/navigation';
 import { subscribeToAllLiveMatches } from '@/lib/supabase/realtime';
+import type { MatchStatus } from '@/types';
 
-const DEMO_MATCHES: Array<Record<string, unknown>> = [
+interface DemoMatch {
+    id: string;
+    homeTeam: { id: string; name: string; shortName: string };
+    awayTeam: { id: string; name: string; shortName: string };
+    homeScore?: number;
+    awayScore?: number;
+    status: MatchStatus;
+    matchTime?: string;
+    date?: string;
+    venue?: string;
+    [key: string]: unknown;
+}
+
+const DEMO_MATCHES: DemoMatch[] = [
     {
         id: '1',
         homeTeam: { id: '1', name: 'FC United', shortName: 'FCU' },
@@ -46,7 +60,7 @@ const DEMO_MATCHES: Array<Record<string, unknown>> = [
 
 export default function PublicScoreboard() {
     const router = useRouter();
-    const [matches, setMatches] = useState<any[]>(DEMO_MATCHES);
+    const [matches, setMatches] = useState<DemoMatch[]>(DEMO_MATCHES);
     const [isLoading, setIsLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(new Date());
 

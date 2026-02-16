@@ -6,7 +6,7 @@ import { metadata } from '@/data/config/metadata';
 const appWindow = typeof window !== 'undefined' ? window : null;
 const appNavigator = typeof window !== 'undefined' ? window?.navigator : null;
 
-const sanitizeMailBody = (body) => body.replace(/(?:\r\n|\r|\n)/g, '%0D%0A');
+const sanitizeMailBody = (body: string) => body.replace(/(?:\r\n|\r|\n)/g, '%0D%0A');
 
 export const SUPPORT_EMAIL = metadata.supportEmail;
 
@@ -41,7 +41,7 @@ export const HELP_HREF = `mailto:${SUPPORT_EMAIL}?subject=${HELP_SUBJECT}&body=$
 )}`;
 
 export const FooterSupportButton = () => {
-  const openSupport = (e) => {
+  const openSupport = (e: React.MouseEvent) => {
     e.preventDefault();
     window.open(HELP_HREF, '_blank');
   };

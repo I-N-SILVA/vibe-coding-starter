@@ -67,6 +67,7 @@ export interface PlayerStats {
 
 export type MatchStatus =
     | 'scheduled'
+    | 'upcoming'
     | 'live'
     | 'completed'
     | 'postponed'

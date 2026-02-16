@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
 import { createMatchEventApiSchema } from '@/lib/api/validation';
+import { rateLimit } from '@/lib/api/rate-limit';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -23,6 +24,9 @@ export async function GET(_request: Request, { params }: RouteParams) {
 }
 
 export async function POST(request: Request, { params }: RouteParams) {
+    const limited = rateLimit(request, 30, 60_000);
+    if (limited) return limited;
+
     const { id } = await params;
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);

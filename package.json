@@ -10,7 +10,9 @@
     "analyze": "cross-env ANALYZE=true next build",
     "lint": "next lint --fix --dir pages --dir app --dir components --dir lib --dir layouts --dir scripts",
     "pretty": "prettier --write .",
-    "appinfo": "node ./scripts/generateAppInfo.mjs"
+    "appinfo": "node ./scripts/generateAppInfo.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
@@ -100,8 +102,10 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.5.9",
+    "@playwright/test": "^1.58.2",
     "@svgr/webpack": "^8.1.0",
     "@types/mdx": "^2.0.13",
+    "@types/mime-types": "^3.0.1",
     "@types/react": "^19.2.1",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
     "@typescript-eslint/parser": "^8.43.0",

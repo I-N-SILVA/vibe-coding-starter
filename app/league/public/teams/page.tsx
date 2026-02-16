@@ -13,7 +13,7 @@ import { publicNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUp } from '@/lib/animations';
 
 export default function PublicTeams() {
-    const [teams, setTeams] = useState<any[]>([]);
+    const [teams, setTeams] = useState<Array<{ id: string; name: string; shortName?: string; short_name?: string; division?: string; played?: number; won?: number; goals?: number }>>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {

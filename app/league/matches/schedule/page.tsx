@@ -22,8 +22,8 @@ import { scheduleMatchAtSchema, type ScheduleMatchAtFormData } from '@/lib/valid
 export default function FixtureScheduler() {
     const router = useRouter();
     const { success, error: showError } = useToast();
-    const [competitions, setCompetitions] = useState<any[]>([]);
-    const [teams, setTeams] = useState<any[]>([]);
+    const [competitions, setCompetitions] = useState<Array<{ id: string; name: string }>>([]);
+    const [teams, setTeams] = useState<Array<{ id: string; name: string; competition_id?: string }>>([]);
     const [isLoadingData, setIsLoadingData] = useState(true);
 
     const {

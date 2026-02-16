@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { log } from '@/lib/logger';
 
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({
@@ -76,7 +77,7 @@ export async function updateSession(request: NextRequest) {
             }
         } catch (e) {
             // If profile check fails, let the page handle it
-            console.error('Middleware profile check failed:', e);
+            log.warn('Middleware profile check failed', { error: String(e) });
         }
     }
 

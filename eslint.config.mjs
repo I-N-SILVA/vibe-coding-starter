@@ -16,9 +16,9 @@ const eslintConfig = [
       // Maintainability rules
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/ban-ts-comment': ['error', { 'ts-ignore': false, 'ts-expect-error': 'allow-with-description' }],
       '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
       'react/no-unescaped-entities': 'off',
     },
   },

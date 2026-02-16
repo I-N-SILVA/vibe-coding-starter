@@ -24,8 +24,9 @@ const globalColors = colors;
 const style: string[] = [];
 
 Object.keys(globalColors).map((variant) => {
-  return Object.keys(globalColors[variant]).map((color) => {
-    const value = globalColors[variant][color];
+  const variantObj = globalColors[variant as keyof typeof globalColors];
+  return Object.keys(variantObj).map((color) => {
+    const value = variantObj[color as keyof typeof variantObj];
     style.push(`--${variant}-${color}: ${value}`);
   });
 });

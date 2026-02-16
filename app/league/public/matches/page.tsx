@@ -24,7 +24,21 @@ const TABS = [
 import { stagger, fadeUp } from '@/lib/animations';
 
 export default function PublicMatches() {
-    const [matches, setMatches] = useState<any[]>([]);
+    const [matches, setMatches] = useState<Array<{
+        id: string;
+        homeTeam?: { name: string; shortName: string };
+        awayTeam?: { name: string; shortName: string };
+        home_team?: { name: string; shortName: string };
+        away_team?: { name: string; shortName: string };
+        homeScore?: number;
+        awayScore?: number;
+        home_score?: number;
+        away_score?: number;
+        status: string;
+        matchTime?: string;
+        match_time?: string;
+        venue?: string;
+    }>>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
 

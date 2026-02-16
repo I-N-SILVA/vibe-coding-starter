@@ -8,6 +8,7 @@ import {
   NavIcons,
 } from '@/components/plyaz';
 import Image from 'next/image';
+import Link from 'next/link';
 import { SportsTechHero } from '@/components/landing/SportsTechHero';
 import { MetricFeatureGrid } from '@/components/landing/MetricFeatureGrid';
 
@@ -25,24 +26,24 @@ export default function LandingPage() {
       {/* Precision Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-white/80 backdrop-blur-xl border-b border-black/5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2 group">
+          <Link href="/" className="flex items-center gap-2 group">
             <div className="w-8 h-8 bg-black flex items-center justify-center transition-transform duration-500 group-hover:rotate-90">
               <NavIcons.Trophy className="text-white w-4 h-4" />
             </div>
             <span className="text-xs font-black tracking-[0.3em] text-black">
               PLYAZ
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-12">
             <div className="flex items-center gap-8 text-[10px] font-black tracking-widest text-black/40 uppercase">
-              <a href="/about" className="hover:text-black transition-colors">Protocol</a>
-              <a href="/league/public/matches" className="hover:text-black transition-colors">Live Data</a>
-              <a href="/contact" className="hover:text-black transition-colors">Access</a>
+              <Link href="/about" className="hover:text-black transition-colors">Protocol</Link>
+              <Link href="/league/public/matches" className="hover:text-black transition-colors">Live Data</Link>
+              <Link href="/contact" className="hover:text-black transition-colors">Access</Link>
             </div>
             <div className="h-4 w-[1px] bg-black/10" />
-            <a href="/login" className="text-[10px] font-black tracking-widest text-black/60 hover:text-black uppercase transition-colors">Sign In</a>
+            <Link href="/login" className="text-[10px] font-black tracking-widest text-black/60 hover:text-black uppercase transition-colors">Sign In</Link>
             <Button
               onClick={() => router.push('/login?mode=signup')}
               className="h-10 px-6 bg-black text-white text-[10px] font-black tracking-widest rounded-none hover:bg-gray-900 transition-colors"
@@ -80,14 +81,14 @@ export default function LandingPage() {
                 { label: 'Access', href: '/contact' },
                 { label: 'Sign In', href: '/login' },
               ].map((link) => (
-                <a
+                <Link
                   key={link.href}
                   href={link.href}
                   className="text-4xl font-black tracking-tighter text-black uppercase"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
               <Button
                 fullWidth
@@ -218,9 +219,15 @@ export default function LandingPage() {
                 <ul className="space-y-4">
                   {col.links.map((link, j) => (
                     <li key={j}>
-                      <a href={link.h} className="text-[10px] font-black tracking-widest text-black/60 hover:text-black uppercase transition-colors">
-                        {link.l}
-                      </a>
+                      {link.h.startsWith('http') ? (
+                        <a href={link.h} className="text-[10px] font-black tracking-widest text-black/60 hover:text-black uppercase transition-colors" target="_blank" rel="noopener noreferrer">
+                          {link.l}
+                        </a>
+                      ) : (
+                        <Link href={link.h} className="text-[10px] font-black tracking-widest text-black/60 hover:text-black uppercase transition-colors">
+                          {link.l}
+                        </Link>
+                      )}
                     </li>
                   ))}
                 </ul>

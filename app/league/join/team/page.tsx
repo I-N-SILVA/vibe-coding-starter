@@ -25,7 +25,7 @@ export default function JoinTeamPage() {
         primary_color: '#1a1a2e',
         secondary_color: '#e94560',
     });
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<{ name?: string; code?: string; invite_code?: string } | null>(null);
 
     const handleJoinTeam = async () => {
         setIsLoading(true);

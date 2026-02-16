@@ -26,7 +26,7 @@ import { stagger, fadeUp } from '@/lib/animations';
 export default function AdminDashboard() {
     const router = useRouter();
     const [isCreateLeagueOpen, setIsCreateLeagueOpen] = useState(false);
-    const [recentActivity, setRecentActivity] = useState<any[]>([]);
+    const [recentActivity, setRecentActivity] = useState<Array<{ id: string; action: string; detail: string; time: string }>>([]);
 
     const { data: competitions = [], isLoading: compsLoading, error: compsError } = useCompetitions();
     const { data: liveMatches = [], isLoading: liveLoading, error: liveError } = useLiveMatches();

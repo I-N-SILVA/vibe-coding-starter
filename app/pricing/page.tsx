@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/plyaz';
 import Image from 'next/image';
+import Link from 'next/link';
 
 import { fadeUpLarge } from '@/lib/animations';
 
@@ -58,12 +59,12 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-white">
       <nav className="px-6 py-6 flex justify-between items-center border-b border-gray-50 bg-white sticky top-0 z-50">
-        <a href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <Image src="/static/branding/logo-circle.png" alt="Plyaz" width={28} height={28} />
           <span className="text-xs font-bold tracking-[0.2em] uppercase">PLYAZ</span>
-        </a>
+        </Link>
         <div className="flex gap-6">
-          <a href="/login" className="text-xs font-bold tracking-widest uppercase text-gray-400 hover:text-orange-500 transition-colors pt-3">Sign In</a>
+          <Link href="/login" className="text-xs font-bold tracking-widest uppercase text-gray-400 hover:text-orange-500 transition-colors pt-3">Sign In</Link>
           <Button variant="primary" size="sm" onClick={() => window.location.href = '/league/create'}>Start League</Button>
         </div>
       </nav>
@@ -154,9 +155,9 @@ export default function PricingPage() {
           </div>
           <div className="flex gap-8">
             {['Features', 'FAQ', 'Terms', 'Privacy'].map((item) => (
-              <a key={item} href={`/${item.toLowerCase()}`} className="text-[10px] font-bold tracking-widest uppercase text-gray-400 hover:text-orange-500 transition-colors">
+              <Link key={item} href={`/${item.toLowerCase()}`} className="text-[10px] font-bold tracking-widest uppercase text-gray-400 hover:text-orange-500 transition-colors">
                 {item}
-              </a>
+              </Link>
             ))}
           </div>
         </div>

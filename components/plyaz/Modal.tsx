@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from './Button';
 
 /**
  * Modal Component - PLYAZ Design System (Refined)
  * Premium styling with clean black/white design
+ * Accessible: focus trap, Escape key, aria attributes
  */
 
 interface ModalProps {
@@ -28,6 +29,66 @@ const Modal: React.FC<ModalProps> = ({
     size = 'md',
     showCloseButton = true,
 }) => {
+    const dialogRef = useRef<HTMLDivElement>(null);
+    const previousFocusRef = useRef<HTMLElement | null>(null);
+
+    // Focus trap: keep focus inside modal
+    const handleKeyDown = useCallback(
+        (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onClose();
+                return;
+            }
+
+            if (e.key !== 'Tab') return;
+
+            const dialog = dialogRef.current;
+            if (!dialog) return;
+
+            const focusable = dialog.querySelectorAll<HTMLElement>(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            if (focusable.length === 0) return;
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        },
+        [onClose]
+    );
+
+    useEffect(() => {
+        if (isOpen) {
+            previousFocusRef.current = document.activeElement as HTMLElement;
+            document.addEventListener('keydown', handleKeyDown);
+            // Focus first focusable element inside modal
+            requestAnimationFrame(() => {
+                const dialog = dialogRef.current;
+                if (dialog) {
+                    const firstFocusable = dialog.querySelector<HTMLElement>(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    firstFocusable?.focus();
+                }
+            });
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            // Restore focus when modal closes
+            if (previousFocusRef.current) {
+                previousFocusRef.current.focus();
+            }
+        };
+    }, [isOpen, handleKeyDown]);
+
     if (!isOpen) return null;
 
     const sizes = {
@@ -49,6 +110,11 @@ const Modal: React.FC<ModalProps> = ({
             {/* Modal */}
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                 <div
+                    ref={dialogRef}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby={title ? 'modal-title' : undefined}
+                    aria-describedby={description ? 'modal-description' : undefined}
                     className={cn(
                         'relative bg-surface-main rounded-lg shadow-2xl w-full',
                         'transform transition-all duration-300',
@@ -69,6 +135,7 @@ const Modal: React.FC<ModalProps> = ({
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
+                                aria-hidden="true"
                             >
                                 <path
                                     strokeLinecap="round"
@@ -84,12 +151,17 @@ const Modal: React.FC<ModalProps> = ({
                     {(title || description) && (
                         <div className="px-6 pt-6 pb-4">
                             {title && (
-                                <h2 className="text-sm font-medium tracking-widest uppercase text-primary-main">
+                                <h2
+                                    id="modal-title"
+                                    className="text-sm font-medium tracking-widest uppercase text-primary-main"
+                                >
                                     {title}
                                 </h2>
                             )}
                             {description && (
-                                <p className="text-sm text-secondary-main/30 mt-2">{description}</p>
+                                <p id="modal-description" className="text-sm text-secondary-main/30 mt-2">
+                                    {description}
+                                </p>
                             )}
                         </div>
                     )}
@@ -145,6 +217,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
+                            aria-hidden="true"
                         >
                             <path
                                 strokeLinecap="round"
@@ -159,6 +232,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
+                            aria-hidden="true"
                         >
                             <path
                                 strokeLinecap="round"

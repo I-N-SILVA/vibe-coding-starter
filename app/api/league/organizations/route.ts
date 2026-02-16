@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { getAuthUser, apiError, parseBody } from '@/lib/api/helpers';
 import { createOrganizationApiSchema } from '@/lib/api/validation';
+import { rateLimit } from '@/lib/api/rate-limit';
 
 export async function GET() {
     const supabase = await createClient();
@@ -32,6 +33,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+    const limited = rateLimit(request, 5, 60_000); // 5 orgs/min
+    if (limited) return limited;
+
     const supabase = await createClient();
     const auth = await getAuthUser(supabase);
     if (auth.error) return auth.error;
