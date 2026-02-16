@@ -267,6 +267,7 @@ export interface CreateInviteDto {
     competitionId?: string;
     teamId?: string;
     email?: string;
+    role?: 'admin' | 'organizer' | 'referee' | 'manager' | 'player' | 'fan';
 }
 
 export interface CreatePlayerDto {

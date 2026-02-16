@@ -57,6 +57,7 @@ export default function AdminStandings() {
 
             {isLoading ? (
                 <Card padding="md" className="overflow-hidden p-0">
+                    <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-gray-100 bg-gray-50/50">
@@ -76,6 +77,7 @@ export default function AdminStandings() {
                             ))}
                         </tbody>
                     </table>
+                    </div>
                 </Card>
             ) : standings.length === 0 ? (
                 <EmptyState

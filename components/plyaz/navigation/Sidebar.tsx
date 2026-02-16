@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { NavItem } from './types';
 import { NavIcons } from './NavIcons';
 import { PlyazLogo } from './PlyazLogo';
@@ -21,6 +22,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ items, className }) => {
     const pathname = usePathname();
     const router = useRouter();
+    const { signOut } = useAuth();
 
     // Intelligent logo redirection for sidebar
     const getLogoHref = () => {
@@ -80,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, className }) => {
                     </Link>
                 )}
                 <button
-                    onClick={() => router.push('/')}
+                    onClick={async () => { await signOut(); router.push('/'); }}
                     className="flex w-full items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 transition-all font-medium"
                 >
                     <span className="w-5 h-5">

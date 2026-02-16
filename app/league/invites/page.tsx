@@ -8,82 +8,121 @@ import {
     Button,
     Input,
     Select,
+    EmptyState,
+    PageHeader,
 } from '@/components/plyaz';
 import { PageLayout } from '@/components/plyaz/navigation/PageLayout';
+import { NavIcons } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
+import { useInvites, useCreateInvite } from '@/lib/hooks';
+import { useToast } from '@/components/providers';
+import { stagger, fadeUp } from '@/lib/animations';
 
-interface Invite {
+type ApiInvite = {
     id: string;
-    type: 'team' | 'player' | 'referee';
-    code: string;
-    email: string;
-    status: 'pending' | 'accepted' | 'expired';
-    created: string;
-    expires: string;
-}
+    type: string;
+    email: string | null;
+    token: string;
+    status: string;
+    invited_role: string | null;
+    created_at: string | null;
+    expires_at: string;
+    organization_id: string;
+};
 
-const DEMO_INVITES: Invite[] = [
-    { id: '1', type: 'team', code: 'PLZ-TM-A1B2', email: 'coach@example.com', status: 'pending', created: '2025-01-15', expires: '2025-01-22' },
-    { id: '2', type: 'player', code: 'PLZ-PL-C3D4', email: 'player@example.com', status: 'accepted', created: '2025-01-14', expires: '2025-01-21' },
-    { id: '3', type: 'referee', code: 'PLZ-RF-E5F6', email: 'ref@example.com', status: 'expired', created: '2025-01-10', expires: '2025-01-17' },
-    { id: '4', type: 'player', code: 'PLZ-PL-G7H8', email: 'star@example.com', status: 'pending', created: '2025-01-16', expires: '2025-01-23' },
+const ROLE_OPTIONS = [
+    { value: 'player', label: 'Player' },
+    { value: 'manager', label: 'Team Manager' },
+    { value: 'referee', label: 'Referee' },
+    { value: 'admin', label: 'Admin' },
+];
+
+const TYPE_OPTIONS = [
+    { value: 'player_join', label: 'Player Invite' },
+    { value: 'team_join', label: 'Team Invite' },
+    { value: 'referee_invite', label: 'Referee Invite' },
+    { value: 'admin_invite', label: 'Admin Invite' },
 ];
 
 const statusColors: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-700',
     accepted: 'bg-green-100 text-green-700',
     expired: 'bg-gray-100 text-gray-500',
+    revoked: 'bg-red-100 text-red-500',
 };
 
-const typeIcons: Record<string, string> = {
-    team: '🏟️',
-    player: '⚽',
-    referee: '🟨',
+const typeLabels: Record<string, string> = {
+    team_join: 'Team',
+    player_join: 'Player',
+    referee_invite: 'Referee',
+    admin_invite: 'Admin',
 };
 
 export default function InvitesPage() {
-    const [invites] = useState<Invite[]>(DEMO_INVITES);
+    const { data: invites = [], isLoading, error } = useInvites();
+    const createInvite = useCreateInvite();
+    const toast = useToast();
     const [showCreate, setShowCreate] = useState(false);
-    const [newInvite, setNewInvite] = useState<{ email: string; type: Invite['type'] }>({ email: '', type: 'player' });
+    const [newInvite, setNewInvite] = useState({
+        email: '',
+        type: 'player_join' as 'team_join' | 'player_join' | 'referee_invite' | 'admin_invite',
+        role: 'player' as string,
+    });
     const [filter, setFilter] = useState<string>('all');
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
-    const filtered = invites.filter((inv) => filter === 'all' || inv.status === filter);
+    // Invites from API — cast to snake_case shape since API returns raw DB rows
+    const inviteList: ApiInvite[] = Array.isArray(invites) ? (invites as unknown as ApiInvite[]) : [];
+    const filtered = inviteList.filter((inv) => filter === 'all' || inv.status === filter);
 
-    const handleCopy = (code: string, id: string) => {
-        navigator.clipboard.writeText(code);
+    const handleCopy = (token: string, id: string) => {
+        const baseUrl = window.location.origin;
+        const link = `${baseUrl}/invites/accept?token=${token}`;
+        navigator.clipboard.writeText(link);
         setCopiedId(id);
+        toast.success('Invite link copied to clipboard');
         setTimeout(() => setCopiedId(null), 2000);
     };
 
-    const handleCreate = () => {
-        // In production, POST to /api/league/invites
-        setShowCreate(false);
-        setNewInvite({ email: '', type: 'player' });
+    const handleCreate = async () => {
+        if (!newInvite.email) return;
+
+        try {
+            await createInvite.mutateAsync({
+                type: newInvite.type,
+                email: newInvite.email,
+                role: newInvite.role as 'admin' | 'organizer' | 'referee' | 'manager' | 'player' | 'fan',
+            });
+            toast.success('Invitation sent successfully');
+            setShowCreate(false);
+            setNewInvite({ email: '', type: 'player_join', role: 'player' });
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : 'Failed to send invitation');
+        }
     };
 
     return (
         <PageLayout navItems={adminNavItems} title="Invites">
             <div className="space-y-6">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-xl md:text-2xl font-black tracking-tight">Invitations</h1>
-                        <p className="text-xs text-gray-400 tracking-widest uppercase mt-1">{invites.length} total invites</p>
-                    </div>
-                    <Button onClick={() => setShowCreate(true)} className="h-10 md:h-9 text-xs">
-                        + Send Invite
-                    </Button>
-                </div>
+                <PageHeader
+                    label="Management"
+                    title="Invitations"
+                    description={`${inviteList.length} total invite${inviteList.length !== 1 ? 's' : ''}`}
+                    rightAction={
+                        <Button onClick={() => setShowCreate(true)} className="h-10 md:h-9 text-xs">
+                            + Send Invite
+                        </Button>
+                    }
+                />
 
-                {/* Create invite modal-like card */}
+                {/* Create invite card */}
                 {showCreate && (
                     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
                         <Card elevated>
                             <CardContent className="p-5 md:p-6">
                                 <h2 className="text-sm font-bold mb-4">New Invitation</h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                                    <div className="sm:col-span-2">
+                                    <div className="sm:col-span-3">
                                         <Input
                                             label="Email"
                                             type="email"
@@ -93,18 +132,25 @@ export default function InvitesPage() {
                                         />
                                     </div>
                                     <Select
-                                        label="Role"
-                                        options={[
-                                            { value: 'player', label: 'Player' },
-                                            { value: 'team', label: 'Team Manager' },
-                                            { value: 'referee', label: 'Referee' },
-                                        ]}
+                                        label="Invite Type"
+                                        options={TYPE_OPTIONS}
                                         value={newInvite.type}
-                                        onChange={(e) => setNewInvite({ ...newInvite, type: e.target.value as Invite['type'] })}
+                                        onChange={(e) => setNewInvite({ ...newInvite, type: e.target.value as typeof newInvite.type })}
+                                    />
+                                    <Select
+                                        label="Role"
+                                        options={ROLE_OPTIONS}
+                                        value={newInvite.role}
+                                        onChange={(e) => setNewInvite({ ...newInvite, role: e.target.value })}
                                     />
                                 </div>
                                 <div className="flex gap-3">
-                                    <Button onClick={handleCreate} disabled={!newInvite.email} className="h-10 text-xs">
+                                    <Button
+                                        onClick={handleCreate}
+                                        disabled={!newInvite.email || createInvite.isPending}
+                                        isLoading={createInvite.isPending}
+                                        className="h-10 text-xs"
+                                    >
                                         Send Invite
                                     </Button>
                                     <Button variant="secondary" onClick={() => setShowCreate(false)} className="h-10 text-xs">
@@ -122,68 +168,110 @@ export default function InvitesPage() {
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
-                            className={`flex-shrink-0 px-3 py-2 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all ${filter === f ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                }`}
+                            className={`flex-shrink-0 px-3 py-2 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all ${
+                                filter === f ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                            }`}
                         >
                             {f}
                         </button>
                     ))}
                 </div>
 
-                {/* Invite list */}
-                <div className="space-y-2">
-                    {filtered.map((invite, i) => (
-                        <motion.div
-                            key={invite.id}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.03 }}
-                        >
-                            <Card className="hover:shadow-md transition-shadow">
-                                <CardContent className="p-3 md:p-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-xl flex-shrink-0">
-                                            {typeIcons[invite.type]}
+                {/* Loading state */}
+                {isLoading && (
+                    <div className="space-y-2">
+                        {[1, 2, 3].map((i) => (
+                            <Card key={i}>
+                                <CardContent className="p-4">
+                                    <div className="animate-pulse flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-gray-100 rounded-full" />
+                                        <div className="flex-1 space-y-2">
+                                            <div className="h-3 bg-gray-100 rounded w-1/3" />
+                                            <div className="h-2 bg-gray-100 rounded w-1/4" />
                                         </div>
-
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-bold text-sm truncate">{invite.email}</p>
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                                <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400">{invite.type}</span>
-                                                <span className="text-gray-200">·</span>
-                                                <span className="text-[10px] text-gray-400">
-                                                    {new Date(invite.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Code + Copy */}
-                                        <button
-                                            onClick={() => handleCopy(invite.code, invite.id)}
-                                            className="hidden sm:flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                                            title="Copy invite code"
-                                        >
-                                            <span className="text-[10px] font-mono font-bold text-gray-600">
-                                                {copiedId === invite.id ? '✓ Copied' : invite.code}
-                                            </span>
-                                        </button>
-
-                                        <span className={`text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded-full flex-shrink-0 ${statusColors[invite.status]}`}>
-                                            {invite.status}
-                                        </span>
+                                        <div className="h-5 bg-gray-100 rounded-full w-16" />
                                     </div>
                                 </CardContent>
                             </Card>
-                        </motion.div>
-                    ))}
+                        ))}
+                    </div>
+                )}
 
-                    {filtered.length === 0 && (
-                        <div className="text-center py-16">
-                            <p className="text-4xl mb-4">📨</p>
-                            <p className="text-sm text-gray-400">No invites found</p>
-                        </div>
-                    )}
-                </div>
+                {/* Error state */}
+                {error && (
+                    <div className="bg-red-50 border border-red-100 rounded-xl p-4 text-sm text-red-600">
+                        Failed to load invitations. Please try again.
+                    </div>
+                )}
+
+                {/* Invite list */}
+                {!isLoading && (
+                    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-2">
+                        {filtered.map((invite) => (
+                            <motion.div key={invite.id} variants={fadeUp}>
+                                <Card className="hover:shadow-md transition-shadow">
+                                    <CardContent className="p-3 md:p-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                                <span className="text-xs font-bold text-gray-500">
+                                                    {(typeLabels[invite.type] || invite.type || '?')[0]}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-bold text-sm truncate">
+                                                    {invite.email || 'Open Invite'}
+                                                </p>
+                                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                                    <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400">
+                                                        {typeLabels[invite.type] || invite.type}
+                                                    </span>
+                                                    {invite.invited_role && (
+                                                        <>
+                                                            <span className="text-gray-200">·</span>
+                                                            <span className="text-[10px] text-gray-400 uppercase tracking-wider">
+                                                                {invite.invited_role}
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                    <span className="text-gray-200">·</span>
+                                                    <span className="text-[10px] text-gray-400">
+                                                        {invite.created_at
+                                                            ? new Date(invite.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+                                                            : '—'}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Copy invite link */}
+                                            <button
+                                                onClick={() => handleCopy(invite.token, invite.id)}
+                                                className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                                title="Copy invite link"
+                                            >
+                                                <span className="text-[10px] font-bold text-gray-600">
+                                                    {copiedId === invite.id ? '✓ Copied' : 'Copy Link'}
+                                                </span>
+                                            </button>
+
+                                            <span className={`text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded-full flex-shrink-0 ${statusColors[invite.status] || 'bg-gray-100 text-gray-500'}`}>
+                                                {invite.status}
+                                            </span>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        ))}
+
+                        {filtered.length === 0 && !isLoading && (
+                            <EmptyState
+                                icon={<NavIcons.Public />}
+                                title="No Invitations"
+                                description={filter === 'all' ? 'Send your first invitation to grow your league.' : `No ${filter} invitations found.`}
+                            />
+                        )}
+                    </motion.div>
+                )}
             </div>
         </PageLayout>
     );

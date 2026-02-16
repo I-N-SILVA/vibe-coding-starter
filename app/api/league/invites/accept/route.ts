@@ -29,7 +29,7 @@ export async function POST(request: Request) {
         .select('*')
         .eq('token', token)
         .eq('status', 'pending')
-        .lte('expires_at', new Date().toISOString()) // Filter for expired invites
+        .gte('expires_at', new Date().toISOString()) // Filter for non-expired invites
         .maybeSingle();
 
     if (inviteError) {

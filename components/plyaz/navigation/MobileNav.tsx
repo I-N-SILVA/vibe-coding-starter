@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { NavItem } from './types';
 import { NavIcons } from './NavIcons';
 
@@ -20,6 +21,7 @@ interface MobileNavProps {
 export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
     const pathname = usePathname();
     const router = useRouter();
+    const { signOut } = useAuth();
 
     return (
         <nav
@@ -56,7 +58,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
                 {/* Logout for mobile if in admin/referee area */}
                 {pathname.includes('/league') && !pathname.includes('/public') && (
                     <button
-                        onClick={() => router.push('/')}
+                        onClick={async () => { await signOut(); router.push('/'); }}
                         className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-colors min-w-[64px] text-gray-400 hover:text-red-500"
                     >
                         <span className="w-6 h-6">

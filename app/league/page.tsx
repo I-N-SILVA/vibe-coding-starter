@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCompetitions, useLiveMatches, useMatches } from '@/lib/hooks';
+import { useCompetitions, useLiveMatches, useMatches, useTeams } from '@/lib/hooks';
 import { motion } from 'framer-motion';
 import {
     PageLayout,
@@ -22,17 +22,37 @@ import {
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUp } from '@/lib/animations';
+import { useToast } from '@/components/providers';
 
 export default function AdminDashboard() {
     const router = useRouter();
+    const toast = useToast();
     const [isCreateLeagueOpen, setIsCreateLeagueOpen] = useState(false);
+    const [newLeague, setNewLeague] = useState({ name: '', type: 'league', startDate: '' });
     const [recentActivity, setRecentActivity] = useState<Array<{ id: string; action: string; detail: string; time: string }>>([]);
 
     const { data: competitions = [], isLoading: compsLoading, error: compsError } = useCompetitions();
     const { data: liveMatches = [], isLoading: liveLoading, error: liveError } = useLiveMatches();
     const { data: upcomingMatches = [], isLoading: upcomingLoading, error: upcomingError } = useMatches({ status: 'upcoming' });
+    const { data: teams = [], isLoading: teamsLoading } = useTeams();
+    const [isCreating, setIsCreating] = useState(false);
 
     const isLoading = compsLoading || liveLoading || upcomingLoading;
+
+    // Fetch player count
+    const [playerCount, setPlayerCount] = useState<number | null>(null);
+    useEffect(() => {
+        async function fetchPlayers() {
+            try {
+                const res = await fetch('/api/league/players');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) setPlayerCount(data.length);
+                }
+            } catch { /* ignore */ }
+        }
+        fetchPlayers();
+    }, []);
 
     // Log errors from query hooks
     useEffect(() => {
@@ -50,7 +70,7 @@ export default function AdminDashboard() {
         }
     }, [compsLoading, competitions, router]);
 
-    // Fetch activity (no hook available)
+    // Fetch activity
     useEffect(() => {
         async function fetchActivity() {
             try {
@@ -65,6 +85,42 @@ export default function AdminDashboard() {
         }
         fetchActivity();
     }, []);
+
+    const handleCreateLeague = async () => {
+        if (!newLeague.name.trim()) return;
+
+        try {
+            setIsCreating(true);
+            // API expects snake_case fields directly
+            await fetch('/api/league/competitions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: newLeague.name,
+                    type: newLeague.type,
+                    status: 'draft',
+                    start_date: newLeague.startDate || null,
+                }),
+            }).then(async (res) => {
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.error || 'Failed to create league');
+                }
+            });
+            toast.success('League created successfully');
+            setIsCreateLeagueOpen(false);
+            setNewLeague({ name: '', type: 'league', startDate: '' });
+            // Refresh competitions list
+            window.location.reload();
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : 'Failed to create league');
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
+    const teamCount = Array.isArray(teams) ? teams.length : 0;
+    const compCount = Array.isArray(competitions) ? competitions.length : 0;
 
     return (
         <PageLayout navItems={adminNavItems} title="PLYAZ">
@@ -89,16 +145,15 @@ export default function AdminDashboard() {
                             <motion.div variants={fadeUp}>
                                 <StatCard
                                     title="Leagues"
-                                    value={competitions.length > 0 ? competitions.length.toString() : "4"}
+                                    value={compCount.toString()}
                                     icon={<NavIcons.Trophy />}
                                 />
                             </motion.div>
                             <motion.div variants={fadeUp}>
                                 <StatCard
                                     title="Teams"
-                                    value="24"
+                                    value={teamsLoading ? '—' : teamCount.toString()}
                                     icon={<NavIcons.Teams />}
-                                    trend={{ value: 12, isPositive: true }}
                                 />
                             </motion.div>
                             <motion.div variants={fadeUp}>
@@ -111,7 +166,7 @@ export default function AdminDashboard() {
                             <motion.div variants={fadeUp}>
                                 <StatCard
                                     title="Players"
-                                    value="156"
+                                    value={playerCount !== null ? playerCount.toString() : '—'}
                                     icon={<NavIcons.Statistics />}
                                 />
                             </motion.div>
@@ -202,19 +257,27 @@ export default function AdminDashboard() {
                     <h2 className="text-[10px] font-medium tracking-[0.25em] uppercase text-secondary-main/30 mb-4">
                         Upcoming
                     </h2>
-                    <div className="space-y-4">
-                        {upcomingMatches.map((match) => (
-                            <MatchCard
-                                key={match.id}
-                                homeTeam={match.homeTeam}
-                                awayTeam={match.awayTeam}
-                                status={match.status}
-                                matchTime={match.matchTime}
-                                date={match.scheduledDate ? new Date(match.scheduledDate).toLocaleDateString() : 'TBD'}
-                                venue={match.venue}
-                            />
-                        ))}
-                    </div>
+                    {upcomingMatches.length > 0 ? (
+                        <div className="space-y-4">
+                            {upcomingMatches.map((match) => (
+                                <MatchCard
+                                    key={match.id}
+                                    homeTeam={match.homeTeam}
+                                    awayTeam={match.awayTeam}
+                                    status={match.status}
+                                    matchTime={match.matchTime}
+                                    date={match.scheduledDate ? new Date(match.scheduledDate).toLocaleDateString() : 'TBD'}
+                                    venue={match.venue}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <EmptyState
+                            icon={<NavIcons.Calendar />}
+                            title="No Upcoming Matches"
+                            description="Schedule your first match to get started."
+                        />
+                    )}
                 </section>
 
                 <section>
@@ -223,22 +286,28 @@ export default function AdminDashboard() {
                     </h2>
                     <Card>
                         <CardContent>
-                            <div className="space-y-4">
-                                {recentActivity.map((activity) => (
-                                    <div
-                                        key={activity.id}
-                                        className="flex items-start justify-between py-2 border-b border-secondary-main/5 last:border-0"
-                                    >
-                                        <div>
-                                            <p className="text-sm font-medium text-primary-main">{activity.action}</p>
-                                            <p className="text-xs text-secondary-main/40">{activity.detail}</p>
+                            {recentActivity.length > 0 ? (
+                                <div className="space-y-4">
+                                    {recentActivity.map((activity) => (
+                                        <div
+                                            key={activity.id}
+                                            className="flex items-start justify-between py-2 border-b border-secondary-main/5 last:border-0"
+                                        >
+                                            <div>
+                                                <p className="text-sm font-medium text-primary-main">{activity.action}</p>
+                                                <p className="text-xs text-secondary-main/40">{activity.detail}</p>
+                                            </div>
+                                            <span className="text-[10px] text-secondary-main/40 uppercase tracking-wider flex-shrink-0 ml-2">
+                                                {activity.time}
+                                            </span>
                                         </div>
-                                        <span className="text-[10px] text-secondary-main/40 uppercase tracking-wider">
-                                            {activity.time}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="py-8 text-center">
+                                    <p className="text-xs text-gray-400">No recent activity yet.</p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </section>
@@ -252,22 +321,37 @@ export default function AdminDashboard() {
                 description="Set up a new competition"
             >
                 <div className="space-y-4">
-                    <Input label="League Name" placeholder="e.g., Premier Division" />
+                    <Input
+                        label="League Name"
+                        placeholder="e.g., Premier Division"
+                        value={newLeague.name}
+                        onChange={(e) => setNewLeague({ ...newLeague, name: e.target.value })}
+                    />
                     <Select
                         label="Format"
-                        placeholder="Select format"
                         options={[
                             { value: 'league', label: 'League (Round Robin)' },
-                            { value: 'cup', label: 'Cup (Knockout)' },
-                            { value: 'group', label: 'Group Stage + Knockout' },
+                            { value: 'knockout', label: 'Cup (Knockout)' },
+                            { value: 'group_knockout', label: 'Group Stage + Knockout' },
                         ]}
+                        value={newLeague.type}
+                        onChange={(e) => setNewLeague({ ...newLeague, type: e.target.value })}
                     />
-                    <Input label="Start Date" type="date" />
+                    <Input
+                        label="Start Date"
+                        type="date"
+                        value={newLeague.startDate}
+                        onChange={(e) => setNewLeague({ ...newLeague, startDate: e.target.value })}
+                    />
                     <div className="flex justify-end gap-3 mt-6">
                         <Button variant="secondary" onClick={() => setIsCreateLeagueOpen(false)}>
                             Cancel
                         </Button>
-                        <Button onClick={() => setIsCreateLeagueOpen(false)}>
+                        <Button
+                            onClick={handleCreateLeague}
+                            disabled={!newLeague.name.trim() || isCreating}
+                            isLoading={isCreating}
+                        >
                             Create
                         </Button>
                     </div>

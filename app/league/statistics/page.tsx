@@ -87,6 +87,7 @@ export default function StatisticsPage() {
                             All Players
                         </h2>
                         <Card padding="sm" className="overflow-hidden">
+                            <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-gray-50 border-b border-gray-100">
@@ -114,6 +115,7 @@ export default function StatisticsPage() {
                                     ))}
                                 </tbody>
                             </table>
+                            </div>
                         </Card>
                     </div>
                 </motion.div>

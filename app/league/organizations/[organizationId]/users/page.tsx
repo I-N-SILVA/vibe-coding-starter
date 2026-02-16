@@ -74,6 +74,7 @@ export default function UserManagementPage() {
     return (
         <div className="p-4 md:p-8">
             <h1 className="text-2xl font-bold mb-4">User Management</h1>
+            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -127,6 +128,7 @@ export default function UserManagementPage() {
                     ))}
                 </TableBody>
             </Table>
+            </div>
         </div>
     );
 }

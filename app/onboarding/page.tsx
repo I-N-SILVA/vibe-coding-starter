@@ -10,6 +10,7 @@ import {
     CardContent,
     Button,
     Input,
+    Select,
 } from '@/components/plyaz';
 
 export default function OnboardingPage() {
@@ -154,18 +155,16 @@ export default function OnboardingPage() {
                                     required
                                 />
 
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-widest text-secondary-main/40">Competition Type</label>
-                                    <select
-                                        className="w-full h-12 px-4 rounded-xl bg-gray-50 border border-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-main/20 transition-all appearance-none"
-                                        value={leagueType}
-                                        onChange={(e) => setLeagueType(e.target.value)}
-                                    >
-                                        <option value="league">League (Round Robin)</option>
-                                        <option value="knockout">Cup (Knockout)</option>
-                                        <option value="group_knockout">Group Stage + Knockout</option>
-                                    </select>
-                                </div>
+                                <Select
+                                    label="Competition Type"
+                                    value={leagueType}
+                                    onChange={(e) => setLeagueType(e.target.value)}
+                                    options={[
+                                        { value: 'league', label: 'League (Round Robin)' },
+                                        { value: 'knockout', label: 'Cup (Knockout)' },
+                                        { value: 'group_knockout', label: 'Group Stage + Knockout' },
+                                    ]}
+                                />
 
                                 {error && (
                                     <p className="text-xs text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 italic">

@@ -143,7 +143,7 @@ export const acceptInviteApiSchema = z.object({
 
 export const updateUserRoleApiSchema = z.object({
     role: z.enum(['admin', 'referee', 'manager', 'player', 'fan'], {
-        errorMap: () => ({ message: 'Invalid role provided.' }),
+        error: 'Invalid role provided.',
     }),
 });
 
