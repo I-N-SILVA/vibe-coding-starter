@@ -56,7 +56,7 @@ export async function POST(
         .from('audit_logs')
         .insert({
             organization_id: organizationId,
-            user_id: auth.id, // Admin who performed the action
+            user_id: auth.userId, // Admin who performed the action
             target_user_id: userId, // User whose role was updated
             action: 'role_changed',
             details: {
