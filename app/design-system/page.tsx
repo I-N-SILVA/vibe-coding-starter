@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import {
     Button,
     Card,
-    CardHeader,
-    CardTitle,
     CardContent,
     Badge,
     StatusBadge,

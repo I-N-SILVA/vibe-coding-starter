@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { useAuthStore } from '@/lib/stores/auth-store';
 import {
     Table,
     TableBody,
@@ -42,17 +41,17 @@ export default function UserManagementPage() {
     const [newRole, setNewRole] = useState<string>('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    useEffect(() => {
-        fetchUsers();
-    }, [organizationId]);
-
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         const response = await fetch(`/api/organizations/${organizationId}/users`);
         if (response.ok) {
             const data = await response.json();
             setUsers(data);
         }
-    };
+    }, [organizationId]);
+
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
 
     const handleApprove = async (userId: string) => {
         await fetch(`/api/organizations/${organizationId}/users/${userId}/approve`, {

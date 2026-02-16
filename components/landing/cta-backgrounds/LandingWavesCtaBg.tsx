@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { convertToRgba } from '@/lib/utils';
@@ -300,7 +300,7 @@ export const LandingWavesCtaBg = ({
     return () => {
       window.removeEventListener('resize', onResize);
     };
-  }, [waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, xGap, yGap]);
+  }, [generateNewColors, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, xGap, yGap]);
 
   return (
     <div ref={domRef} className={clsx('inset-0 opacity-70', className)}>

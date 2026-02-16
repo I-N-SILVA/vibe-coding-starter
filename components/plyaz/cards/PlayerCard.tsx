@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Card } from '../Card';
 
@@ -40,9 +41,11 @@ export const PlayerCard = React.forwardRef<HTMLDivElement, PlayerCardProps>(
                 {/* Avatar */}
                 <div className="relative">
                     {avatarUrl ? (
-                        <img
+                        <Image
                             src={avatarUrl}
                             alt={name}
+                            width={48}
+                            height={48}
                             className="w-12 h-12 rounded-full object-cover bg-gray-100"
                         />
                     ) : (

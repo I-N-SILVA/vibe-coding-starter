@@ -3,7 +3,6 @@
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { LandingHeader, LandingHeaderMenuItem } from '@/components/landing';
 import ThemeSwitch from '@/components/shared/ThemeSwitch';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 export const Header = ({ className }: { className?: string }) => {

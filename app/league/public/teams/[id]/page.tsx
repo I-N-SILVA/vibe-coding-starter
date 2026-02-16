@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import {
     PageLayout,
     UltimatePlayerCard,
-    MatchCard,
     StatCard,
 } from '@/components/plyaz';
 import { publicNavItems } from '@/lib/constants/navigation';

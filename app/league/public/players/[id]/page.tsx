@@ -10,7 +10,7 @@ import {
     Badge,
 } from '@/components/plyaz';
 import { publicNavItems } from '@/lib/constants/navigation';
-import { stagger, fadeUpLarge } from '@/lib/animations';
+// Removed unused animation imports
 
 export default function PublicPlayerProfile() {
     const params = useParams();
@@ -174,8 +174,8 @@ export default function PublicPlayerProfile() {
                                     <div
                                         key={i}
                                         className={`w-10 h-10 rounded-lg flex items-center justify-center font-black border ${result === 'W' ? 'bg-green-500/20 border-green-500/50 text-green-400' :
-                                                result === 'D' ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400' :
-                                                    'bg-red-500/20 border-red-500/50 text-red-400'
+                                            result === 'D' ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400' :
+                                                'bg-red-500/20 border-red-500/50 text-red-400'
                                             }`}
                                     >
                                         {result}

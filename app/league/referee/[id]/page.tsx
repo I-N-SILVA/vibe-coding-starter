@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
@@ -24,7 +24,7 @@ export default function RefereeController() {
     const matchId = params.id as string;
 
     const [initialFetchMatch, setInitialFetchMatch] = useState<FetchedMatch | null>(null);
-    const { match, isLive } = useLiveMatch(initialFetchMatch || {
+    const { match } = useLiveMatch(initialFetchMatch || {
         id: matchId,
         homeTeam: { id: '', name: 'Home', shortName: 'HOM' },
         awayTeam: { id: '', name: 'Away', shortName: 'AWY' },
@@ -47,7 +47,6 @@ export default function RefereeController() {
     // Modal states
     const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
     const [isCardModalOpen, setIsCardModalOpen] = useState(false);
-    const [isSubModalOpen, setIsSubModalOpen] = useState(false);
     const [isEndMatchOpen, setIsEndMatchOpen] = useState(false);
     const [selectedTeam, setSelectedTeam] = useState<'home' | 'away'>('home');
     const [cardType, setCardType] = useState<MatchEventType>('yellow_card');
@@ -166,7 +165,6 @@ export default function RefereeController() {
             setEvents(prev => [newEvent, ...prev]);
             setIsGoalModalOpen(false);
             setIsCardModalOpen(false);
-            setIsSubModalOpen(false);
         } catch (err) {
             console.error('Failed to record event:', err);
         }
@@ -263,8 +261,8 @@ export default function RefereeController() {
                                     RED
                                 </button>
                                 <button
-                                    onClick={() => setIsSubModalOpen(true)}
-                                    className="h-20 rounded-2xl bg-secondary-main text-white font-black text-[10px] tracking-widest uppercase active:scale-95 transition-all"
+                                    disabled
+                                    className="h-20 rounded-2xl bg-secondary-main/50 text-white/50 font-black text-[10px] tracking-widest uppercase cursor-not-allowed"
                                 >
                                     SUB
                                 </button>

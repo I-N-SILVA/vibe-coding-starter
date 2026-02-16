@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
     PageLayout,
     PageHeader,
@@ -9,7 +9,6 @@ import {
     CardContent,
     Button,
     Badge,
-    NavIcons,
 } from '@/components/plyaz';
 import { playerNavItems } from '@/lib/constants/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';

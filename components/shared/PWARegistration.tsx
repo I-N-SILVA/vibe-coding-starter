@@ -13,10 +13,10 @@ export const PWARegistration = () => {
                 navigator.serviceWorker
                     .register('/sw.js')
                     .then((registration) => {
-                        console.log('SW registered: ', registration);
+                        console.warn('SW registered: ', registration);
                     })
                     .catch((registrationError) => {
-                        console.log('SW registration failed: ', registrationError);
+                        console.warn('SW registration failed: ', registrationError);
                     });
             });
         }

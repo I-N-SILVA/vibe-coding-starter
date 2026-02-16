@@ -27,19 +27,29 @@ export async function getAuthUser(supabase: SupabaseClient) {
  */
 export async function getUserOrgId(supabase: SupabaseClient) {
     const auth = await getAuthUser(supabase);
-    if (auth.error) return { orgId: null, userId: null, error: auth.error };
+    if (auth.error) return { orgId: null, userId: null, user: null, error: auth.error };
 
     const { data: profile, error } = await supabase
         .from('profiles')
-        .select('organization_id')
+        .select('organization_id, role')
         .eq('id', auth.user!.id)
         .single();
 
     if (error || !profile?.organization_id) {
-        return { orgId: null, userId: auth.user!.id, error: apiError('No organization found. Please create or join one first.', 403) };
+        return {
+            orgId: null,
+            userId: auth.user!.id,
+            user: auth.user,
+            error: apiError('No organization found. Please create or join one first.', 403)
+        };
     }
 
-    return { orgId: profile.organization_id as string, userId: auth.user!.id, error: null };
+    return {
+        orgId: profile.organization_id as string,
+        userId: auth.user!.id,
+        user: { ...auth.user, role: profile.role as string },
+        error: null
+    };
 }
 
 /**

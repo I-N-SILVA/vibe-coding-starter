@@ -7,19 +7,11 @@ import { searchLinks } from '@/data/config/searchLinks';
 export const SearchProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
-  const makeRootPath = (path: string) => {
-    if (!path.startsWith('/')) {
-      return `/${path}`;
-    }
-
-    return path;
-  };
-
   return (
     <KBarSearchProvider
       kbarConfig={{
         searchDocumentsPath: 'search.json',
-        onSearchDocumentsLoad(json) {
+        onSearchDocumentsLoad(_json) {
           return [
             ...searchLinks.map((link) => {
               return {

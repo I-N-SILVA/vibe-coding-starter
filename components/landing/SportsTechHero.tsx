@@ -3,7 +3,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/plyaz';
-import { NavIcons } from '@/components/plyaz/navigation';
 import { useRouter } from 'next/navigation';
 
 export const SportsTechHero = () => {

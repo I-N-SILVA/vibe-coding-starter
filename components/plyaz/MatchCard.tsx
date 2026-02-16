@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Card } from './Card';
 import { StatusBadge, type MatchStatus } from './Badge';
@@ -89,9 +90,11 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                     <div className="flex-1 text-left">
                         <div className="flex items-center gap-3">
                             {homeTeam.logoUrl ? (
-                                <img
+                                <Image
                                     src={homeTeam.logoUrl}
                                     alt={homeTeam.name}
+                                    width={40}
+                                    height={40}
                                     className="w-10 h-10 rounded-full object-cover bg-secondary-main/5"
                                 />
                             ) : (
@@ -144,9 +147,11 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                                 <p className="text-[10px] text-secondary-main/40 uppercase tracking-wider">Away</p>
                             </div>
                             {awayTeam.logoUrl ? (
-                                <img
+                                <Image
                                     src={awayTeam.logoUrl}
                                     alt={awayTeam.name}
+                                    width={40}
+                                    height={40}
                                     className="w-10 h-10 rounded-full object-cover bg-secondary-main/5"
                                 />
                             ) : (

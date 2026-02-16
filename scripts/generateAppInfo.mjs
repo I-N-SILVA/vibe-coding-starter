@@ -16,4 +16,4 @@ export const name = '${pkg.name}';
 `;
 
 fs.writeFileSync(outputPath, content);
-console.log('Generated app-info.js successfully.');
+console.warn('Generated app-info.js successfully.');

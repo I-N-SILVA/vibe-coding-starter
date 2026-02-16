@@ -5,12 +5,10 @@ import {
     PageLayout,
     PageHeader,
     Card,
-    CardContent,
     Button,
     Badge,
     Input,
     Modal,
-    NavIcons,
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
 import { motion } from 'framer-motion';
@@ -25,7 +23,7 @@ const MOCK_ORGS = [
 
 export default function OrganizationsPage() {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const [orgs, setOrgs] = useState(MOCK_ORGS);
+    const [orgs] = useState(MOCK_ORGS);
 
     return (
         <PageLayout navItems={adminNavItems} title="ORGANIZATIONS">

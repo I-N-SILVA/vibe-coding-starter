@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Card } from '../Card';
 
@@ -36,9 +37,11 @@ export const TeamCard = React.forwardRef<HTMLDivElement, TeamCardProps>(
             >
                 {/* Team Logo */}
                 {logoUrl ? (
-                    <img
+                    <Image
                         src={logoUrl}
                         alt={name}
+                        width={64}
+                        height={64}
                         className="w-16 h-16 mx-auto rounded-full object-cover bg-gray-100 mb-4"
                     />
                 ) : (

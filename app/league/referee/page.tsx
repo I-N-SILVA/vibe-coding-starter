@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
     PageLayout,
@@ -10,7 +9,6 @@ import {
     CardContent,
     Button,
     Badge,
-    NavIcons,
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
 
@@ -33,9 +31,8 @@ const DEFAULT_MATCH = {
 
 
 export default function RefereeDashboard() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const matchId = searchParams?.get('matchId') || '1';
+    // matchId is currently unused as we use DEFAULT_MATCH for demo
+    // const matchId = searchParams?.get('matchId') || '1';
 
     const [match, setMatch] = useState(DEFAULT_MATCH);
     const [clock, setClock] = useState(0);

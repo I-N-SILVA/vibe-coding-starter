@@ -80,8 +80,8 @@ const ElegantShape = memo(
           animate={
             isInView
               ? {
-                  y: [0, 15, 0],
-                }
+                y: [0, 15, 0],
+              }
               : { y: 0 }
           }
           transition={{
@@ -105,8 +105,8 @@ const ElegantShape = memo(
               backgroundImage: `linear-gradient(to right, ${gradientColor})`,
               ...(shapeType === 'triangle'
                 ? {
-                    clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-                  }
+                  clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                }
                 : {}),
             }}
           />
@@ -204,7 +204,7 @@ export const LandingShapesCtaBg = ({
       ...shape,
       colorIndex: index % 3,
     }));
-  }, [shapeCount]); // Remove gradientColors from dependencies
+  }, [shapeType, shapeCount]); // Remove gradientColors from dependencies
 
   const generateNewColors = useCallback(() => {
     if (!domRef.current) return;

@@ -12,15 +12,15 @@ import {
 
 import { stagger, fadeUpLarge } from '@/lib/animations';
 
+const DEFAULT_COMPS = [
+    { id: '1', name: 'Premier Division', type: 'League', teamCount: 12, startDate: 'Feb 1, 2026' },
+    { id: '2', name: 'Sunday Cup', type: 'Knockout', teamCount: 16, startDate: 'Mar 15, 2026' },
+];
+
 export default function PublicCompetitions() {
     const router = useRouter();
     const [competitions, setCompetitions] = useState<Array<{ id: string; name: string; type: string; teamCount?: number; startDate: string }>>([]);
     const [isLoading, setIsLoading] = useState(true);
-
-    const DEFAULT_COMPS = [
-        { id: '1', name: 'Premier Division', type: 'League', teamCount: 12, startDate: 'Feb 1, 2026' },
-        { id: '2', name: 'Sunday Cup', type: 'Knockout', teamCount: 16, startDate: 'Mar 15, 2026' },
-    ];
 
     useEffect(() => {
         async function fetchComps() {

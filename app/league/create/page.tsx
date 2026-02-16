@@ -65,7 +65,7 @@ export default function CreateLeaguePage() {
         setIsSubmitting(true);
         try {
             // Destructure to remove fields that don't belong in the top-level schema
-            const { venue, ...formData } = form;
+            const { ...formData } = form;
 
             const payload = {
                 ...formData,
