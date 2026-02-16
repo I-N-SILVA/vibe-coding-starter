@@ -56,7 +56,7 @@ export async function POST(request: Request) {
         .from('audit_logs')
         .insert({
             organization_id: auth.orgId,
-            user_id: auth.id, // User who sent the invite (admin)
+            user_id: auth.userId, // User who sent the invite (admin)
             target_user_id: null, // Target user is not yet known/authenticated
             action: 'invite_sent',
             details: {
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     if (auditLogError) {
         console.error('Failed to write audit log for invite sent:', auditLogError);
     }
-    
+
     // Send invitation email
     if (data.email) {
         const { data: org } = await supabase.from('organizations').select('name').eq('id', auth.orgId).single();
