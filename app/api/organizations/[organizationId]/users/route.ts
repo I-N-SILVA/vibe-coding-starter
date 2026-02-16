@@ -4,13 +4,13 @@ import { getUserOrgId, apiError } from '@/lib/api/helpers';
 
 export async function GET(
     request: Request,
-    { params }: { params: { organizationId: string } }
+    { params }: { params: Promise<{ organizationId: string }> }
 ) {
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
 
-    const { organizationId } = params;
+    const { organizationId } = await params;
 
     // Authorization: Only 'admin' of the organization can view users
     if (auth.orgId !== organizationId || auth.user.role !== 'admin') {

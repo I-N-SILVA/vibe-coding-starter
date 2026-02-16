@@ -6,7 +6,7 @@ import { rateLimit } from '@/lib/api/rate-limit';
 
 export async function POST(
     request: Request,
-    { params }: { params: { organizationId: string, userId: string } }
+    { params }: { params: Promise<{ organizationId: string, userId: string }> }
 ) {
     const limited = rateLimit(request, 10, 60_000);
     if (limited) return limited;
@@ -15,7 +15,7 @@ export async function POST(
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
 
-    const { organizationId, userId } = params;
+    const { organizationId, userId } = await params;
 
     // Authorization: Only 'admin' of the organization can update roles
     if (auth.orgId !== organizationId || auth.user.role !== 'admin') {
