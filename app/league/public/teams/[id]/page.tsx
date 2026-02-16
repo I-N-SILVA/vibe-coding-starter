@@ -49,15 +49,7 @@ const teamData = {
     ]
 };
 
-const stagger = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.1 } },
-};
-
-const fadeUp = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
-};
+import { stagger, fadeUpLarge } from '@/lib/animations';
 
 export default function TeamProfile() {
     const router = useRouter();
@@ -172,7 +164,7 @@ export default function TeamProfile() {
                         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6"
                     >
                         {teamData.roster.map((player, idx) => (
-                            <motion.div key={idx} variants={fadeUp}>
+                            <motion.div key={idx} variants={fadeUpLarge}>
                                 <UltimatePlayerCard
                                     name={player.name}
                                     position={player.position}

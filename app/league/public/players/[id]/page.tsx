@@ -10,16 +10,7 @@ import {
     Badge,
 } from '@/components/plyaz';
 import { publicNavItems } from '@/lib/constants/navigation';
-
-const stagger = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.1 } },
-};
-
-const fadeUp = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
-};
+import { stagger, fadeUpLarge } from '@/lib/animations';
 
 export default function PublicPlayerProfile() {
     const params = useParams();

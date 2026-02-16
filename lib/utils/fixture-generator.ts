@@ -3,14 +3,7 @@
  * Algorithms for creating round-robin and knockout tournament brackets
  */
 
-import type { Team, MatchStatus } from '@/types';
-
-interface InternalMatch {
-    homeTeam: Team;
-    awayTeam: Team;
-    status: MatchStatus;
-    scheduledDate: Date;
-}
+type FixtureTeam = { id: string; name: string; short_name?: string | null };
 
 /**
  * Generates Round Robin fixtures for a set of teams
@@ -20,7 +13,7 @@ interface InternalMatch {
  * @returns Array of generated matches
  */
 export const generateRoundRobin = (
-    teams: Team[],
+    teams: FixtureTeam[],
     startDate: Date,
     competitionId: string,
     intervalDays: number = 7
@@ -30,7 +23,7 @@ export const generateRoundRobin = (
     const teamsCopy = [...teams];
     if (teamsCopy.length % 2 !== 0) {
         // Add a "BYE" team if odd number of teams
-        teamsCopy.push({ id: 'bye', name: 'BYE', shortName: 'BYE' } as Team);
+        teamsCopy.push({ id: 'bye', name: 'BYE', short_name: 'BYE' });
     }
 
     const numTeams = teamsCopy.length;
@@ -73,7 +66,7 @@ export const generateRoundRobin = (
  * This only generates the first round of a tournament tree.
  */
 export const generateKnockout = (
-    teams: Team[],
+    teams: FixtureTeam[],
     startDate: Date,
     competitionId: string
 ): any[] => {

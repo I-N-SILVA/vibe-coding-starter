@@ -14,16 +14,7 @@ import {
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
 import { motion } from 'framer-motion';
-
-const stagger = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.1 } },
-};
-
-const fadeUp = {
-    hidden: { opacity: 0, y: 12 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-};
+import { stagger, fadeUp } from '@/lib/animations';
 
 // Mock organizations for demonstration
 const MOCK_ORGS = [

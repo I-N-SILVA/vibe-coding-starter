@@ -10,15 +10,7 @@ import {
     Skeleton,
 } from '@/components/plyaz';
 
-const stagger = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.1 } },
-};
-
-const fadeUp = {
-    hidden: { opacity: 0, y: 16 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
-};
+import { stagger, fadeUpLarge } from '@/lib/animations';
 
 export default function PublicCompetitions() {
     const router = useRouter();
@@ -93,7 +85,7 @@ export default function PublicCompetitions() {
                         className="grid md:grid-cols-2 gap-6"
                     >
                         {competitions.map((comp) => (
-                            <motion.div key={comp.id} variants={fadeUp}>
+                            <motion.div key={comp.id} variants={fadeUpLarge}>
                                 <Card
                                     elevated
                                     hoverable

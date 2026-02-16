@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const supabase = createClient();
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
             const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
             const hasKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
             console.log('[Auth] Supabase Config Check:', { hasUrl, hasKey });
@@ -70,21 +70,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const initAuth = async () => {
             try {
-                console.log('[Auth] Initializing session...');
                 const { data: { user: authUser } } = await Promise.race([
                     supabase.auth.getUser(),
-                    new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Auth init timed out')), 10000))
+                    new Promise<{ data: { user: null } }>((_, reject) => setTimeout(() => reject(new Error('Auth init timed out')), 10000))
                 ]);
                 if (authUser) {
-                    console.log('[Auth] Session found for:', authUser.email);
                     const prof = await fetchProfile(authUser.id);
                     setUser({ id: authUser.id, email: authUser.email || '', profile: prof });
                     setProfile(prof);
-                } else {
-                    console.log('[Auth] No active session');
                 }
             } catch (err) {
-                console.error('[Auth] Initialization error:', err);
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('[Auth] Initialization error:', err);
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -111,23 +109,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Sign In
     const signIn = async (email: string, password: string) => {
         try {
-            console.log('[Auth] Attempting sign in for:', email);
             const { error } = await Promise.race([
                 supabase.auth.signInWithPassword({ email, password }),
-                new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Sign in timed out')), 15000))
+                new Promise<{ error: { message: string } }>((_, reject) => setTimeout(() => reject(new Error('Sign in timed out')), 15000))
             ]);
-            if (error) console.error('[Auth] Sign in error:', error);
             return { error: error?.message || null };
-        } catch (err: any) {
-            console.error('[Auth] Sign in exception:', err);
-            return { error: err.message || 'An unexpected error occurred' };
+        } catch (err: unknown) {
+            return { error: err instanceof Error ? err.message : 'An unexpected error occurred' };
         }
     };
 
     // Sign Up
     const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'fan') => {
         try {
-            console.log('[Auth] Attempting sign up for:', email);
             const { error } = await Promise.race([
                 supabase.auth.signUp({
                     email,
@@ -136,13 +130,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         data: { full_name: fullName, role },
                     },
                 }),
-                new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Sign up timed out')), 15000))
+                new Promise<{ error: { message: string } }>((_, reject) => setTimeout(() => reject(new Error('Sign up timed out')), 15000))
             ]);
-            if (error) console.error('[Auth] Sign up error:', error);
             return { error: error?.message || null };
-        } catch (err: any) {
-            console.error('[Auth] Sign up exception:', err);
-            return { error: err.message || 'An unexpected error occurred' };
+        } catch (err: unknown) {
+            return { error: err instanceof Error ? err.message : 'An unexpected error occurred' };
         }
     };
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { ZodSchema } from 'zod';
 
 /**
  * Standardized API error response
@@ -39,4 +40,27 @@ export async function getUserOrgId(supabase: SupabaseClient) {
     }
 
     return { orgId: profile.organization_id as string, userId: auth.user!.id, error: null };
+}
+
+/**
+ * Parse and validate a request body against a Zod schema.
+ * Returns typed data on success or a 400 error response on failure.
+ */
+export async function parseBody<T>(
+    request: Request,
+    schema: ZodSchema<T>
+): Promise<{ data: T; error: null } | { data: null; error: NextResponse }> {
+    try {
+        const raw = await request.json();
+        const result = schema.safeParse(raw);
+        if (!result.success) {
+            const messages = result.error.issues
+                .map((i) => `${i.path.join('.')}: ${i.message}`)
+                .join('; ');
+            return { data: null, error: apiError(messages, 400) };
+        }
+        return { data: result.data, error: null };
+    } catch {
+        return { data: null, error: apiError('Invalid JSON body', 400) };
+    }
 }

@@ -52,16 +52,19 @@ export default function RefereeController() {
     useEffect(() => {
         async function fetchInitialData() {
             try {
-                const matchData = await leagueApi.getMatch(matchId);
+                const matchData = await leagueApi.getMatch(matchId) as any;
                 if (matchData) {
                     setInitialFetchMatch(matchData);
-                    setHomeScore(matchData.homeScore || 0);
-                    setAwayScore(matchData.awayScore || 0);
+                    setHomeScore(matchData.homeScore ?? matchData.home_score ?? 0);
+                    setAwayScore(matchData.awayScore ?? matchData.away_score ?? 0);
                     setIsMatchStarted(matchData.status === 'live');
 
+                    const homeTeamId = matchData.homeTeam?.id ?? matchData.home_team_id;
+                    const awayTeamId = matchData.awayTeam?.id ?? matchData.away_team_id;
+
                     const [hPlayers, aPlayers, mEvents] = await Promise.all([
-                        teamsApi.getPlayers(matchData.homeTeam.id),
-                        teamsApi.getPlayers(matchData.awayTeam.id),
+                        teamsApi.getPlayers(homeTeamId),
+                        teamsApi.getPlayers(awayTeamId),
                         leagueApi.getMatchEvents(matchId)
                     ]);
 

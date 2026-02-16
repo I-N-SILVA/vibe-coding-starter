@@ -13,13 +13,12 @@ import type {
     UpdateScoreDto,
     AddMatchEventDto,
     MatchEvent,
-} from '@/types';
-import type {
     Organization,
     CreateOrganizationDto,
     Invite,
     CreateInviteDto,
-} from '@/lib/supabase/types';
+    ActivityItem,
+} from '@/types';
 
 export const leagueApi = {
     // ============================================
@@ -89,7 +88,7 @@ export const leagueApi = {
         apiClient.get<StandingsEntry[]>(`/api/league/competitions/${competitionId}/standings`),
 
     getActivity: () =>
-        apiClient.get<any[]>('/api/league/activity'),
+        apiClient.get<ActivityItem[]>('/api/league/activity'),
 
     // ============================================
     // ORGANIZATIONS

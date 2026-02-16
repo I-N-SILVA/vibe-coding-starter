@@ -1,13 +1,17 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { getUserOrgId, apiError } from '@/lib/api/helpers';
+import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
+import { createCompetitionApiSchema } from '@/lib/api/validation';
 
 export async function GET() {
     const supabase = await createClient();
+    const auth = await getUserOrgId(supabase);
+    if (auth.error) return auth.error;
 
     const { data, error } = await supabase
         .from('competitions')
         .select('*')
+        .eq('organization_id', auth.orgId)
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -22,11 +26,12 @@ export async function POST(request: Request) {
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
 
-    const body = await request.json();
+    const parsed = await parseBody(request, createCompetitionApiSchema);
+    if (parsed.error) return parsed.error;
 
     const { data, error } = await supabase
         .from('competitions')
-        .insert([{ ...body, organization_id: auth.orgId }])
+        .insert([{ ...parsed.data, organization_id: auth.orgId }])
         .select()
         .single();
 

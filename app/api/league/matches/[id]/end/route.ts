@@ -10,6 +10,14 @@ export async function POST(_request: Request, { params }: RouteParams) {
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
 
+    // Verify match is live before ending
+    const { data: match } = await supabase
+        .from('matches').select('status').eq('id', id).single();
+    if (!match) return apiError('Match not found', 404);
+    if (match.status !== 'live') {
+        return apiError(`Cannot end match with status "${match.status}". Match must be live.`, 409);
+    }
+
     const { data, error } = await supabase
         .from('matches')
         .update({

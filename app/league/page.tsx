@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useCompetitions, useLiveMatches, useMatches } from '@/lib/hooks';
 import { motion } from 'framer-motion';
 import {
     PageLayout,
@@ -20,71 +21,49 @@ import {
     SkeletonMatchCard,
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
-
-const stagger = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.08 } },
-};
-
-const fadeUp = {
-    hidden: { opacity: 0, y: 12 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
-};
+import { stagger, fadeUp } from '@/lib/animations';
 
 export default function AdminDashboard() {
     const router = useRouter();
     const [isCreateLeagueOpen, setIsCreateLeagueOpen] = useState(false);
-    const [competitions, setCompetitions] = useState<any[]>([]);
-    const [liveMatches, setLiveMatches] = useState<any[]>([]);
-    const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
     const [recentActivity, setRecentActivity] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
 
+    const { data: competitions = [], isLoading: compsLoading, error: compsError } = useCompetitions();
+    const { data: liveMatches = [], isLoading: liveLoading, error: liveError } = useLiveMatches();
+    const { data: upcomingMatches = [], isLoading: upcomingLoading, error: upcomingError } = useMatches({ status: 'upcoming' });
+
+    const isLoading = compsLoading || liveLoading || upcomingLoading;
+
+    // Log errors from query hooks
     useEffect(() => {
-        async function fetchData() {
+        if (compsError) console.error('Failed to fetch competitions:', compsError);
+        if (liveError) console.error('Failed to fetch live matches:', liveError);
+        if (upcomingError) console.error('Failed to fetch upcoming matches:', upcomingError);
+    }, [compsError, liveError, upcomingError]);
+
+    // Redirect to onboarding if no competitions
+    useEffect(() => {
+        if (!compsLoading && Array.isArray(competitions) && competitions.length === 0) {
+            setTimeout(() => {
+                router.push('/onboarding');
+            }, 1500);
+        }
+    }, [compsLoading, competitions, router]);
+
+    // Fetch activity (no hook available)
+    useEffect(() => {
+        async function fetchActivity() {
             try {
-                const [complRes, liveRes, upcomingRes, activityRes] = await Promise.all([
-                    fetch('/api/league/competitions'),
-                    fetch('/api/league/matches?status=live'),
-                    fetch('/api/league/matches?status=upcoming'),
-                    fetch('/api/league/activity'),
-                ]);
-
-                if (complRes.ok) {
-                    const comps = await complRes.json();
-                    if (Array.isArray(comps)) {
-                        setCompetitions(comps);
-                        // If no leagues found, redirect to onboarding after a short delay
-                        if (comps.length === 0) {
-                            setTimeout(() => {
-                                router.push('/onboarding');
-                            }, 1500);
-                        }
-                    }
-                }
-
-                if (liveRes.ok) {
-                    const matches = await liveRes.json();
-                    if (Array.isArray(matches)) setLiveMatches(matches);
-                }
-
-                if (upcomingRes.ok) {
-                    const matches = await upcomingRes.json();
-                    if (Array.isArray(matches)) setUpcomingMatches(matches);
-                }
-
+                const activityRes = await fetch('/api/league/activity');
                 if (activityRes.ok) {
                     const activity = await activityRes.json();
                     if (Array.isArray(activity)) setRecentActivity(activity);
                 }
             } catch (error) {
-                console.error('Failed to fetch dashboard data:', error);
-            } finally {
-                setIsLoading(false);
+                console.error('Failed to fetch activity:', error);
             }
         }
-
-        fetchData();
+        fetchActivity();
     }, []);
 
     return (
@@ -231,7 +210,7 @@ export default function AdminDashboard() {
                                 awayTeam={match.awayTeam}
                                 status={match.status}
                                 matchTime={match.matchTime}
-                                date={match.date}
+                                date={match.scheduledDate ? new Date(match.scheduledDate).toLocaleDateString() : 'TBD'}
                                 venue={match.venue}
                             />
                         ))}

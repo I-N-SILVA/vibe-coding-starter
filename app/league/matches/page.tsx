@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useMatches } from '@/lib/hooks';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     PageLayout,
@@ -24,23 +25,13 @@ const TABS = [
 
 export default function AdminMatches() {
     const router = useRouter();
-    const [matches, setMatches] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
 
+    const { data: matches = [], isLoading, error } = useMatches();
+
     useEffect(() => {
-        async function fetchMatches() {
-            try {
-                const res = await fetch('/api/league/matches');
-                if (res.ok) setMatches(await res.json());
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchMatches();
-    }, []);
+        if (error) console.error('Failed to fetch matches:', error);
+    }, [error]);
 
     const filteredMatches = activeTab === 'all'
         ? matches
@@ -85,13 +76,13 @@ export default function AdminMatches() {
                             {filteredMatches.map((match) => (
                                 <MatchCard
                                     key={match.id}
-                                    homeTeam={match.home_team || { name: 'Home Team', shortName: 'HOM' }}
-                                    awayTeam={match.away_team || { name: 'Away Team', shortName: 'AWY' }}
-                                    homeScore={match.home_score}
-                                    awayScore={match.away_score}
+                                    homeTeam={match.homeTeam || { name: 'Home Team', shortName: 'HOM' }}
+                                    awayTeam={match.awayTeam || { name: 'Away Team', shortName: 'AWY' }}
+                                    homeScore={match.homeScore}
+                                    awayScore={match.awayScore}
                                     status={match.status}
-                                    matchTime={match.match_time}
-                                    date={match.scheduled_at ? new Date(match.scheduled_at).toLocaleDateString() : 'TBD'}
+                                    matchTime={match.matchTime}
+                                    date={match.scheduledDate ? new Date(match.scheduledDate).toLocaleDateString() : 'TBD'}
                                     venue={match.venue}
                                     onPress={() => router.push(`/league/referee/${match.id}`)}
                                 />

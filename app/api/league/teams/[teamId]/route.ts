@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { getUserOrgId, apiError } from '@/lib/api/helpers';
+import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
+import { updateTeamApiSchema } from '@/lib/api/validation';
 
 type RouteParams = { params: Promise<{ teamId: string }> };
 
@@ -30,11 +31,12 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
 
-    const body = await request.json();
+    const parsed = await parseBody(request, updateTeamApiSchema);
+    if (parsed.error) return parsed.error;
 
     const { data, error } = await supabase
         .from('teams')
-        .update(body)
+        .update(parsed.data)
         .eq('id', teamId)
         .select()
         .single();

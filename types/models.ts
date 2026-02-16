@@ -11,9 +11,11 @@ export interface Team {
     id: string;
     name: string;
     shortName: string;
+    competitionId?: string;
     logoUrl?: string;
     primaryColor?: string;
     secondaryColor?: string;
+    managerId?: string;
     stats?: TeamStats;
     createdAt?: Date;
     updatedAt?: Date;
@@ -223,4 +225,55 @@ export interface AddMatchEventDto {
     playerId: string;
     teamId: string;
     assistPlayerId?: string;
+}
+
+// ============================================
+// ORGANIZATION & INVITE MODELS
+// ============================================
+
+export interface Organization {
+    id: string;
+    name: string;
+    slug: string;
+    ownerId: string;
+    logoUrl: string | null;
+    plan: 'free' | 'pro' | 'elite';
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface Invite {
+    id: string;
+    organizationId: string;
+    competitionId: string | null;
+    teamId: string | null;
+    type: 'team_join' | 'player_join' | 'referee_invite' | 'admin_invite';
+    email: string | null;
+    token: string;
+    status: 'pending' | 'accepted' | 'expired' | 'revoked';
+    expiresAt: string;
+    acceptedBy: string | null;
+    createdAt?: string;
+}
+
+export interface CreateOrganizationDto {
+    name: string;
+    slug: string;
+}
+
+export interface CreateInviteDto {
+    type: Invite['type'];
+    competitionId?: string;
+    teamId?: string;
+    email?: string;
+}
+
+export interface CreatePlayerDto {
+    name: string;
+    teamId?: string;
+    position?: PlayerPosition;
+    jerseyNumber?: number;
+    dateOfBirth?: string;
+    nationality?: string;
+    bio?: string;
 }

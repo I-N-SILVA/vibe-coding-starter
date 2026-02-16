@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useCompetitions, useStandings } from '@/lib/hooks';
 import {
     PageLayout,
     PageHeader,
@@ -29,42 +30,16 @@ const DEMO_COMPETITIONS = [
 ];
 
 export default function AdminStandings() {
-    const [standings, setStandings] = useState<typeof DEMO_STANDINGS>([]);
-    const [competitions, setCompetitions] = useState(DEMO_COMPETITIONS);
     const [selectedComp, setSelectedComp] = useState('1');
-    const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const [standingsRes, compsRes] = await Promise.all([
-                    fetch(`/api/league/standings?competition_id=${selectedComp}`),
-                    fetch('/api/league/competitions'),
-                ]);
+    const { data: fetchedCompetitions = [] } = useCompetitions();
+    const { data: fetchedStandings, isLoading: standingsLoading } = useStandings(selectedComp);
 
-                if (compsRes.ok) {
-                    const data = await compsRes.json();
-                    if (data?.length > 0) setCompetitions(data);
-                }
-
-                if (standingsRes.ok) {
-                    const data = await standingsRes.json();
-                    if (data?.length > 0) {
-                        setStandings(data);
-                        setIsLoading(false);
-                        return;
-                    }
-                }
-            } catch {
-                // Fall back to demo
-            }
-            setStandings(DEMO_STANDINGS);
-            setIsLoading(false);
-        }
-
-        setIsLoading(true);
-        fetchData();
-    }, [selectedComp]);
+    const competitions = fetchedCompetitions.length > 0 ? fetchedCompetitions : DEMO_COMPETITIONS;
+    const standings = (fetchedStandings && (fetchedStandings as unknown[]).length > 0)
+        ? fetchedStandings as unknown as typeof DEMO_STANDINGS
+        : DEMO_STANDINGS;
+    const isLoading = standingsLoading;
 
     return (
         <PageLayout navItems={adminNavItems} title="STANDINGS">

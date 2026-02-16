@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { getAuthUser, apiError } from '@/lib/api/helpers';
+import { getAuthUser, apiError, parseBody } from '@/lib/api/helpers';
+import { createOrganizationApiSchema } from '@/lib/api/validation';
 
 export async function GET() {
     const supabase = await createClient();
@@ -35,11 +36,12 @@ export async function POST(request: Request) {
     const auth = await getAuthUser(supabase);
     if (auth.error) return auth.error;
 
-    const body = await request.json();
+    const parsed = await parseBody(request, createOrganizationApiSchema);
+    if (parsed.error) return parsed.error;
 
     const { data: org, error: orgError } = await supabase
         .from('organizations')
-        .insert([{ ...body, owner_id: auth.user!.id }])
+        .insert([{ ...parsed.data, owner_id: auth.user!.id }])
         .select()
         .single();
 

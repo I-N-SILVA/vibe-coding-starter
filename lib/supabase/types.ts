@@ -24,7 +24,7 @@ export type Profile = {
     id: string;
     full_name: string | null;
     avatar_url: string | null;
-    role: 'admin' | 'referee' | 'manager' | 'player' | 'fan';
+    role: 'admin' | 'organizer' | 'referee' | 'manager' | 'player' | 'fan';
     organization_id: string | null;
     phone: string | null;
     bio: string | null;
@@ -46,8 +46,8 @@ export type Competition = {
     start_date: string | null;
     end_date: string | null;
     max_teams: number;
-    rules: Record<string, any>;
-    settings: Record<string, any>;
+    rules: Record<string, unknown>;
+    settings: Record<string, unknown>;
     invite_code: string | null;
     created_at: string;
     updated_at: string;
@@ -131,7 +131,7 @@ export type MatchEvent = {
     player_name: string | null;
     minute: number | null;
     half: '1st' | '2nd' | 'ET1' | 'ET2' | 'penalties' | null;
-    details: Record<string, any>;
+    details: Record<string, unknown>;
     created_at: string;
 };
 
@@ -184,7 +184,7 @@ export type CreateCompetitionDto = {
     start_date?: string;
     end_date?: string;
     max_teams?: number;
-    rules?: Record<string, any>;
+    rules?: Record<string, unknown>;
 };
 
 export type CreateTeamDto = {
@@ -228,6 +228,25 @@ export type CreateInviteDto = {
     competition_id?: string;
     team_id?: string;
     email?: string;
+};
+
+// ============================================
+// DERIVED TYPE ALIASES
+// ============================================
+
+export type MatchStatus = Match['status'];
+export type MatchEventType = MatchEvent['type'];
+export type CompetitionFormat = Competition['type'];
+
+export type AddMatchEventDto = {
+    match_id: string;
+    type: MatchEventType;
+    minute?: number;
+    half?: MatchEvent['half'];
+    player_id?: string;
+    player_name?: string;
+    team_id?: string;
+    details?: Record<string, unknown>;
 };
 
 // ============================================

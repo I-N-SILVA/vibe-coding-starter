@@ -10,16 +10,7 @@ import {
     Badge,
 } from '@/components/plyaz';
 import { publicNavItems } from '@/lib/constants/navigation';
-
-const stagger = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.06 } },
-};
-
-const fadeUp = {
-    hidden: { opacity: 0, y: 12 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
-};
+import { stagger, fadeUp } from '@/lib/animations';
 
 export default function PublicTeams() {
     const [teams, setTeams] = useState<any[]>([]);

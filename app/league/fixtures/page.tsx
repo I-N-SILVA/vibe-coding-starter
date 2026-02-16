@@ -19,12 +19,12 @@ import { generateRoundRobin } from '@/lib/utils/fixture-generator';
 import { useToast } from '@/components/providers';
 
 const MOCK_TEAMS = [
-    { id: '1', name: 'FC United', shortName: 'FCU' },
-    { id: '2', name: 'City Rangers', shortName: 'CRG' },
-    { id: '3', name: 'Phoenix FC', shortName: 'PHX' },
-    { id: '4', name: 'Eagles', shortName: 'EGL' },
-    { id: '5', name: 'Rovers', shortName: 'ROV' },
-    { id: '6', name: 'Athletic', shortName: 'ATH' },
+    { id: '1', name: 'FC United', short_name: 'FCU' },
+    { id: '2', name: 'City Rangers', short_name: 'CRG' },
+    { id: '3', name: 'Phoenix FC', short_name: 'PHX' },
+    { id: '4', name: 'Eagles', short_name: 'EGL' },
+    { id: '5', name: 'Rovers', short_name: 'ROV' },
+    { id: '6', name: 'Athletic', short_name: 'ATH' },
 ];
 
 export default function FixturesPage() {

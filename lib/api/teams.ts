@@ -4,7 +4,7 @@
  */
 
 import { apiClient } from './client';
-import type { Team, Player, CreateTeamDto } from '@/types';
+import type { Team, Player, CreateTeamDto, CreatePlayerDto } from '@/types';
 
 export const teamsApi = {
     // ============================================
@@ -38,10 +38,10 @@ export const teamsApi = {
     getPlayer: (teamId: string, playerId: string) =>
         apiClient.get<Player>(`/api/league/teams/${teamId}/players/${playerId}`),
 
-    addPlayer: (teamId: string, data: Omit<Player, 'id' | 'teamId' | 'createdAt' | 'updatedAt'>) =>
+    addPlayer: (teamId: string, data: CreatePlayerDto) =>
         apiClient.post<Player>(`/api/league/teams/${teamId}/players`, data),
 
-    updatePlayer: (teamId: string, playerId: string, data: Partial<Player>) =>
+    updatePlayer: (teamId: string, playerId: string, data: Partial<CreatePlayerDto>) =>
         apiClient.patch<Player>(`/api/league/teams/${teamId}/players/${playerId}`, data),
 
     removePlayer: (teamId: string, playerId: string) =>

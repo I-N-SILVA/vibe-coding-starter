@@ -4,10 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
-const fadeUp = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
-};
+import { fadeUpLarge } from '@/lib/animations';
 
 export default function AboutPage() {
     return (
@@ -18,7 +15,7 @@ export default function AboutPage() {
                     <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[80%] bg-orange-500 rounded-full blur-[200px]" />
                 </div>
                 <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <motion.div initial="hidden" animate="show" variants={fadeUp}>
+                    <motion.div initial="hidden" animate="show" variants={fadeUpLarge}>
                         <p className="text-xs font-bold tracking-[0.4em] text-orange-400 uppercase mb-6">Our Mission</p>
                         <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-8 leading-[0.9]">
                             KEEPING FOOTBALL <br />

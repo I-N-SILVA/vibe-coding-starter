@@ -44,7 +44,7 @@ export default function LandingPage() {
             <div className="h-4 w-[1px] bg-black/10" />
             <a href="/login" className="text-[10px] font-black tracking-widest text-black/60 hover:text-black uppercase transition-colors">Sign In</a>
             <Button
-              onClick={() => router.push('/onboarding')}
+              onClick={() => router.push('/login?mode=signup')}
               className="h-10 px-6 bg-black text-white text-[10px] font-black tracking-widest rounded-none hover:bg-gray-900 transition-colors"
             >
               INITIALIZE
@@ -95,7 +95,7 @@ export default function LandingPage() {
                 className="h-16 bg-black text-white text-sm font-black tracking-[0.2em] rounded-none mt-4"
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  router.push('/onboarding');
+                  router.push('/login?mode=signup');
                 }}
               >
                 INITIALIZE LEAGUE
@@ -176,7 +176,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               className="h-20 px-12 bg-black text-white text-sm font-black tracking-[0.3em] rounded-none hover:bg-gray-900 transition-all duration-300"
-              onClick={() => router.push('/onboarding')}
+              onClick={() => router.push('/login?mode=signup')}
             >
               INITIALIZE ENVIRONMENT
             </Button>

@@ -5,10 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/plyaz';
 import Image from 'next/image';
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
-};
+import { fadeUpLarge } from '@/lib/animations';
 
 const FAQS = [
   {
@@ -54,7 +51,7 @@ export default function FAQPage() {
       <section className="px-6 py-24 bg-gray-50 border-b border-gray-100 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-500/5 blur-[120px] rounded-full" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <motion.div initial="hidden" animate="show" variants={fadeUp}>
+          <motion.div initial="hidden" animate="show" variants={fadeUpLarge}>
             <p className="text-xs font-bold tracking-[0.4em] text-orange-500 uppercase mb-4">Support</p>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Frequently Asked Questions</h1>
             <p className="text-gray-500 max-w-lg mx-auto">

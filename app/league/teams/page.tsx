@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTeams, useCompetitions, useCreateTeam } from '@/lib/hooks';
 import { motion } from 'framer-motion';
 import {
     PageLayout,
@@ -18,60 +19,27 @@ import {
     NavIcons,
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
-
-const stagger = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.06 } },
-};
-
-const fadeUp = {
-    hidden: { opacity: 0, y: 12 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
-};
+import { stagger, fadeUp } from '@/lib/animations';
 
 export default function AdminTeams() {
     const router = useRouter();
-    const [teams, setTeams] = useState<any[]>([]);
-    const [competitions, setCompetitions] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [newTeam, setNewTeam] = useState({ name: '', short_name: '', competition_id: '' });
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const [teamsRes, compsRes] = await Promise.all([
-                    fetch('/api/league/teams'),
-                    fetch('/api/league/competitions')
-                ]);
+    const { data: teams = [], isLoading: teamsLoading } = useTeams();
+    const { data: competitions = [], isLoading: compsLoading } = useCompetitions();
+    const createTeamMutation = useCreateTeam();
 
-                if (teamsRes.ok) setTeams(await teamsRes.json());
-                if (compsRes.ok) setCompetitions(await compsRes.json());
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchData();
-    }, []);
+    const isLoading = teamsLoading || compsLoading;
 
     const handleAddTeam = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await fetch('/api/league/teams', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newTeam)
-            });
-            if (res.ok) {
-                const added = await res.json();
-                setTeams([added, ...teams]);
-                setIsAddModalOpen(false);
-                setNewTeam({ name: '', short_name: '', competition_id: '' });
-            }
+            await createTeamMutation.mutateAsync(newTeam as any);
+            setIsAddModalOpen(false);
+            setNewTeam({ name: '', short_name: '', competition_id: '' });
         } catch (err) {
-            console.error(err);
+            console.error('Failed to create team:', err);
         }
     };
 
@@ -113,11 +81,11 @@ export default function AdminTeams() {
                                 <CardContent className="pt-4">
                                     <div className="flex flex-col items-center text-center">
                                         <div className="w-16 h-16 rounded-full bg-primary-main flex items-center justify-center text-xl font-bold text-white mb-4 group-hover:scale-110 transition-transform">
-                                            {team.short_name || team.name.substring(0, 2).toUpperCase()}
+                                            {team.shortName || team.name.substring(0, 2).toUpperCase()}
                                         </div>
                                         <h3 className="text-lg font-bold text-primary-main mb-1">{team.name}</h3>
                                         <Badge variant="secondary" size="sm" className="mb-6 border-secondary-main/10 text-secondary-main/40">
-                                            {competitions.find(c => c.id === team.competition_id)?.name || 'Unassigned'}
+                                            {competitions.find(c => c.id === team.competitionId)?.name || 'Unassigned'}
                                         </Badge>
 
                                         <div className="grid grid-cols-2 gap-2 w-full pt-6 border-t border-secondary-main/5 mt-auto">

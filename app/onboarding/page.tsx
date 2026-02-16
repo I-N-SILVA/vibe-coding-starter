@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import {
     Card,
     CardContent,
@@ -13,10 +14,24 @@ import {
 
 export default function OnboardingPage() {
     const router = useRouter();
+    const { user, profile, isLoading } = useAuth();
     const [leagueName, setLeagueName] = useState('');
     const [leagueType, setLeagueType] = useState('league');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Role Enforcement
+    React.useEffect(() => {
+        if (!isLoading) {
+            if (!user) {
+                router.push('/login');
+                return;
+            }
+            if (profile && profile.role !== 'organizer') {
+                router.push('/league/public/matches');
+            }
+        }
+    }, [user, profile, isLoading, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,6 +93,18 @@ export default function OnboardingPage() {
             setIsSubmitting(false);
         }
     };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-white">
+                <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    if (!profile || profile.role !== 'organizer') {
+        return null; // or a minimal loading/redirecting state
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-primary-main/5 px-4">

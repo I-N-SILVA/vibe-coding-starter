@@ -11,12 +11,10 @@ import type {
     CreateMatchDto,
     UpdateScoreDto,
     AddMatchEventDto,
-} from '@/types';
-import type {
     CreateOrganizationDto,
     CreateInviteDto,
     CreatePlayerDto,
-} from '@/lib/supabase/types';
+} from '@/types';
 
 // ============================================
 // QUERY KEYS

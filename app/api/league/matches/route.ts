@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { getUserOrgId, apiError } from '@/lib/api/helpers';
+import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
+import { createMatchApiSchema, updateMatchApiSchema } from '@/lib/api/validation';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -8,12 +9,16 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
 
     const supabase = await createClient();
+    const auth = await getUserOrgId(supabase);
+    if (auth.error) return auth.error;
 
     let query = supabase.from('matches').select(`
         *,
         home_team:teams!home_team_id(*),
         away_team:teams!away_team_id(*)
     `);
+
+    query = query.eq('organization_id', auth.orgId);
 
     if (competitionId) {
         query = query.eq('competition_id', competitionId);
@@ -37,11 +42,12 @@ export async function POST(request: Request) {
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
 
-    const body = await request.json();
+    const parsed = await parseBody(request, createMatchApiSchema);
+    if (parsed.error) return parsed.error;
 
     const { data, error } = await supabase
         .from('matches')
-        .insert([{ ...body, organization_id: auth.orgId }])
+        .insert([{ ...parsed.data, organization_id: auth.orgId }])
         .select()
         .single();
 
@@ -57,12 +63,21 @@ export async function PATCH(request: Request) {
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
 
-    const body = await request.json();
-    const { id, ...updates } = body;
+    const raw = await request.json();
+    const id = raw?.id;
+    if (!id || typeof id !== 'string') {
+        return apiError('Match ID is required', 400);
+    }
+
+    const parsed = updateMatchApiSchema.safeParse(raw);
+    if (!parsed.success) {
+        const messages = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+        return apiError(messages, 400);
+    }
 
     const { data, error } = await supabase
         .from('matches')
-        .update(updates)
+        .update(parsed.data)
         .eq('id', id)
         .select()
         .single();
