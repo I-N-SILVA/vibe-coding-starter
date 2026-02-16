@@ -24,8 +24,9 @@ interface AuthContextType {
     isReferee: boolean;
     isManager: boolean;
     signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-    signUp: (email: string, password: string, fullName: string, role?: Profile['role']) => Promise<{ error: string | null }>;
+    signUp: (email: string, password: string, fullName: string, role?: Profile['role'], inviteToken?: string) => Promise<{ error: string | null }>;
     signOut: () => Promise<void>;
+    forgotPassword: (email: string) => Promise<{ error: string | null }>;
     updateProfile: (updates: Partial<Profile>) => Promise<{ error: string | null }>;
 }
 
@@ -121,15 +122,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     // Sign Up
-    const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'fan') => {
+    const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'fan', inviteToken?: string) => {
         try {
+            let options: { data: any } = { data: { full_name: fullName, role, approval_status: 'pending' } };
+
+            if (inviteToken) {
+                const response = await fetch('/api/league/invites/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: inviteToken }),
+                });
+
+                if (response.ok) {
+                    const { invited_role, organization_id } = await response.json();
+                    options.data = {
+                        ...options.data,
+                        role: invited_role,
+                        organization_id,
+                        approval_status: 'approved',
+                    };
+                } else {
+                    const { error } = await response.json();
+                    return { error: `Invalid invite token: ${error}` };
+                }
+            }
+
             const { error } = await Promise.race([
                 supabase.auth.signUp({
                     email,
                     password,
-                    options: {
-                        data: { full_name: fullName, role },
-                    },
+                    options,
                 }),
                 new Promise<{ error: { message: string } }>((_, reject) => setTimeout(() => reject(new Error('Sign up timed out')), 15000))
             ]);
@@ -144,6 +166,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabase.auth.signOut();
         setUser(null);
         setProfile(null);
+    };
+
+    // Forgot Password
+    const forgotPassword = async (email: string) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
+        return { error: error?.message || null };
     };
 
     // Update Profile
@@ -178,6 +206,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signUp,
         signOut,
+        forgotPassword,
         updateProfile,
     };
 

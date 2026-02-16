@@ -41,7 +41,7 @@ export default function LoginPage() {
 
 function LoginForm() {
     const router = useRouter();
-    const { signIn, signUp, user, isLoading: authLoading } = useAuth();
+    const { signIn, signUp, forgotPassword, user, isLoading: authLoading } = useAuth();
     const searchParams = useSearchParams();
     const modeParam = searchParams.get('mode');
     const initialMode: 'login' | 'signup' | 'forgot' = (modeParam === 'login' || modeParam === 'signup' || modeParam === 'forgot') ? modeParam : 'login';
@@ -57,6 +57,28 @@ function LoginForm() {
     });
     const [message, setMessage] = useState('');
     const [envCheck, setEnvCheck] = useState({ hasUrl: true, hasKey: true });
+
+    // Handle invite token from URL
+    useEffect(() => {
+        const inviteToken = searchParams.get('invite_token');
+        if (inviteToken) {
+            const verifyInvite = async () => {
+                const response = await fetch('/api/league/invites/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: inviteToken }),
+                });
+                if (response.ok) {
+                    const { email } = await response.json();
+                    setForm(prev => ({ ...prev, email }));
+                    setMode('signup');
+                } else {
+                    setMessage('Invalid or expired invite token.');
+                }
+            };
+            verifyInvite();
+        }
+    }, [searchParams]);
 
     // Sync mode with URL if it changes
     useEffect(() => {
@@ -91,8 +113,8 @@ function LoginForm() {
                 setIsLoading(false);
                 return;
             }
-
-            const { error } = await signUp(form.email, form.password, form.fullName, form.role);
+            const inviteToken = searchParams.get('invite_token') || undefined;
+            const { error } = await signUp(form.email, form.password, form.fullName, form.role, inviteToken);
             if (error) {
                 setMessage(error);
                 setIsLoading(false);
@@ -109,8 +131,12 @@ function LoginForm() {
                 // AuthProvider will handle the redirect via the useEffect
             }
         } else if (mode === 'forgot') {
-            // TODO: Implement forgot password in AuthProvider
-            setMessage('Forgot password is not implemented yet.');
+            const { error } = await forgotPassword(form.email);
+            if (error) {
+                setMessage(error);
+            } else {
+                setMessage('Password reset link sent to your email.');
+            }
             setIsLoading(false);
         }
     };

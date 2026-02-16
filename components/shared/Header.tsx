@@ -1,8 +1,20 @@
+"use client";
+
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { LandingHeader, LandingHeaderMenuItem } from '@/components/landing';
 import ThemeSwitch from '@/components/shared/ThemeSwitch';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export const Header = ({ className }: { className?: string }) => {
+  const { isAuthenticated, signOut } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push('/'); // Redirect to home page after sign out
+  };
+
   return (
     <LandingHeader
       className={className}
@@ -27,9 +39,20 @@ export const Header = ({ className }: { className?: string }) => {
         Dashboard
       </LandingHeaderMenuItem>
 
+      {isAuthenticated ? (
+        <LandingHeaderMenuItem type="button" onClick={handleSignOut}>
+          Sign Out
+        </LandingHeaderMenuItem>
+      ) : (
+        <LandingHeaderMenuItem type="button" href="/login">
+          Sign In
+        </LandingHeaderMenuItem>
+      )}
+
       <ThemeSwitch />
     </LandingHeader>
   );
 };
 
 export default Header;
+

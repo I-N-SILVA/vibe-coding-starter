@@ -128,3 +128,22 @@ export const createInviteApiSchema = z.object({
     email: z.string().email('Invalid email address').optional().nullable(),
     role: z.enum(['admin', 'organizer', 'referee', 'manager', 'player', 'fan']).optional().nullable(),
 });
+
+// ============================================
+// INVITE ACCEPTANCE
+// ============================================
+
+export const acceptInviteApiSchema = z.object({
+    token: z.string().min(1, 'Invite token is required.'),
+});
+
+// ============================================
+// USER ROLE UPDATE
+// ============================================
+
+export const updateUserRoleApiSchema = z.object({
+    role: z.enum(['admin', 'referee', 'manager', 'player', 'fan'], {
+        errorMap: () => ({ message: 'Invalid role provided.' }),
+    }),
+});
+
