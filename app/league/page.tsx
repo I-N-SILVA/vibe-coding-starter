@@ -237,6 +237,9 @@ export default function AdminDashboard() {
                     <Button variant="primary" onClick={() => setIsCreateLeagueOpen(true)}>
                         Create League
                     </Button>
+                    <Button variant="secondary" onClick={() => router.push('/league/invites')}>
+                        Invite Members
+                    </Button>
                     <Button variant="secondary" onClick={() => router.push('/league/teams')}>
                         Add Team
                     </Button>

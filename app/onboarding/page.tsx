@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import {
@@ -19,13 +19,19 @@ export default function OnboardingPage() {
     const [leagueName, setLeagueName] = useState('');
     const [leagueType, setLeagueType] = useState('league');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Role Enforcement
+    // Role Enforcement & Redirects
     React.useEffect(() => {
         if (!isLoading) {
             if (!user) {
                 router.push('/login');
+                return;
+            }
+            // If user already has an organization, they shouldn't be here
+            if (profile?.organization_id) {
+                router.push('/league');
                 return;
             }
             if (profile && profile.role !== 'organizer') {
@@ -63,9 +69,10 @@ export default function OnboardingPage() {
 
             await orgRes.json();
             // Organization created successfully
+            setIsSuccess(true);
 
-            // 2. Create Initial League
-            const leagueRes = await fetch('/api/league/competitions', {
+            // 2. Create Initial League (Fire and forget, don't block success screen)
+            fetch('/api/league/competitions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -73,24 +80,16 @@ export default function OnboardingPage() {
                     type: leagueType,
                     status: 'draft'
                 }),
-            });
+            }).catch(err => console.warn('Background league creation failed:', err));
 
-            if (!leagueRes.ok) {
-                const data = await leagueRes.json();
-                console.warn('Failed to create initial league:', data.error);
-                // We still redirect because the org was created successfully
-            }
-
-            // Force a small delay to ensure profile is updated before redirect (from remote)
-            await new Promise(resolve => setTimeout(resolve, 800));
-
-            // Success! Redirect to dashboard
-            router.push('/league');
-            router.refresh();
+            // Redirect after celebration delay
+            setTimeout(() => {
+                router.push('/league');
+                router.refresh();
+            }, 2500);
         } catch (err) {
             console.warn('[Onboarding] Error:', err);
             setError(err instanceof Error ? err.message : 'Something went wrong');
-        } finally {
             setIsSubmitting(false);
         }
     };
@@ -171,72 +170,107 @@ export default function OnboardingPage() {
                 transition={{ duration: 0.5, ease: 'easeOut' }}
                 className="w-full max-w-md relative z-10"
             >
-                <div className="flex justify-center mb-8">
-                    <div className="flex items-center gap-2">
-                        <Image
-                            src="/static/branding/logo-circle.png"
-                            alt="PLYAZ"
-                            width={40}
-                            height={40}
-                            className="rounded-xl"
-                        />
-                        <span className="text-2xl font-bold tracking-tight text-primary-main">PLYAZ</span>
-                    </div>
-                </div>
-
-                <Card className="border-secondary-main/10 shadow-xl overflow-hidden">
-                    <CardContent className="p-8">
+                <AnimatePresence mode="wait">
+                    {isSuccess ? (
                         <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4 }}
+                            key="success"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 1.1 }}
+                            className="bg-white rounded-3xl p-10 text-center shadow-2xl border border-secondary-main/5"
                         >
-                            <h1 className="text-2xl font-black text-primary-main mb-2">Create Your First League</h1>
-                            <p className="text-secondary-main/50 text-sm mb-8">
-                                Welcome to PLYAZ! Let&apos;s get your first competition set up and launch your organization.
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: 'spring', damping: 12, delay: 0.2 }}
+                                className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8"
+                            >
+                                <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </motion.div>
+                            <h2 className="text-2xl font-black text-primary-main mb-2">Welcome to your dashboard!</h2>
+                            <p className="text-secondary-main/50 text-sm mb-0">
+                                Your league is being prepared. Propelling talent forward...
                             </p>
-
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <Input
-                                    label="League Name"
-                                    placeholder="e.g., Sunday Premier League"
-                                    value={leagueName}
-                                    onChange={(e) => setLeagueName(e.target.value)}
-                                    autoFocus
-                                    required
-                                />
-
-                                <Select
-                                    label="Competition Type"
-                                    value={leagueType}
-                                    onChange={(e) => setLeagueType(e.target.value)}
-                                    options={[
-                                        { value: 'league', label: 'League (Round Robin)' },
-                                        { value: 'knockout', label: 'Cup (Knockout)' },
-                                        { value: 'group_knockout', label: 'Group Stage + Knockout' },
-                                    ]}
-                                />
-
-                                {error && (
-                                    <p className="text-xs text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 italic">
-                                        {error}
-                                    </p>
-                                )}
-
-                                <Button
-                                    type="submit"
-                                    fullWidth
-                                    size="lg"
-                                    disabled={!leagueName.trim() || isSubmitting}
-                                    isLoading={isSubmitting}
-                                    className="h-14 text-sm font-bold tracking-widest"
-                                >
-                                    LAUNCH DASHBOARD
-                                </Button>
-                            </form>
+                            <div className="mt-8 flex justify-center">
+                                <div className="w-12 h-1 bg-green-500/10 rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ x: '-100%' }}
+                                        animate={{ x: '100%' }}
+                                        transition={{ duration: 2, ease: 'linear', repeat: Infinity }}
+                                        className="w-full h-full bg-green-500"
+                                    />
+                                </div>
+                            </div>
                         </motion.div>
-                    </CardContent>
-                </Card>
+                    ) : (
+                        <Card key="onboarding-form" className="border-secondary-main/10 shadow-xl overflow-hidden">
+                            <CardContent className="p-8">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.4 }}
+                                >
+                                    <div className="flex items-center gap-1 mb-8">
+                                        <div className="flex-1 h-1 rounded-full bg-black" />
+                                        <div className="flex-1 h-1 rounded-full bg-secondary-main/10" />
+                                        <div className="flex-1 h-1 rounded-full bg-secondary-main/10" />
+                                    </div>
+
+                                    <h1 className="text-2xl font-black text-primary-main mb-2">Create Your First League</h1>
+                                    <p className="text-secondary-main/50 text-sm mb-8">
+                                        Welcome to PLYAZ! Let&apos;s get your first competition set up and launch your organization.
+                                    </p>
+
+                                    <form onSubmit={handleSubmit} className="space-y-6">
+                                        <Input
+                                            label="League Name"
+                                            placeholder="e.g., Sunday Premier League"
+                                            value={leagueName}
+                                            onChange={(e) => setLeagueName(e.target.value)}
+                                            autoFocus
+                                            required
+                                        />
+
+                                        <div className="space-y-2">
+                                            <Select
+                                                label="Competition Type"
+                                                value={leagueType}
+                                                onChange={(e) => setLeagueType(e.target.value)}
+                                                options={[
+                                                    { value: 'league', label: 'League (Round Robin)' },
+                                                    { value: 'knockout', label: 'Cup (Knockout)' },
+                                                    { value: 'group_knockout', label: 'Group Stage + Knockout' },
+                                                ]}
+                                            />
+                                            <p className="text-[10px] text-secondary-main/40 uppercase font-medium tracking-wider">
+                                                💡 Recommended: League for season-long points
+                                            </p>
+                                        </div>
+
+                                        {error && (
+                                            <p className="text-xs text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 italic">
+                                                {error}
+                                            </p>
+                                        )}
+
+                                        <Button
+                                            type="submit"
+                                            fullWidth
+                                            size="lg"
+                                            disabled={!leagueName.trim() || isSubmitting}
+                                            isLoading={isSubmitting}
+                                            className="h-14 text-sm font-bold tracking-widest"
+                                        >
+                                            LAUNCH DASHBOARD
+                                        </Button>
+                                    </form>
+                                </motion.div>
+                            </CardContent>
+                        </Card>
+                    )}
+                </AnimatePresence>
 
                 <p className="text-center mt-8 text-[10px] font-bold tracking-[0.2em] uppercase text-secondary-main/30">
                     Propelling Talent Forward • PLYAZ
