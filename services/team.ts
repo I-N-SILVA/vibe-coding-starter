@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/client';
+import { LocalStore } from '@/lib/mock/store';
 import type { Database } from '@/lib/supabase/types';
 
 type Team = Database['public']['Tables']['teams']['Row'];
 
 /**
- * Team Service
- * Handles team creation, roster management, and statistics.
+ * Team Service (Mock)
+ * Handles team creation, roster management, and statistics using localStorage.
  */
 export const teamService = {
     /**
@@ -25,57 +25,47 @@ export const teamService = {
      * Get teams for an organization or competition
      */
     async getTeams(competitionId?: string) {
-        const supabase = createClient();
-        let query = supabase.from('teams').select('*');
+        let teams: any[] = [];
 
         if (competitionId) {
-            // Need to join via group_teams? 
-            // The existing leagueApi might have a more complex query.
-            // For now, let's just get all teams if no competitionId, 
-            // or filter by organization if we can identify it.
-            // Actually, competitions have teams linked via group_teams in knockout or group stage.
-            // But teams also belong to an organization.
-            query = query.eq('organization_id', 'current'); // Placeholder logic
+            // Teams are usually linked to competitions through groups or registrations
+            // For mock, let's look at all teams that might be in this competition
+            // This is a bit simplified for now
+            teams = LocalStore.get<any>('teams');
+            // If we had a group_teams store, we would filter here.
+        } else {
+            // Get current user's org teams
+            const user = LocalStore.findOne<any>('auth', u => u.isActive);
+            if (user) {
+                const profile = LocalStore.findOne<any>('profiles', p => p.id === user.id);
+                if (profile?.organization_id) {
+                    teams = LocalStore.find<any>('teams', t => t.organization_id === profile.organization_id);
+                }
+            }
         }
 
-        const { data, error } = await query.order('name');
-        if (error) throw error;
-
-        return (data || []).map(t => teamService.mapTeam(t));
+        return teams.sort((a, b) => a.name.localeCompare(b.name)).map(t => teamService.mapTeam(t));
     },
 
     /**
      * Get a single team
      */
     async getTeam(id: string) {
-        const supabase = createClient();
-        const { data, error } = await supabase
-            .from('teams')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-        if (error) throw error;
-        return teamService.mapTeam(data);
+        const team = LocalStore.findOne<any>('teams', t => t.id === id);
+        return teamService.mapTeam(team);
     },
 
     /**
      * Create a new team
      */
     async createTeam(data: any) {
-        const supabase = createClient();
-        const { data: team, error } = await supabase
-            .from('teams')
-            .insert({
-                name: data.name,
-                short_name: data.shortName,
-                logo_url: data.logoUrl,
-                organization_id: data.organizationId
-            } as any)
-            .select()
-            .single();
+        const team = LocalStore.addItem<any>('teams', {
+            name: data.name,
+            short_name: data.shortName,
+            logo_url: data.logoUrl,
+            organization_id: data.organizationId
+        });
 
-        if (error) throw error;
         return teamService.mapTeam(team);
     },
 
@@ -83,15 +73,7 @@ export const teamService = {
      * Update a team
      */
     async updateTeam(id: string, data: Partial<Team>) {
-        const supabase = createClient();
-        const { data: updated, error } = await supabase
-            .from('teams')
-            .update(data as any)
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (error) throw error;
+        const updated = LocalStore.updateItem<any>('teams', id, data);
         return teamService.mapTeam(updated);
     },
 
@@ -99,13 +81,6 @@ export const teamService = {
      * Delete a team
      */
     async deleteTeam(id: string) {
-        const supabase = createClient();
-        const { error } = await supabase
-            .from('teams')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-        return true;
+        return LocalStore.deleteItem('teams', id);
     }
 };

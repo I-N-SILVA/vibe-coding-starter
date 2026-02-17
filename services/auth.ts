@@ -1,33 +1,33 @@
-import { createClient } from '@/lib/supabase/client';
+import { LocalStore } from '@/lib/mock/store';
 import type { Profile } from '@/lib/supabase/types';
 
 /**
- * Authentication Service
- * Centralizes all Supabase Auth interactions.
+ * Authentication Service (Mock)
+ * Simulates authentication logic using localStorage.
  */
 export const authService = {
     /**
      * Get current session
      */
     async getSession() {
-        const supabase = createClient();
-        return await supabase.auth.getSession();
+        const user = LocalStore.findOne<any>('auth', u => u.isActive);
+        if (!user) return { data: { session: null }, error: null };
+        return {
+            data: {
+                session: { user, access_token: 'mock-token', refresh_token: 'mock-token' } as any
+            },
+            error: null
+        };
     },
 
     /**
      * Get current user and their profile
      */
     async getCurrentUser() {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const user = LocalStore.findOne<any>('auth', u => u.isActive);
         if (!user) return { user: null, profile: null };
 
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-
+        const profile = LocalStore.findOne<Profile>('profiles', p => p.id === user.id);
         return { user, profile };
     },
 
@@ -35,29 +35,44 @@ export const authService = {
      * Sign in with email and password
      */
     async signIn(email: string, password: string) {
-        const supabase = createClient();
-        return await supabase.auth.signInWithPassword({ email, password });
+        const user = LocalStore.findOne<any>('auth', u => u.email === email);
+        if (!user) return { data: { user: null }, error: { message: 'Invalid credentials' } as any };
+
+        LocalStore.updateItem('auth', user.id, { isActive: true });
+        return { data: { user, session: { user } as any }, error: null };
     },
 
     /**
      * Sign up with custom metadata
      */
     async signUp(email: string, password: string, fullName: string, role: string = 'organizer') {
-        const supabase = createClient();
-        return await supabase.auth.signUp({
+        const existing = LocalStore.findOne<any>('auth', u => u.email === email);
+        if (existing) return { data: { user: null }, error: { message: 'User already exists' } as any };
+
+        const newUser = LocalStore.addItem<any>('auth', {
             email,
-            password,
-            options: {
-                data: { full_name: fullName, role }
-            }
+            isActive: true,
         });
+
+        LocalStore.addItem<Profile>('profiles', {
+            id: newUser.id,
+            full_name: fullName,
+            role: role as any,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        } as any);
+
+        return { data: { user: newUser, session: { user: newUser } as any }, error: null };
     },
 
     /**
      * Sign out
      */
     async signOut() {
-        const supabase = createClient();
-        return await supabase.auth.signOut();
+        const user = LocalStore.findOne<any>('auth', u => u.isActive);
+        if (user) {
+            LocalStore.updateItem('auth', user.id, { isActive: false });
+        }
+        return { error: null };
     }
 };

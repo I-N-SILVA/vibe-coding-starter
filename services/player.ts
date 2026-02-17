@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/client';
+import { LocalStore } from '@/lib/mock/store';
 import type { Database } from '@/lib/supabase/types';
 
 type Player = Database['public']['Tables']['players']['Row'];
 
 /**
- * Player Service
- * Handles all player-related data operations.
+ * Player Service (Mock)
+ * Handles all player-related data operations using localStorage.
  */
 export const playerService = {
     /**
@@ -28,30 +28,29 @@ export const playerService = {
      * Get all players in the organization (or specific team)
      */
     async getPlayers(teamId?: string) {
-        const supabase = createClient();
-        let query = supabase.from('players').select('*');
+        let players: any[] = [];
 
         if (teamId) {
-            query = query.eq('team_id', teamId);
+            players = LocalStore.find<any>('players', p => p.team_id === teamId);
+        } else {
+            // Get all players for current org
+            const user = LocalStore.findOne<any>('auth', u => u.isActive);
+            if (user) {
+                const profile = LocalStore.findOne<any>('profiles', p => p.id === user.id);
+                if (profile?.organization_id) {
+                    players = LocalStore.find<any>('players', p => p.organization_id === profile.organization_id);
+                }
+            }
         }
 
-        const { data, error } = await query;
-        if (error) throw error;
-        return (data || []).map(p => playerService.mapPlayer(p));
+        return players.sort((a, b) => a.name.localeCompare(b.name)).map(p => playerService.mapPlayer(p));
     },
 
     /**
      * Get a single player by ID
      */
     async getPlayer(id: string) {
-        const supabase = createClient();
-        const { data, error } = await supabase
-            .from('players')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-        if (error) throw error;
-        return playerService.mapPlayer(data);
+        const player = LocalStore.findOne<any>('players', p => p.id === id);
+        return playerService.mapPlayer(player);
     }
 };

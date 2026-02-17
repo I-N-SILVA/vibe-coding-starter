@@ -1,12 +1,13 @@
-import { createClient } from '@/lib/supabase/client';
+import { LocalStore } from '@/lib/mock/store';
 import type { Database } from '@/lib/supabase/types';
 
 type Organization = Database['public']['Tables']['organizations']['Row'];
 type Competition = Database['public']['Tables']['competitions']['Row'];
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 /**
- * Organization Service
- * Centralizes all league and organization related data calls.
+ * Organization Service (Mock)
+ * Centralizes all league and organization related data calls using localStorage.
  */
 export const orgService = {
     /**
@@ -34,7 +35,7 @@ export const orgService = {
             endDate: comp.end_date,
             maxTeams: comp.max_teams,
             inviteCode: comp.invite_code,
-            organization: comp.organization ? orgService.mapOrganization(comp.organization) : undefined,
+            organization: comp.organization_id ? orgService.mapOrganization(LocalStore.findOne('organizations', o => (o as any).id === comp.organization_id)) : undefined,
         };
     },
 
@@ -42,32 +43,21 @@ export const orgService = {
      * Create a new organization and link it to the current profile
      */
     async createOrganization(name: string, slug: string) {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
+        const user = LocalStore.findOne<any>('auth', u => u.isActive);
         if (!user) throw new Error('User not authenticated');
 
-        // 1. Insert Org with owner_id
-        const { data: org, error: orgError } = await supabase
-            .from('organizations')
-            .insert({
-                name,
-                slug,
-                owner_id: user.id
-            })
-            .select()
-            .single();
+        // 1. Insert Org
+        const org = LocalStore.addItem<any>('organizations', {
+            name,
+            slug,
+            owner_id: user.id
+        });
 
-        if (orgError) throw orgError;
-
-        // 2. Update current user's profile with the organization_id
-        await supabase
-            .from('profiles')
-            .update({
-                organization_id: org.id,
-                role: 'organizer'
-            })
-            .eq('id', user.id);
+        // 2. Update current user's profile
+        LocalStore.updateItem<any>('profiles', user.id, {
+            organization_id: org.id,
+            role: 'organizer'
+        });
 
         return orgService.mapOrganization(org);
     },
@@ -76,59 +66,33 @@ export const orgService = {
      * Get organization by ID or current
      */
     async getOrganization(idOrCurrent: string) {
-        const supabase = createClient();
         let orgId = idOrCurrent;
 
         if (idOrCurrent === 'current') {
-            const { data: { user } } = await supabase.auth.getUser();
+            const user = LocalStore.findOne<any>('auth', u => u.isActive);
             if (!user) return null;
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('organization_id')
-                .eq('id', user.id)
-                .single();
+            const profile = LocalStore.findOne<any>('profiles', p => p.id === user.id);
             if (!profile?.organization_id) return null;
             orgId = profile.organization_id;
         }
 
-        const { data, error } = await supabase
-            .from('organizations')
-            .select('*')
-            .eq('id', orgId)
-            .single();
-
-        if (error) throw error;
-        return orgService.mapOrganization(data);
+        const org = LocalStore.findOne<any>('organizations', o => o.id === orgId);
+        return orgService.mapOrganization(org);
     },
 
     /**
      * Get a single competition
      */
     async getCompetition(id: string) {
-        const supabase = createClient();
-        const { data, error } = await supabase
-            .from('competitions')
-            .select('*, organization:organizations(*)')
-            .eq('id', id)
-            .single();
-
-        if (error) throw error;
-        return orgService.mapCompetition(data);
+        const comp = LocalStore.findOne<any>('competitions', c => c.id === id);
+        return orgService.mapCompetition(comp);
     },
 
     /**
      * Update a competition
      */
     async updateCompetition(id: string, data: Partial<Competition>) {
-        const supabase = createClient();
-        const { data: updated, error } = await supabase
-            .from('competitions')
-            .update(data as any)
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (error) throw error;
+        const updated = LocalStore.updateItem<any>('competitions', id, data);
         return orgService.mapCompetition(updated);
     },
 
@@ -136,92 +100,72 @@ export const orgService = {
      * Delete a competition
      */
     async deleteCompetition(id: string) {
-        const supabase = createClient();
-        const { error } = await supabase
-            .from('competitions')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-        return true;
+        return LocalStore.deleteItem('competitions', id);
     },
 
     /**
      * Create an initial competition for an organization
      */
     async createCompetition(orgId: string, name: string, type: string) {
-        const supabase = createClient();
         let targetOrgId = orgId;
 
         if (orgId === 'current') {
-            const { data: { user } } = await supabase.auth.getUser();
+            const user = LocalStore.findOne<any>('auth', u => u.isActive);
             if (!user) throw new Error('User not authenticated');
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('organization_id')
-                .eq('id', user.id)
-                .single();
+            const profile = LocalStore.findOne<any>('profiles', p => p.id === user.id);
             if (!profile?.organization_id) throw new Error('No organization found for current user');
             targetOrgId = profile.organization_id;
         }
 
-        const { data, error } = await supabase
-            .from('competitions')
-            .insert({
-                organization_id: targetOrgId,
-                name,
-                type: type as any,
-                status: 'draft'
-            })
-            .select()
-            .single();
+        const comp = LocalStore.addItem<any>('competitions', {
+            organization_id: targetOrgId,
+            name,
+            type: type as any,
+            status: 'draft'
+        });
 
-        if (error) throw error;
-        return orgService.mapCompetition(data);
+        return orgService.mapCompetition(comp);
     },
 
     /**
      * Get all competitions for the organization
      */
     async getCompetitions(orgId?: string) {
-        const supabase = createClient();
-        let query = supabase.from('competitions').select('*');
+        let targetOrgId = orgId;
 
-        if (orgId && orgId !== 'current') {
-            query = query.eq('organization_id', orgId);
-        } else {
-            // Get current user's org
-            const { data: { user } } = await supabase.auth.getUser();
+        if (!orgId || orgId === 'current') {
+            const user = LocalStore.findOne<any>('auth', u => u.isActive);
             if (user) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('organization_id')
-                    .eq('id', user.id)
-                    .single();
-
-                if (profile?.organization_id) {
-                    query = query.eq('organization_id', profile.organization_id);
-                }
+                const profile = LocalStore.findOne<any>('profiles', p => p.id === user.id);
+                targetOrgId = profile?.organization_id;
             }
         }
 
-        const { data, error } = await query.order('created_at', { ascending: false });
-        if (error) throw error;
-        return (data || []).map(c => orgService.mapCompetition(c));
+        if (!targetOrgId) return [];
+
+        const comps = LocalStore.find<any>('competitions', c => c.organization_id === targetOrgId);
+        return comps.map(c => orgService.mapCompetition(c));
     },
 
     /**
      * Get recent activity for the organization
      */
     async getActivity() {
-        const supabase = createClient();
-        const { data, error } = await supabase
-            .from('match_events')
-            .select('*, matches(home_team_id, away_team_id, competitions(name))')
-            .limit(10)
-            .order('created_at', { ascending: false });
-
-        if (error) return [];
-        return data; // activity mapping might be needed if UI consumes it specifically
+        const events = LocalStore.get<any>('match_events');
+        // Sort and map similarly to the real service
+        return events
+            .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .slice(0, 10)
+            .map((e: any) => {
+                const match = LocalStore.findOne<any>('matches', m => m.id === e.match_id);
+                const competition = match ? LocalStore.findOne<any>('competitions', c => c.id === match.competition_id) : null;
+                return {
+                    ...e,
+                    matches: match ? {
+                        ...match,
+                        competitions: competition
+                    } : null
+                };
+            });
     }
 };

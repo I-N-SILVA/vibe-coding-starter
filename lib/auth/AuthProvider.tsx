@@ -1,23 +1,24 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { authService } from '@/services/auth';
-import type { Profile } from '@/lib/supabase/types';
+import { User, Session } from '@supabase/supabase-js';
+import { Profile } from '@/lib/supabase/types';
+import { LocalStore } from '@/lib/mock/store';
+import { useRouter } from 'next/navigation';
 
 // ============================================
 // TYPES
 // ============================================
 
-interface AuthUser {
+interface AuthUser extends Partial<User> {
     id: string;
     email: string;
-    profile: Profile | null;
 }
 
 interface AuthContextType {
     user: AuthUser | null;
     profile: Profile | null;
+    session: Session | null;
     isLoading: boolean;
     isAuthInitialized: boolean;
     isAuthenticated: boolean;
@@ -32,147 +33,90 @@ interface AuthContextType {
     updateProfile: (updates: Partial<Profile>) => Promise<{ error: string | null }>;
 }
 
-// ============================================
-// CONTEXT
-// ============================================
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
+    const [session, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthInitialized, setIsAuthInitialized] = useState(false);
+    const router = useRouter();
 
-    const supabase = createClient();
-
-    // Fetch profile from Supabase with retry logic to handle trigger race conditions
-    const fetchProfile = useCallback(async (userId: string, retries = 3, delay = 1000) => {
-        for (let i = 0; i <= retries; i++) {
-            try {
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', userId)
-                    .single();
-
-                if (error) {
-                    if (i < retries) {
-                        console.log(`[Auth] Profile not found, retrying... (${i + 1}/${retries})`);
-                        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
-                        continue;
-                    }
-                    throw error;
-                }
-                return data as Profile;
-            } catch (err) {
-                if (i === retries) {
-                    console.warn('[Auth] Final profile fetch attempt failed:', err);
-                    return null;
-                }
-            }
-        }
-        return null;
-    }, [supabase]);
-
-    // Initialize auth state
     useEffect(() => {
-        const initAuth = async () => {
-            try {
-                const { data: { session } } = await authService.getSession();
-                const authUser = session?.user;
-                if (authUser) {
-                    const prof = await fetchProfile(authUser.id);
-                    setUser({ id: authUser.id, email: authUser.email || '', profile: prof });
-                    setProfile(prof);
-                }
-            } catch (err) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.warn('[Auth] Initialization error:', err);
-                }
-            } finally {
-                setIsLoading(false);
-                setIsAuthInitialized(true);
-            }
-        };
+        // Load mock auth state from localStorage
+        const storedUser = LocalStore.findOne<any>('auth', (u) => u.isActive);
 
-        initAuth();
+        if (storedUser) {
+            setUser(storedUser as unknown as AuthUser);
+            setSession({ user: storedUser } as any);
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (session?.user) {
-                const prof = await fetchProfile(session.user.id);
-                setUser({ id: session.user.id, email: session.user.email || '', profile: prof });
-                setProfile(prof);
-            } else {
-                setUser(null);
-                setProfile(null);
-            }
-            setIsLoading(false);
-            setIsAuthInitialized(true);
-        });
+            // Get profile
+            const userProfile = LocalStore.findOne<Profile>('profiles', (p) => p.id === storedUser.id);
+            setProfile(userProfile);
+        }
 
-        return () => subscription.unsubscribe();
-    }, [supabase, fetchProfile]);
+        setIsLoading(false);
+        setIsAuthInitialized(true);
+    }, []);
 
     const signIn = async (email: string, password: string) => {
-        try {
-            const { error } = await authService.signIn(email, password);
-            if (error) return { error: error.message };
-            return { error: null };
-        } catch (err: unknown) {
-            return { error: err instanceof Error ? err.message : 'An unexpected error occurred' };
-        }
+        const mockUser = LocalStore.findOne<any>('auth', (u) => u.email === email);
+        if (!mockUser) return { error: 'User not found' };
+
+        LocalStore.updateItem('auth', mockUser.id, { isActive: true });
+        setUser(mockUser);
+        setSession({ user: mockUser } as any);
+        const userProfile = LocalStore.findOne<Profile>('profiles', (p) => p.id === mockUser.id);
+        setProfile(userProfile);
+
+        return { error: null };
     };
 
-    const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'organizer', inviteToken?: string) => {
-        try {
-            if (inviteToken) {
-                const response = await fetch('/api/league/invites/verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: inviteToken }),
-                });
+    const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'organizer') => {
+        // Check if exists
+        const existing = LocalStore.findOne<any>('auth', (u) => u.email === email);
+        if (existing) return { error: 'Email already exists' };
 
-                if (!response.ok) {
-                    const { error } = await response.json();
-                    return { error: `Invalid invite token: ${error}` };
-                }
-            }
+        const newUser = LocalStore.addItem<any>('auth', {
+            email,
+            isActive: true,
+        });
 
-            const { error } = await authService.signUp(email, password, fullName, role);
-            if (error) return { error: error.message };
-            return { error: null };
-        } catch (err: unknown) {
-            return { error: err instanceof Error ? err.message : 'An unexpected error occurred' };
-        }
+        const newProfile = LocalStore.addItem<Profile>('profiles', {
+            id: newUser.id,
+            full_name: fullName,
+            role,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        } as any);
+
+        setUser(newUser);
+        setProfile(newProfile);
+        setSession({ user: newUser } as any);
+
+        return { error: null };
     };
 
     const signOut = async () => {
-        await authService.signOut();
+        if (user) {
+            LocalStore.updateItem('auth', user.id, { isActive: false });
+        }
         setUser(null);
         setProfile(null);
+        setSession(null);
+        router.push('/login');
     };
 
     const forgotPassword = async (email: string) => {
-        const { error } = await supabase.auth.resetPasswordForEmail(email);
-        return { error: error?.message || null };
+        return { error: null };
     };
 
     const updateProfile = async (updates: Partial<Profile>) => {
         if (!user) return { error: 'Not authenticated' };
-
-        const { error } = await supabase
-            .from('profiles')
-            .update(updates)
-            .eq('id', user.id);
-
-        if (!error) {
-            const updatedProfile = { ...profile, ...updates } as Profile;
-            setProfile(updatedProfile);
-            setUser({ ...user, profile: updatedProfile });
-        }
-
-        return { error: error?.message || null };
+        const updated = LocalStore.updateItem<Profile>('profiles', user.id, updates);
+        if (updated) setProfile(updated);
+        return { error: null };
     };
 
     const role = profile?.role || 'fan';
@@ -180,6 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const value: AuthContextType = {
         user,
         profile,
+        session,
         isLoading,
         isAuthInitialized,
         isAuthenticated: !!user,
@@ -199,14 +144,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             {children}
         </AuthContext.Provider>
     );
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
     const context = useContext(AuthContext);
-    if (!context) {
+    if (context === undefined) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;
-}
+};
 
 export default AuthProvider;
