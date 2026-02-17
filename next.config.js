@@ -9,7 +9,7 @@ const ContentSecurityPolicy = `
   style-src 'self' 'unsafe-inline' api.fontshare.com fonts.googleapis.com;
   img-src 'self' *.supabase.co blob: data:;
   media-src *.s3.amazonaws.com *.shipixen.com;
-  connect-src 'self' *.supabase.co *.vercel-analytics.com *.vercel-scripts.com vercel.live api.fontshare.com fonts.googleapis.com;
+  connect-src 'self' *.supabase.co *.vercel-analytics.com *.vercel-scripts.com vercel.live api.fontshare.com fonts.googleapis.com cdn.fontshare.com;
   font-src 'self' fonts.gstatic.com r2cdn.perplexity.ai cdn.fontshare.com data:;
 `;
 
