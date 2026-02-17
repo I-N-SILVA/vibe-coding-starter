@@ -39,7 +39,7 @@ export async function GET() {
         return NextResponse.json([]);
     }
 
-    const activity = ((data || []) as MatchEventWithJoin[])
+    const activity = ((data || []) as unknown as MatchEventWithJoin[])
         .filter((event) => event.match?.home_team && event.match?.away_team)
         .map((event) => {
             const homeName = event.match!.home_team!.name;

@@ -568,7 +568,22 @@ export type Database = {
                     updated_at?: string;
                 };
                 Update: Partial<Match>;
-                Relationships: [];
+                Relationships: [
+                    {
+                        foreignKeyName: "matches_home_team_id_fkey";
+                        columns: ["home_team_id"];
+                        isOneToOne: false;
+                        referencedRelation: "teams";
+                        referencedColumns: ["id"];
+                    },
+                    {
+                        foreignKeyName: "matches_away_team_id_fkey";
+                        columns: ["away_team_id"];
+                        isOneToOne: false;
+                        referencedRelation: "teams";
+                        referencedColumns: ["id"];
+                    }
+                ];
             };
             match_events: {
                 Row: MatchEvent;
@@ -585,7 +600,15 @@ export type Database = {
                     created_at?: string;
                 };
                 Update: Partial<MatchEvent>;
-                Relationships: [];
+                Relationships: [
+                    {
+                        foreignKeyName: "match_events_match_id_fkey";
+                        columns: ["match_id"];
+                        isOneToOne: false;
+                        referencedRelation: "matches";
+                        referencedColumns: ["id"];
+                    }
+                ];
             };
             standings: {
                 Row: StandingsEntry;
