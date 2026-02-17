@@ -1,27 +1,18 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import type { Database } from '@/lib/supabase/types';
 
 export async function createClient() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
-        // During build/prerender, return a non-functional client
-        return createServerClient(
-            'https://placeholder.supabase.co',
-            'placeholder-key',
-            {
-                cookies: {
-                    getAll() { return []; },
-                    setAll() { }
-                }
-            }
-        );
+        throw new Error('Missing Supabase environment variables for server client.');
     }
 
     const cookieStore = await cookies();
 
-    return createServerClient(
+    return createServerClient<Database>(
         supabaseUrl,
         supabaseAnonKey,
         {

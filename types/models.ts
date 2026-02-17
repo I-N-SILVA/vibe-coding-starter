@@ -116,16 +116,15 @@ export interface MatchEvent {
 // COMPETITION MODELS
 // ============================================
 
-export type CompetitionFormat =
+export type CompetitionType =
     | 'league'
     | 'knockout'
-    | 'group_knockout'
-    | 'round_robin';
+    | 'group_knockout';
 
 export interface Competition {
     id: string;
     name: string;
-    format: CompetitionFormat;
+    type: CompetitionType;
     seasonYear: string;
     year?: number;
     categoryId?: string;
@@ -197,7 +196,8 @@ export interface ApiError {
 
 export interface CreateCompetitionDto {
     name: string;
-    format: CompetitionFormat;
+    description?: string;
+    type: CompetitionType;
     startDate: Date;
     endDate?: Date;
 }

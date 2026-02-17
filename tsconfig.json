@@ -47,6 +47,9 @@
       ],
       "@/types/*": [
         "types/*"
+      ],
+      "@/services/*": [
+        "services/*"
       ]
     },
     "plugins": [

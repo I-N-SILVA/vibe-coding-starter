@@ -4,7 +4,11 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { leagueApi, teamsApi } from '@/lib/api';
+import { orgService } from '@/services/org';
+import { matchService } from '@/services/match';
+import { playerService } from '@/services/player';
+import { teamService } from '@/services/team';
+import { apiClient } from '@/lib/api';
 import type {
     CreateCompetitionDto,
     CreateTeamDto,
@@ -20,7 +24,6 @@ import type {
     CreateGroupDto,
     CreateRegistrationDto,
 } from '@/types';
-import { apiClient } from '@/lib/api';
 
 // ============================================
 // QUERY KEYS
@@ -47,6 +50,7 @@ export const queryKeys = {
     registrations: (competitionId: string) => ['registrations', competitionId] as const,
     competitionStats: (competitionId: string) => ['competitionStats', competitionId] as const,
     playerCareerStats: (playerId: string) => ['playerCareerStats', playerId] as const,
+    activity: ['activity'] as const,
 };
 
 // ============================================
@@ -56,7 +60,14 @@ export const queryKeys = {
 export function useOrganization() {
     return useQuery({
         queryKey: queryKeys.organization,
-        queryFn: () => leagueApi.getOrganization(),
+        queryFn: () => orgService.getOrganization('current'),
+    });
+}
+
+export function useActivity() {
+    return useQuery({
+        queryKey: queryKeys.activity,
+        queryFn: () => orgService.getActivity(),
     });
 }
 
@@ -64,7 +75,7 @@ export function useCreateOrganization() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreateOrganizationDto) => leagueApi.createOrganization(data),
+        mutationFn: (data: CreateOrganizationDto) => orgService.createOrganization(data.name, data.slug),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.organization });
         },
@@ -78,14 +89,14 @@ export function useCreateOrganization() {
 export function useCompetitions() {
     return useQuery({
         queryKey: queryKeys.competitions,
-        queryFn: () => leagueApi.getCompetitions(),
+        queryFn: () => orgService.getCompetitions(),
     });
 }
 
 export function useCompetition(id: string) {
     return useQuery({
         queryKey: queryKeys.competition(id),
-        queryFn: () => leagueApi.getCompetition(id),
+        queryFn: () => orgService.getCompetition(id),
         enabled: !!id,
     });
 }
@@ -94,7 +105,7 @@ export function useCreateCompetition() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreateCompetitionDto) => leagueApi.createCompetition(data),
+        mutationFn: (data: CreateCompetitionDto) => orgService.createCompetition('current', data.name, data.type),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.competitions });
         },
@@ -106,7 +117,7 @@ export function useUpdateCompetition() {
 
     return useMutation({
         mutationFn: ({ id, data }: { id: string; data: Partial<CreateCompetitionDto> }) =>
-            leagueApi.updateCompetition(id, data),
+            orgService.updateCompetition(id, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.competition(variables.id) });
             queryClient.invalidateQueries({ queryKey: queryKeys.competitions });
@@ -118,7 +129,7 @@ export function useDeleteCompetition() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (id: string) => leagueApi.deleteCompetition(id),
+        mutationFn: (id: string) => orgService.deleteCompetition(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.competitions });
         },
@@ -132,14 +143,14 @@ export function useDeleteCompetition() {
 export function useMatches(params?: { status?: string; competitionId?: string }) {
     return useQuery({
         queryKey: queryKeys.matches(params),
-        queryFn: () => leagueApi.getMatches(params),
+        queryFn: () => matchService.getMatches(params),
     });
 }
 
 export function useLiveMatches() {
     return useQuery({
         queryKey: queryKeys.matches({ status: 'live' }),
-        queryFn: () => leagueApi.getMatches({ status: 'live' }),
+        queryFn: () => matchService.getMatches({ status: 'live' }),
         refetchInterval: 30000,
     });
 }
@@ -147,7 +158,7 @@ export function useLiveMatches() {
 export function useMatch(id: string) {
     return useQuery({
         queryKey: queryKeys.match(id),
-        queryFn: () => leagueApi.getMatch(id),
+        queryFn: () => matchService.getMatch(id),
         enabled: !!id,
     });
 }
@@ -156,7 +167,7 @@ export function useCreateMatch() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreateMatchDto) => leagueApi.createMatch(data),
+        mutationFn: (data: CreateMatchDto) => matchService.createMatch(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.matches() });
         },
@@ -167,7 +178,7 @@ export function useUpdateScore() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: UpdateScoreDto) => leagueApi.updateScore(data),
+        mutationFn: (data: UpdateScoreDto) => matchService.updateScore(data.matchId, data.homeScore, data.awayScore),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.match(variables.matchId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.matches() });
@@ -179,7 +190,7 @@ export function useStartMatch() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (matchId: string) => leagueApi.startMatch(matchId),
+        mutationFn: (matchId: string) => matchService.startMatch(matchId),
         onSuccess: (_, matchId) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.match(matchId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.matches() });
@@ -191,7 +202,7 @@ export function useEndMatch() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (matchId: string) => leagueApi.endMatch(matchId),
+        mutationFn: (matchId: string) => matchService.endMatch(matchId),
         onSuccess: (_, matchId) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.match(matchId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.matches() });
@@ -206,7 +217,7 @@ export function useEndMatch() {
 export function useMatchEvents(matchId: string) {
     return useQuery({
         queryKey: queryKeys.matchEvents(matchId),
-        queryFn: () => leagueApi.getMatchEvents(matchId),
+        queryFn: () => matchService.getMatchEvents(matchId),
         enabled: !!matchId,
     });
 }
@@ -215,7 +226,7 @@ export function useAddMatchEvent() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: AddMatchEventDto) => leagueApi.addMatchEvent(data),
+        mutationFn: (data: AddMatchEventDto) => matchService.addMatchEvent(data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.matchEvents(variables.matchId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.match(variables.matchId) });
@@ -230,14 +241,14 @@ export function useAddMatchEvent() {
 export function useTeams(competitionId?: string) {
     return useQuery({
         queryKey: queryKeys.teams(competitionId),
-        queryFn: () => teamsApi.getTeams(competitionId),
+        queryFn: () => teamService.getTeams(competitionId),
     });
 }
 
 export function useTeam(id: string) {
     return useQuery({
         queryKey: queryKeys.team(id),
-        queryFn: () => teamsApi.getTeam(id),
+        queryFn: () => teamService.getTeam(id),
         enabled: !!id,
     });
 }
@@ -246,7 +257,7 @@ export function useCreateTeam() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreateTeamDto) => teamsApi.createTeam(data),
+        mutationFn: (data: CreateTeamDto) => teamService.createTeam(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.teams() });
         },
@@ -258,7 +269,7 @@ export function useUpdateTeam() {
 
     return useMutation({
         mutationFn: ({ id, data }: { id: string; data: Partial<CreateTeamDto> }) =>
-            teamsApi.updateTeam(id, data),
+            teamService.updateTeam(id, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.team(variables.id) });
             queryClient.invalidateQueries({ queryKey: queryKeys.teams() });
@@ -270,7 +281,7 @@ export function useDeleteTeam() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (id: string) => teamsApi.deleteTeam(id),
+        mutationFn: (id: string) => teamService.deleteTeam(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.teams() });
         },
@@ -284,28 +295,36 @@ export function useDeleteTeam() {
 export function usePlayers(teamId: string) {
     return useQuery({
         queryKey: queryKeys.players(teamId),
-        queryFn: () => teamsApi.getPlayers(teamId),
+        queryFn: () => playerService.getPlayers(teamId),
         enabled: !!teamId,
+    });
+}
+
+export function useAllPlayers() {
+    return useQuery({
+        queryKey: queryKeys.players('all'),
+        queryFn: () => playerService.getPlayers(),
     });
 }
 
 export function usePlayer(teamId: string, playerId: string) {
     return useQuery({
         queryKey: queryKeys.player(teamId, playerId),
-        queryFn: () => teamsApi.getPlayer(teamId, playerId),
-        enabled: !!teamId && !!playerId,
+        queryFn: () => playerService.getPlayer(playerId),
+        enabled: !!playerId,
     });
 }
 
-export function useAddPlayer() {
+export function useCreatePlayer() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ teamId, data }: { teamId: string; data: CreatePlayerDto }) =>
-            teamsApi.addPlayer(teamId, data),
+        mutationFn: (data: CreatePlayerDto) => apiClient.post('/api/league/players', data),
         onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });
-            queryClient.invalidateQueries({ queryKey: queryKeys.team(variables.teamId) });
+            if (variables.teamId) {
+                queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });
+            }
+            queryClient.invalidateQueries({ queryKey: queryKeys.players('all') });
         },
     });
 }
@@ -314,11 +333,12 @@ export function useUpdatePlayer() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ teamId, playerId, data }: { teamId: string; playerId: string; data: Partial<CreatePlayerDto> }) =>
-            teamsApi.updatePlayer(teamId, playerId, data),
+        mutationFn: ({ playerId, data }: { teamId: string; playerId: string; data: Partial<CreatePlayerDto> }) =>
+            apiClient.patch(`/api/league/players/${playerId}`, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.player(variables.teamId, variables.playerId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.players('all') });
         },
     });
 }
@@ -327,11 +347,11 @@ export function useRemovePlayer() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ teamId, playerId }: { teamId: string; playerId: string }) =>
-            teamsApi.removePlayer(teamId, playerId),
+        mutationFn: ({ playerId }: { teamId: string; playerId: string }) =>
+            apiClient.delete(`/api/league/players/${playerId}`),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });
-            queryClient.invalidateQueries({ queryKey: queryKeys.team(variables.teamId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.players('all') });
         },
     });
 }
@@ -343,7 +363,7 @@ export function useRemovePlayer() {
 export function useStandings(competitionId: string) {
     return useQuery({
         queryKey: queryKeys.standings(competitionId),
-        queryFn: () => leagueApi.getStandings(competitionId),
+        queryFn: () => apiClient.get(`/api/league/competitions/${competitionId}/standings`),
         enabled: !!competitionId,
     });
 }
@@ -355,7 +375,7 @@ export function useStandings(competitionId: string) {
 export function useInvites() {
     return useQuery({
         queryKey: queryKeys.invites,
-        queryFn: () => leagueApi.getInvites(),
+        queryFn: () => apiClient.get('/api/league/invites'),
     });
 }
 
@@ -363,7 +383,7 @@ export function useCreateInvite() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreateInviteDto) => leagueApi.createInvite(data),
+        mutationFn: (data: CreateInviteDto) => apiClient.post('/api/league/invites', data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.invites });
         },

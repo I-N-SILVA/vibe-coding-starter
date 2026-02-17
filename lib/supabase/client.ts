@@ -1,22 +1,18 @@
+// lib/supabase/client.ts
 import { createBrowserClient } from '@supabase/ssr';
+import type { Database } from '@/lib/supabase/types';
 
 export function createClient() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
-        // During build/prerender, env vars may not be available.
-        // Return a client with dummy values — it won't be used for real requests during static generation.
-        if (typeof window === 'undefined') {
-            return createBrowserClient(
-                'https://placeholder.supabase.co',
-                'placeholder-key'
-            );
-        }
-        throw new Error(
-            'Missing Supabase environment variables. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local'
-        );
+        // Fallback or warning instead of crash
+        console.warn('[Supabase] Missing environment variables. Client initialization might fail.');
     }
 
-    return createBrowserClient(supabaseUrl, supabaseAnonKey);
+    return createBrowserClient<Database>(supabaseUrl || '', supabaseAnonKey || '');
 }
+
+// Client-side singleton for easy use in hooks/components
+export const supabase = typeof window !== 'undefined' ? createClient() : null;

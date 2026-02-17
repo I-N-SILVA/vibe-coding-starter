@@ -410,26 +410,374 @@ export type CreateRegistrationDto = {
 // DATABASE TYPE (for Supabase client)
 // ============================================
 
+// ============================================
+// DATABASE TYPE
+// ============================================
+
 export type Database = {
     public: {
         Tables: {
-            organizations: { Row: Organization; Insert: Omit<Organization, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Omit<Organization, 'id' | 'created_at' | 'updated_at'>>; };
-            profiles: { Row: Profile; Insert: Omit<Profile, 'created_at' | 'updated_at'>; Update: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at'>>; };
-            competitions: { Row: Competition; Insert: Omit<Competition, 'id' | 'created_at' | 'updated_at' | 'invite_code'>; Update: Partial<Omit<Competition, 'id' | 'created_at' | 'updated_at'>>; };
-            teams: { Row: Team; Insert: Omit<Team, 'id' | 'created_at' | 'updated_at' | 'invite_code'>; Update: Partial<Omit<Team, 'id' | 'created_at' | 'updated_at'>>; };
-            players: { Row: Player; Insert: Omit<Player, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Omit<Player, 'id' | 'created_at' | 'updated_at'>>; };
-            matches: { Row: Match; Insert: Omit<Match, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Omit<Match, 'id' | 'created_at' | 'updated_at'>>; };
-            match_events: { Row: MatchEvent; Insert: Omit<MatchEvent, 'id' | 'created_at'>; Update: Partial<Omit<MatchEvent, 'id' | 'created_at'>>; };
-            standings: { Row: StandingsEntry; Insert: Omit<StandingsEntry, 'id' | 'goal_difference' | 'updated_at'>; Update: Partial<Omit<StandingsEntry, 'id' | 'goal_difference' | 'updated_at'>>; };
-            invites: { Row: Invite; Insert: Omit<Invite, 'id' | 'created_at' | 'token'>; Update: Partial<Omit<Invite, 'id' | 'created_at'>>; };
-            venues: { Row: Venue; Insert: Omit<Venue, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Omit<Venue, 'id' | 'created_at' | 'updated_at'>>; };
-            categories: { Row: Category; Insert: Omit<Category, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at'>>; };
-            championship_config: { Row: ChampionshipConfig; Insert: Omit<ChampionshipConfig, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Omit<ChampionshipConfig, 'id' | 'created_at' | 'updated_at'>>; };
-            groups: { Row: Group; Insert: Omit<Group, 'id' | 'created_at'>; Update: Partial<Omit<Group, 'id' | 'created_at'>>; };
-            group_teams: { Row: GroupTeam; Insert: Omit<GroupTeam, 'id'>; Update: Partial<Omit<GroupTeam, 'id'>>; };
-            competition_registrations: { Row: CompetitionRegistration; Insert: Omit<CompetitionRegistration, 'id' | 'registered_at'>; Update: Partial<Omit<CompetitionRegistration, 'id' | 'registered_at'>>; };
-            competition_registration_fields: { Row: CompetitionRegistrationField; Insert: Omit<CompetitionRegistrationField, 'id' | 'created_at'>; Update: Partial<Omit<CompetitionRegistrationField, 'id' | 'created_at'>>; };
-            player_competition_stats: { Row: PlayerCompetitionStats; Insert: Omit<PlayerCompetitionStats, 'id' | 'updated_at'>; Update: Partial<Omit<PlayerCompetitionStats, 'id' | 'updated_at'>>; };
+            organizations: {
+                Row: Organization;
+                Insert: {
+                    id?: string;
+                    name: string;
+                    slug: string;
+                    owner_id: string;
+                    logo_url?: string | null;
+                    plan?: 'free' | 'pro' | 'elite';
+                    stripe_customer_id?: string | null;
+                    stripe_subscription_id?: string | null;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: Partial<Organization>;
+                Relationships: [
+                    {
+                        foreignKeyName: "organizations_owner_id_fkey";
+                        columns: ["owner_id"];
+                        isOneToOne: false;
+                        referencedRelation: "profiles";
+                        referencedColumns: ["id"];
+                    }
+                ];
+            };
+            profiles: {
+                Row: Profile;
+                Insert: {
+                    id: string;
+                    full_name?: string | null;
+                    avatar_url?: string | null;
+                    role?: Profile['role'];
+                    organization_id?: string | null;
+                    phone?: string | null;
+                    bio?: string | null;
+                    position?: string | null;
+                    jersey_number?: number | null;
+                    nationality?: string | null;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: Partial<Profile>;
+                Relationships: [
+                    {
+                        foreignKeyName: "profiles_organization_id_fkey";
+                        columns: ["organization_id"];
+                        isOneToOne: false;
+                        referencedRelation: "organizations";
+                        referencedColumns: ["id"];
+                    }
+                ];
+            };
+            competitions: {
+                Row: Competition;
+                Insert: {
+                    id?: string;
+                    organization_id: string;
+                    name: string;
+                    description?: string | null;
+                    type: Competition['type'];
+                    status?: Competition['status'];
+                    season?: string | null;
+                    year?: number | null;
+                    category_id?: string | null;
+                    start_date?: string | null;
+                    end_date?: string | null;
+                    max_teams?: number;
+                    rules?: Record<string, unknown>;
+                    settings?: Record<string, unknown>;
+                    invite_code?: string | null;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: Partial<Competition>;
+                Relationships: [
+                    {
+                        foreignKeyName: "competitions_organization_id_fkey";
+                        columns: ["organization_id"];
+                        isOneToOne: false;
+                        referencedRelation: "organizations";
+                        referencedColumns: ["id"];
+                    }
+                ];
+            };
+            teams: {
+                Row: Team;
+                Insert: {
+                    id?: string;
+                    competition_id?: string | null;
+                    organization_id: string;
+                    name: string;
+                    short_name?: string | null;
+                    logo_url?: string | null;
+                    primary_color?: string;
+                    secondary_color?: string;
+                    manager_id?: string | null;
+                    invite_code?: string | null;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: Partial<Team>;
+                Relationships: [];
+            };
+            players: {
+                Row: Player;
+                Insert: {
+                    id?: string;
+                    team_id?: string | null;
+                    profile_id?: string | null;
+                    organization_id: string;
+                    name: string;
+                    position?: PlayerPosition | null;
+                    jersey_number?: number | null;
+                    date_of_birth?: string | null;
+                    nationality?: string | null;
+                    photo_url?: string | null;
+                    bio?: string | null;
+                    status?: Player['status'];
+                    stats?: PlayerStats;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: Partial<Player>;
+                Relationships: [];
+            };
+            matches: {
+                Row: Match;
+                Insert: {
+                    id?: string;
+                    competition_id: string;
+                    organization_id: string;
+                    home_team_id: string;
+                    away_team_id: string;
+                    matchday?: number | null;
+                    round?: string | null;
+                    home_score?: number;
+                    away_score?: number;
+                    status?: Match['status'];
+                    match_time?: string | null;
+                    venue?: string | null;
+                    venue_id?: string | null;
+                    group_id?: string | null;
+                    referee_id?: string | null;
+                    scheduled_at?: string | null;
+                    started_at?: string | null;
+                    ended_at?: string | null;
+                    notes?: string | null;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: Partial<Match>;
+                Relationships: [];
+            };
+            match_events: {
+                Row: MatchEvent;
+                Insert: {
+                    id?: string;
+                    match_id: string;
+                    type: MatchEventType;
+                    team_id?: string | null;
+                    player_id?: string | null;
+                    player_name?: string | null;
+                    minute?: number | null;
+                    half?: MatchEvent['half'];
+                    details?: Record<string, unknown>;
+                    created_at?: string;
+                };
+                Update: Partial<MatchEvent>;
+                Relationships: [];
+            };
+            standings: {
+                Row: StandingsEntry;
+                Insert: {
+                    id?: string;
+                    competition_id: string;
+                    team_id: string;
+                    group_id?: string | null;
+                    played?: number;
+                    won?: number;
+                    drawn?: number;
+                    lost?: number;
+                    goals_for?: number;
+                    goals_against?: number;
+                    points?: number;
+                    form?: string[];
+                    updated_at?: string;
+                };
+                Update: Partial<StandingsEntry>;
+                Relationships: [];
+            };
+            invites: {
+                Row: Invite;
+                Insert: {
+                    id?: string;
+                    organization_id: string;
+                    competition_id?: string | null;
+                    team_id?: string | null;
+                    type: Invite['type'];
+                    email?: string | null;
+                    token?: string;
+                    status?: Invite['status'];
+                    expires_at: string;
+                    accepted_by?: string | null;
+                    created_at?: string;
+                };
+                Update: Partial<Invite>;
+                Relationships: [];
+            };
+            venues: {
+                Row: Venue;
+                Insert: {
+                    id?: string;
+                    organization_id: string;
+                    name: string;
+                    address?: string | null;
+                    city?: string | null;
+                    capacity?: number | null;
+                    surface_type?: Venue['surface_type'];
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: Partial<Venue>;
+                Relationships: [];
+            };
+            categories: {
+                Row: Category;
+                Insert: {
+                    id?: string;
+                    organization_id: string;
+                    name: string;
+                    description?: string | null;
+                    min_age?: number | null;
+                    max_age?: number | null;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: Partial<Category>;
+                Relationships: [];
+            };
+            championship_config: {
+                Row: ChampionshipConfig;
+                Insert: {
+                    id?: string;
+                    competition_id: string;
+                    format?: ChampionshipConfig['format'];
+                    groups_count?: number;
+                    teams_per_group?: number;
+                    advance_count?: number;
+                    has_gold_final?: boolean;
+                    has_silver_final?: boolean;
+                    has_third_place?: boolean;
+                    points_win?: number;
+                    points_draw?: number;
+                    points_loss?: number;
+                    match_duration_minutes?: number;
+                    half_time_minutes?: number;
+                    has_extra_time?: boolean;
+                    extra_time_minutes?: number;
+                    has_penalties?: boolean;
+                    max_substitutions?: number;
+                    custom_rules?: Record<string, unknown>;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: Partial<ChampionshipConfig>;
+                Relationships: [];
+            };
+            groups: {
+                Row: Group;
+                Insert: {
+                    id?: string;
+                    competition_id: string;
+                    name: string;
+                    display_order?: number;
+                    created_at?: string;
+                };
+                Update: Partial<Group>;
+                Relationships: [];
+            };
+            group_teams: {
+                Row: GroupTeam;
+                Insert: {
+                    id?: string;
+                    group_id: string;
+                    team_id: string;
+                    seed?: number | null;
+                };
+                Update: Partial<GroupTeam>;
+                Relationships: [];
+            };
+            competition_registrations: {
+                Row: CompetitionRegistration;
+                Insert: {
+                    id?: string;
+                    competition_id: string;
+                    player_id: string;
+                    team_id: string;
+                    organization_id: string;
+                    id_document_type: CompetitionRegistration['id_document_type'];
+                    id_document_number: string;
+                    full_name: string;
+                    date_of_birth: string;
+                    jersey_number?: number | null;
+                    position?: string | null;
+                    photo_url?: string | null;
+                    custom_fields?: Record<string, unknown>;
+                    status?: CompetitionRegistration['status'];
+                    registered_at?: string;
+                };
+                Update: Partial<CompetitionRegistration>;
+                Relationships: [];
+            };
+            competition_registration_fields: {
+                Row: CompetitionRegistrationField;
+                Insert: {
+                    id?: string;
+                    competition_id: string;
+                    field_name: string;
+                    field_type: CompetitionRegistrationField['field_type'];
+                    is_required?: boolean;
+                    options?: unknown[];
+                    display_order?: number;
+                    created_at?: string;
+                };
+                Update: Partial<CompetitionRegistrationField>;
+                Relationships: [];
+            };
+            player_competition_stats: {
+                Row: PlayerCompetitionStats;
+                Insert: {
+                    id?: string;
+                    competition_id: string;
+                    player_id: string;
+                    team_id: string;
+                    games_played?: number;
+                    goals?: number;
+                    assists?: number;
+                    yellow_cards?: number;
+                    red_cards?: number;
+                    minutes_played?: number;
+                    clean_sheets?: number;
+                    saves?: number;
+                    goals_conceded?: number;
+                    penalties_saved?: number;
+                    updated_at?: string;
+                };
+                Update: Partial<PlayerCompetitionStats>;
+                Relationships: [];
+            };
+        };
+        Views: {
+            [_ in never]: never;
+        };
+        Functions: {
+            [_ in never]: never;
+        };
+        Enums: {
+            [_ in never]: never;
+        };
+        CompositeTypes: {
+            [_ in never]: never;
         };
     };
 };

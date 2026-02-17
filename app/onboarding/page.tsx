@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { orgService } from '@/services/org';
 import {
     Card,
     CardContent,
@@ -48,39 +49,21 @@ export default function OnboardingPage() {
         setError(null);
 
         try {
-            // Derive organization name and slug from league name
-            const orgName = leagueName;
+            // Derive slug from league name
             const orgSlug = leagueName.toLowerCase()
                 .replace(/[^a-z0-9]/g, '-')
                 .replace(/-+/g, '-')
                 .replace(/^-|-$/g, '');
 
-            // 1. Create Organization
-            const orgRes = await fetch('/api/league/organizations', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: orgName, slug: orgSlug }),
-            });
+            // 1. Create Organization (and link to profile) via service
+            const org = await orgService.createOrganization(leagueName, orgSlug);
 
-            if (!orgRes.ok) {
-                const data = await orgRes.json();
-                throw new Error(data.error || 'Failed to create organization');
-            }
-
-            await orgRes.json();
-            // Organization created successfully
+            // 2. Success screen
             setIsSuccess(true);
 
-            // 2. Create Initial League (Fire and forget, don't block success screen)
-            fetch('/api/league/competitions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: leagueName,
-                    type: leagueType,
-                    status: 'draft'
-                }),
-            }).catch(err => console.warn('Background league creation failed:', err));
+            // 3. Create Initial League (Fire and forget)
+            orgService.createCompetition(org.id, leagueName, leagueType)
+                .catch(err => console.warn('Background league creation failed:', err));
 
             // Redirect after celebration delay
             setTimeout(() => {
