@@ -48,7 +48,7 @@ export default function LandingPage() {
               onClick={() => router.push('/login?mode=signup')}
               className="h-10 px-6 bg-black text-white text-[10px] font-black tracking-widest rounded-none hover:bg-gray-900 transition-colors"
             >
-              INITIALIZE
+              CREATE YOUR LEAGUE
             </Button>
           </div>
 
@@ -99,7 +99,7 @@ export default function LandingPage() {
                   router.push('/login?mode=signup');
                 }}
               >
-                INITIALIZE LEAGUE
+                CREATE YOUR LEAGUE
               </Button>
             </nav>
           </motion.div>
@@ -179,7 +179,7 @@ export default function LandingPage() {
               className="h-20 px-12 bg-black text-white text-sm font-black tracking-[0.3em] rounded-none hover:bg-gray-900 transition-all duration-300"
               onClick={() => router.push('/login?mode=signup')}
             >
-              INITIALIZE ENVIRONMENT
+              CREATE YOUR LEAGUE
             </Button>
           </div>
         </section>

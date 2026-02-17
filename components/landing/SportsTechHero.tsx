@@ -78,7 +78,7 @@ export const SportsTechHero = () => {
                         className="h-16 px-10 text-xs font-black tracking-[0.2em] rounded-none border-2 border-black hover:bg-white hover:text-black transition-all duration-300"
                         onClick={() => router.push('/login?mode=signup')}
                     >
-                        INITIALIZE LEAGUE
+                        CREATE YOUR LEAGUE
                     </Button>
                     <Button
                         variant="ghost"

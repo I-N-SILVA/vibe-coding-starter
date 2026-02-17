@@ -14,7 +14,13 @@ import type {
     CreateOrganizationDto,
     CreateInviteDto,
     CreatePlayerDto,
+    CreateVenueDto,
+    CreateCategoryDto,
+    CreateChampionshipConfigDto,
+    CreateGroupDto,
+    CreateRegistrationDto,
 } from '@/types';
+import { apiClient } from '@/lib/api';
 
 // ============================================
 // QUERY KEYS
@@ -34,6 +40,13 @@ export const queryKeys = {
     standings: (competitionId: string) => ['standings', competitionId] as const,
     organization: ['organization'] as const,
     invites: ['invites'] as const,
+    venues: ['venues'] as const,
+    categories: ['categories'] as const,
+    championshipConfig: (competitionId: string) => ['championshipConfig', competitionId] as const,
+    groups: (competitionId: string) => ['groups', competitionId] as const,
+    registrations: (competitionId: string) => ['registrations', competitionId] as const,
+    competitionStats: (competitionId: string) => ['competitionStats', competitionId] as const,
+    playerCareerStats: (playerId: string) => ['playerCareerStats', playerId] as const,
 };
 
 // ============================================
@@ -354,5 +367,172 @@ export function useCreateInvite() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.invites });
         },
+    });
+}
+
+// ============================================
+// VENUE HOOKS
+// ============================================
+
+export function useVenues() {
+    return useQuery({
+        queryKey: queryKeys.venues,
+        queryFn: () => apiClient.get('/api/league/venues'),
+    });
+}
+
+export function useCreateVenue() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: CreateVenueDto) => apiClient.post('/api/league/venues', data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.venues });
+        },
+    });
+}
+
+export function useDeleteVenue() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => apiClient.delete(`/api/league/venues/${id}`),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.venues });
+        },
+    });
+}
+
+// ============================================
+// CATEGORY HOOKS
+// ============================================
+
+export function useCategories() {
+    return useQuery({
+        queryKey: queryKeys.categories,
+        queryFn: () => apiClient.get('/api/league/categories'),
+    });
+}
+
+export function useCreateCategory() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: CreateCategoryDto) => apiClient.post('/api/league/categories', data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.categories });
+        },
+    });
+}
+
+// ============================================
+// CHAMPIONSHIP CONFIG HOOKS
+// ============================================
+
+export function useChampionshipConfig(competitionId: string) {
+    return useQuery({
+        queryKey: queryKeys.championshipConfig(competitionId),
+        queryFn: () => apiClient.get(`/api/league/competitions/${competitionId}/config`),
+        enabled: !!competitionId,
+    });
+}
+
+export function useUpsertChampionshipConfig() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: { competitionId: string } & Record<string, unknown>) =>
+            apiClient.put(`/api/league/competitions/${data.competitionId}/config`, data),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.championshipConfig(variables.competitionId),
+            });
+        },
+    });
+}
+
+// ============================================
+// GROUP HOOKS
+// ============================================
+
+export function useGroups(competitionId: string) {
+    return useQuery({
+        queryKey: queryKeys.groups(competitionId),
+        queryFn: () => apiClient.get(`/api/league/competitions/${competitionId}/groups`),
+        enabled: !!competitionId,
+    });
+}
+
+export function useCreateGroup() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: CreateGroupDto) =>
+            apiClient.post(`/api/league/competitions/${data.competitionId}/groups`, data),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.groups(variables.competitionId),
+            });
+        },
+    });
+}
+
+export function useExecuteDraw() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: { competitionId: string; method: string }) =>
+            apiClient.post(`/api/league/competitions/${data.competitionId}/draw`, data),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.groups(variables.competitionId),
+            });
+        },
+    });
+}
+
+// ============================================
+// REGISTRATION HOOKS
+// ============================================
+
+export function useRegistrations(competitionId: string) {
+    return useQuery({
+        queryKey: queryKeys.registrations(competitionId),
+        queryFn: () => apiClient.get(`/api/league/competitions/${competitionId}/registrations`),
+        enabled: !!competitionId,
+    });
+}
+
+export function useCreateRegistration() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: CreateRegistrationDto) =>
+            apiClient.post(`/api/league/competitions/${data.competitionId}/registrations`, data),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.registrations(variables.competitionId),
+            });
+        },
+    });
+}
+
+// ============================================
+// STATS HOOKS
+// ============================================
+
+export function useCompetitionStats(competitionId: string) {
+    return useQuery({
+        queryKey: queryKeys.competitionStats(competitionId),
+        queryFn: () => apiClient.get(`/api/league/competitions/${competitionId}/stats`),
+        enabled: !!competitionId,
+    });
+}
+
+export function usePlayerCareerStats(playerId: string) {
+    return useQuery({
+        queryKey: queryKeys.playerCareerStats(playerId),
+        queryFn: () => apiClient.get(`/api/league/players/${playerId}/stats`),
+        enabled: !!playerId,
     });
 }

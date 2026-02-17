@@ -43,6 +43,8 @@ export type Competition = {
     type: 'league' | 'knockout' | 'group_knockout';
     status: 'draft' | 'active' | 'completed' | 'archived';
     season: string | null;
+    year: number | null;
+    category_id: string | null;
     start_date: string | null;
     end_date: string | null;
     max_teams: number;
@@ -109,6 +111,8 @@ export type Match = {
     status: 'upcoming' | 'live' | 'completed' | 'postponed' | 'cancelled';
     match_time: string | null;
     venue: string | null;
+    venue_id: string | null;
+    group_id: string | null;
     referee_id: string | null;
     scheduled_at: string | null;
     started_at: string | null;
@@ -139,6 +143,7 @@ export type StandingsEntry = {
     id: string;
     competition_id: string;
     team_id: string;
+    group_id: string | null;
     played: number;
     won: number;
     drawn: number;
@@ -212,6 +217,8 @@ export type CreateMatchDto = {
     matchday?: number;
     round?: string;
     venue?: string;
+    venue_id?: string;
+    group_id?: string;
     scheduled_at?: string;
     referee_id?: string;
 };
@@ -250,6 +257,156 @@ export type AddMatchEventDto = {
 };
 
 // ============================================
+// CHAMPIONSHIP SYSTEM ENTITIES
+// ============================================
+
+export type Venue = {
+    id: string;
+    organization_id: string;
+    name: string;
+    address: string | null;
+    city: string | null;
+    capacity: number | null;
+    surface_type: 'grass' | 'artificial' | 'indoor' | 'hybrid' | null;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Category = {
+    id: string;
+    organization_id: string;
+    name: string;
+    description: string | null;
+    min_age: number | null;
+    max_age: number | null;
+    created_at: string;
+    updated_at: string;
+};
+
+export type ChampionshipConfig = {
+    id: string;
+    competition_id: string;
+    format: 'round_robin' | 'knockout' | 'group_knockout';
+    groups_count: number;
+    teams_per_group: number;
+    advance_count: number;
+    has_gold_final: boolean;
+    has_silver_final: boolean;
+    has_third_place: boolean;
+    points_win: number;
+    points_draw: number;
+    points_loss: number;
+    match_duration_minutes: number;
+    half_time_minutes: number;
+    has_extra_time: boolean;
+    extra_time_minutes: number;
+    has_penalties: boolean;
+    max_substitutions: number;
+    custom_rules: Record<string, unknown>;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Group = {
+    id: string;
+    competition_id: string;
+    name: string;
+    display_order: number;
+    created_at: string;
+};
+
+export type GroupTeam = {
+    id: string;
+    group_id: string;
+    team_id: string;
+    seed: number | null;
+};
+
+export type CompetitionRegistration = {
+    id: string;
+    competition_id: string;
+    player_id: string;
+    team_id: string;
+    organization_id: string;
+    id_document_type: 'passport' | 'national_id' | 'birth_certificate' | 'other';
+    id_document_number: string;
+    full_name: string;
+    date_of_birth: string;
+    jersey_number: number | null;
+    position: string | null;
+    photo_url: string | null;
+    custom_fields: Record<string, unknown>;
+    status: 'pending' | 'approved' | 'rejected';
+    registered_at: string;
+};
+
+export type CompetitionRegistrationField = {
+    id: string;
+    competition_id: string;
+    field_name: string;
+    field_type: 'text' | 'number' | 'date' | 'select' | 'file';
+    is_required: boolean;
+    options: unknown[];
+    display_order: number;
+    created_at: string;
+};
+
+export type PlayerCompetitionStats = {
+    id: string;
+    competition_id: string;
+    player_id: string;
+    team_id: string;
+    games_played: number;
+    goals: number;
+    assists: number;
+    yellow_cards: number;
+    red_cards: number;
+    minutes_played: number;
+    clean_sheets: number;
+    saves: number;
+    goals_conceded: number;
+    penalties_saved: number;
+    updated_at: string;
+};
+
+// Championship DTOs
+export type CreateVenueDto = {
+    name: string;
+    address?: string;
+    city?: string;
+    capacity?: number;
+    surface_type?: Venue['surface_type'];
+};
+
+export type CreateCategoryDto = {
+    name: string;
+    description?: string;
+    min_age?: number;
+    max_age?: number;
+};
+
+export type CreateChampionshipConfigDto = Omit<ChampionshipConfig, 'id' | 'created_at' | 'updated_at'>;
+
+export type CreateGroupDto = {
+    competition_id: string;
+    name: string;
+    display_order?: number;
+};
+
+export type CreateRegistrationDto = {
+    competition_id: string;
+    player_id: string;
+    team_id: string;
+    id_document_type: CompetitionRegistration['id_document_type'];
+    id_document_number: string;
+    full_name: string;
+    date_of_birth: string;
+    jersey_number?: number;
+    position?: string;
+    custom_fields?: Record<string, unknown>;
+};
+
+// ============================================
 // DATABASE TYPE (for Supabase client)
 // ============================================
 
@@ -265,6 +422,14 @@ export type Database = {
             match_events: { Row: MatchEvent; Insert: Omit<MatchEvent, 'id' | 'created_at'>; Update: Partial<Omit<MatchEvent, 'id' | 'created_at'>>; };
             standings: { Row: StandingsEntry; Insert: Omit<StandingsEntry, 'id' | 'goal_difference' | 'updated_at'>; Update: Partial<Omit<StandingsEntry, 'id' | 'goal_difference' | 'updated_at'>>; };
             invites: { Row: Invite; Insert: Omit<Invite, 'id' | 'created_at' | 'token'>; Update: Partial<Omit<Invite, 'id' | 'created_at'>>; };
+            venues: { Row: Venue; Insert: Omit<Venue, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Omit<Venue, 'id' | 'created_at' | 'updated_at'>>; };
+            categories: { Row: Category; Insert: Omit<Category, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at'>>; };
+            championship_config: { Row: ChampionshipConfig; Insert: Omit<ChampionshipConfig, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Omit<ChampionshipConfig, 'id' | 'created_at' | 'updated_at'>>; };
+            groups: { Row: Group; Insert: Omit<Group, 'id' | 'created_at'>; Update: Partial<Omit<Group, 'id' | 'created_at'>>; };
+            group_teams: { Row: GroupTeam; Insert: Omit<GroupTeam, 'id'>; Update: Partial<Omit<GroupTeam, 'id'>>; };
+            competition_registrations: { Row: CompetitionRegistration; Insert: Omit<CompetitionRegistration, 'id' | 'registered_at'>; Update: Partial<Omit<CompetitionRegistration, 'id' | 'registered_at'>>; };
+            competition_registration_fields: { Row: CompetitionRegistrationField; Insert: Omit<CompetitionRegistrationField, 'id' | 'created_at'>; Update: Partial<Omit<CompetitionRegistrationField, 'id' | 'created_at'>>; };
+            player_competition_stats: { Row: PlayerCompetitionStats; Insert: Omit<PlayerCompetitionStats, 'id' | 'updated_at'>; Update: Partial<Omit<PlayerCompetitionStats, 'id' | 'updated_at'>>; };
         };
     };
 };

@@ -9,6 +9,8 @@ export const adminNavItems: NavItem[] = [
     { label: 'Players', href: '/league/players', icon: <NavIcons.Statistics /> },
     { label: 'Standings', href: '/league/standings', icon: <NavIcons.Standings /> },
     { label: 'Fixtures', href: '/league/fixtures', icon: <NavIcons.Calendar /> },
+    { label: 'Venues', href: '/league/venues', icon: <NavIcons.Public /> },
+    { label: 'Categories', href: '/league/categories', icon: <NavIcons.Trophy /> },
     { label: 'Invites', href: '/league/invites', icon: <NavIcons.Public /> },
     { label: 'Analytics', href: '/league/analytics', icon: <NavIcons.Analytics /> },
     { label: 'Referee', href: '/league/referee', icon: <NavIcons.Matches /> },

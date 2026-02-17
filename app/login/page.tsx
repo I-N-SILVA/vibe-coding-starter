@@ -11,7 +11,6 @@ import {
     CardContent,
     Button,
     Input,
-    Select,
 } from '@/components/plyaz';
 
 /**
@@ -19,13 +18,6 @@ import {
  * Unified sign-in / sign-up / forgot password
  */
 
-const ROLES = [
-    { value: 'organizer', label: 'League Organiser' },
-    { value: 'manager', label: 'Team Manager' },
-    { value: 'player', label: 'Player' },
-    { value: 'referee', label: 'Referee' },
-    { value: 'fan', label: 'Fan / Spectator' },
-];
 
 export default function LoginPage() {
     return (
@@ -53,7 +45,6 @@ function LoginForm() {
         password: '',
         fullName: '',
         confirmPassword: '',
-        role: 'organizer' as 'admin' | 'organizer' | 'referee' | 'manager' | 'player' | 'fan',
     });
     const [message, setMessage] = useState('');
     const [envCheck, setEnvCheck] = useState({ hasUrl: true, hasKey: true });
@@ -114,7 +105,7 @@ function LoginForm() {
                 return;
             }
             const inviteToken = searchParams.get('invite_token') || undefined;
-            const { error } = await signUp(form.email, form.password, form.fullName, form.role, inviteToken);
+            const { error } = await signUp(form.email, form.password, form.fullName, 'organizer', inviteToken);
             if (error) {
                 setMessage(error);
                 setIsLoading(false);
@@ -201,7 +192,7 @@ function LoginForm() {
                                     </h1>
                                     <p className="text-xs tracking-widest uppercase text-gray-400 mt-2">
                                         {mode === 'login' && 'Sign in to manage your league'}
-                                        {mode === 'signup' && 'Join PLYAZ and start your journey'}
+                                        {mode === 'signup' && 'Create your league and start managing'}
                                         {mode === 'forgot' && 'We\'ll send you a reset link'}
                                     </p>
                                 </div>
@@ -248,12 +239,6 @@ function LoginForm() {
                                                         value={form.confirmPassword}
                                                         onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
                                                         required
-                                                    />
-                                                    <Select
-                                                        label="Your Role"
-                                                        options={ROLES}
-                                                        value={form.role}
-                                                        onChange={(e) => setForm({ ...form, role: e.target.value as typeof form.role })}
                                                     />
                                                 </>
                                             )}

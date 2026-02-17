@@ -84,6 +84,8 @@ export interface Match {
     matchTime?: string;      // "67'" for live, "3:00 PM" for scheduled
     scheduledDate: Date;
     venue?: string;
+    venueId?: string;
+    groupId?: string;
     events?: MatchEvent[];
     createdAt?: Date;
     updatedAt?: Date;
@@ -116,14 +118,17 @@ export interface MatchEvent {
 
 export type CompetitionFormat =
     | 'league'
-    | 'cup'
-    | 'group';
+    | 'knockout'
+    | 'group_knockout'
+    | 'round_robin';
 
 export interface Competition {
     id: string;
     name: string;
     format: CompetitionFormat;
     seasonYear: string;
+    year?: number;
+    categoryId?: string;
     startDate: Date;
     endDate?: Date;
     isActive: boolean;
@@ -278,4 +283,162 @@ export interface CreatePlayerDto {
     dateOfBirth?: string;
     nationality?: string;
     bio?: string;
+}
+
+// ============================================
+// CHAMPIONSHIP SYSTEM MODELS
+// ============================================
+
+export interface Venue {
+    id: string;
+    organizationId: string;
+    name: string;
+    address?: string;
+    city?: string;
+    capacity?: number;
+    surfaceType?: 'grass' | 'artificial' | 'indoor' | 'hybrid';
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface Category {
+    id: string;
+    organizationId: string;
+    name: string;
+    description?: string;
+    minAge?: number;
+    maxAge?: number;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface ChampionshipConfig {
+    id: string;
+    competitionId: string;
+    format: 'round_robin' | 'knockout' | 'group_knockout';
+    groupsCount: number;
+    teamsPerGroup: number;
+    advanceCount: number;
+    hasGoldFinal: boolean;
+    hasSilverFinal: boolean;
+    hasThirdPlace: boolean;
+    pointsWin: number;
+    pointsDraw: number;
+    pointsLoss: number;
+    matchDurationMinutes: number;
+    halfTimeMinutes: number;
+    hasExtraTime: boolean;
+    extraTimeMinutes: number;
+    hasPenalties: boolean;
+    maxSubstitutions: number;
+    customRules: Record<string, unknown>;
+}
+
+export interface CompetitionGroup {
+    id: string;
+    competitionId: string;
+    name: string;
+    displayOrder: number;
+    teams?: Team[];
+}
+
+export interface CompetitionRegistration {
+    id: string;
+    competitionId: string;
+    playerId: string;
+    teamId: string;
+    idDocumentType: 'passport' | 'national_id' | 'birth_certificate' | 'other';
+    idDocumentNumber: string;
+    fullName: string;
+    dateOfBirth: string;
+    jerseyNumber?: number;
+    position?: string;
+    photoUrl?: string;
+    customFields: Record<string, unknown>;
+    status: 'pending' | 'approved' | 'rejected';
+    registeredAt: string;
+}
+
+export interface RegistrationFieldConfig {
+    id: string;
+    competitionId: string;
+    fieldName: string;
+    fieldType: 'text' | 'number' | 'date' | 'select' | 'file';
+    isRequired: boolean;
+    options: unknown[];
+    displayOrder: number;
+}
+
+export interface PlayerCompetitionStats {
+    id: string;
+    competitionId: string;
+    playerId: string;
+    teamId: string;
+    gamesPlayed: number;
+    goals: number;
+    assists: number;
+    yellowCards: number;
+    redCards: number;
+    minutesPlayed: number;
+    // Goalkeeper specific
+    cleanSheets: number;
+    saves: number;
+    goalsConceded: number;
+    penaltiesSaved: number;
+}
+
+// Championship DTOs
+export interface CreateVenueDto {
+    name: string;
+    address?: string;
+    city?: string;
+    capacity?: number;
+    surfaceType?: Venue['surfaceType'];
+}
+
+export interface CreateCategoryDto {
+    name: string;
+    description?: string;
+    minAge?: number;
+    maxAge?: number;
+}
+
+export interface CreateChampionshipConfigDto {
+    competitionId: string;
+    format: ChampionshipConfig['format'];
+    groupsCount?: number;
+    teamsPerGroup?: number;
+    advanceCount?: number;
+    hasGoldFinal?: boolean;
+    hasSilverFinal?: boolean;
+    hasThirdPlace?: boolean;
+    pointsWin?: number;
+    pointsDraw?: number;
+    pointsLoss?: number;
+    matchDurationMinutes?: number;
+    halfTimeMinutes?: number;
+    hasExtraTime?: boolean;
+    extraTimeMinutes?: number;
+    hasPenalties?: boolean;
+    maxSubstitutions?: number;
+    customRules?: Record<string, unknown>;
+}
+
+export interface CreateGroupDto {
+    competitionId: string;
+    name: string;
+    displayOrder?: number;
+}
+
+export interface CreateRegistrationDto {
+    competitionId: string;
+    playerId: string;
+    teamId: string;
+    idDocumentType: CompetitionRegistration['idDocumentType'];
+    idDocumentNumber: string;
+    fullName: string;
+    dateOfBirth: string;
+    jerseyNumber?: number;
+    position?: string;
+    customFields?: Record<string, unknown>;
 }

@@ -7,6 +7,34 @@
 -- ============================================
 -- STEP 1: DROP ALL DATA (order matters for FK constraints)
 -- ============================================
+-- Truncate new championship tables first
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'player_competition_stats' AND table_schema = 'public') THEN
+        TRUNCATE player_competition_stats CASCADE;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'competition_registration_fields' AND table_schema = 'public') THEN
+        TRUNCATE competition_registration_fields CASCADE;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'competition_registrations' AND table_schema = 'public') THEN
+        TRUNCATE competition_registrations CASCADE;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'group_teams' AND table_schema = 'public') THEN
+        TRUNCATE group_teams CASCADE;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'groups' AND table_schema = 'public') THEN
+        TRUNCATE groups CASCADE;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'championship_config' AND table_schema = 'public') THEN
+        TRUNCATE championship_config CASCADE;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'categories' AND table_schema = 'public') THEN
+        TRUNCATE categories CASCADE;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'venues' AND table_schema = 'public') THEN
+        TRUNCATE venues CASCADE;
+    END IF;
+END $$;
+
 TRUNCATE match_events CASCADE;
 TRUNCATE standings CASCADE;
 TRUNCATE matches CASCADE;
@@ -64,6 +92,181 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 );
 
 -- ============================================
+-- STEP 2B: CREATE NEW TABLES FOR CHAMPIONSHIP SYSTEM
+-- ============================================
+
+-- Venues - match locations
+CREATE TABLE IF NOT EXISTS venues (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    address TEXT,
+    city TEXT,
+    capacity INTEGER,
+    surface_type TEXT CHECK (surface_type IN ('grass', 'artificial', 'indoor', 'hybrid')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Categories - age/skill categories (e.g., U-8 Elite, U-8 Academy)
+CREATE TABLE IF NOT EXISTS categories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    description TEXT,
+    min_age INTEGER,
+    max_age INTEGER,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Add year and category to competitions
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'competitions' AND column_name = 'year') THEN
+        ALTER TABLE competitions ADD COLUMN year INTEGER;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'competitions' AND column_name = 'category_id') THEN
+        ALTER TABLE competitions ADD COLUMN category_id UUID REFERENCES categories(id) ON DELETE SET NULL;
+    END IF;
+END $$;
+
+-- Championship config - per-competition rules (1:1 with competitions)
+CREATE TABLE IF NOT EXISTS championship_config (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    competition_id UUID UNIQUE NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    format TEXT NOT NULL CHECK (format IN ('round_robin', 'knockout', 'group_knockout')),
+    groups_count INTEGER DEFAULT 1,
+    teams_per_group INTEGER DEFAULT 4,
+    advance_count INTEGER DEFAULT 2,
+    has_gold_final BOOLEAN DEFAULT true,
+    has_silver_final BOOLEAN DEFAULT false,
+    has_third_place BOOLEAN DEFAULT false,
+    points_win INTEGER DEFAULT 3,
+    points_draw INTEGER DEFAULT 1,
+    points_loss INTEGER DEFAULT 0,
+    match_duration_minutes INTEGER DEFAULT 90,
+    half_time_minutes INTEGER DEFAULT 15,
+    has_extra_time BOOLEAN DEFAULT false,
+    extra_time_minutes INTEGER DEFAULT 30,
+    has_penalties BOOLEAN DEFAULT true,
+    max_substitutions INTEGER DEFAULT 5,
+    custom_rules JSONB DEFAULT '{}',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Groups - for group_knockout format
+CREATE TABLE IF NOT EXISTS groups (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    competition_id UUID NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Group teams junction
+CREATE TABLE IF NOT EXISTS group_teams (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    seed INTEGER,
+    UNIQUE(group_id, team_id)
+);
+
+-- Add venue_id and group_id to matches
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'matches' AND column_name = 'venue_id') THEN
+        ALTER TABLE matches ADD COLUMN venue_id UUID REFERENCES venues(id) ON DELETE SET NULL;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'matches' AND column_name = 'group_id') THEN
+        ALTER TABLE matches ADD COLUMN group_id UUID REFERENCES groups(id) ON DELETE SET NULL;
+    END IF;
+END $$;
+
+-- Add group_id to standings for per-group standings
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'standings' AND column_name = 'group_id') THEN
+        ALTER TABLE standings ADD COLUMN group_id UUID REFERENCES groups(id) ON DELETE SET NULL;
+    END IF;
+END $$;
+
+-- Competition registrations - per-competition athlete sign-up
+CREATE TABLE IF NOT EXISTS competition_registrations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    competition_id UUID NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    id_document_type TEXT NOT NULL CHECK (id_document_type IN ('passport', 'national_id', 'birth_certificate', 'other')),
+    id_document_number TEXT NOT NULL,
+    full_name TEXT NOT NULL,
+    date_of_birth DATE NOT NULL,
+    jersey_number INTEGER,
+    position TEXT,
+    photo_url TEXT,
+    custom_fields JSONB DEFAULT '{}',
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+    registered_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(competition_id, player_id)
+);
+
+-- Competition registration field configs - configurable optional fields
+CREATE TABLE IF NOT EXISTS competition_registration_fields (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    competition_id UUID NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    field_name TEXT NOT NULL,
+    field_type TEXT NOT NULL CHECK (field_type IN ('text', 'number', 'date', 'select', 'file')),
+    is_required BOOLEAN DEFAULT false,
+    options JSONB DEFAULT '[]',
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Player competition stats - per-competition player statistics
+CREATE TABLE IF NOT EXISTS player_competition_stats (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    competition_id UUID NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+    player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    games_played INTEGER DEFAULT 0,
+    goals INTEGER DEFAULT 0,
+    assists INTEGER DEFAULT 0,
+    yellow_cards INTEGER DEFAULT 0,
+    red_cards INTEGER DEFAULT 0,
+    minutes_played INTEGER DEFAULT 0,
+    clean_sheets INTEGER DEFAULT 0,
+    saves INTEGER DEFAULT 0,
+    goals_conceded INTEGER DEFAULT 0,
+    penalties_saved INTEGER DEFAULT 0,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(competition_id, player_id)
+);
+
+-- Add date_of_birth to players if missing
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'players' AND column_name = 'date_of_birth') THEN
+        ALTER TABLE players ADD COLUMN date_of_birth DATE;
+    END IF;
+END $$;
+
+-- Indexes for new tables
+CREATE INDEX IF NOT EXISTS idx_venues_org ON venues(organization_id);
+CREATE INDEX IF NOT EXISTS idx_categories_org ON categories(organization_id);
+CREATE INDEX IF NOT EXISTS idx_championship_config_comp ON championship_config(competition_id);
+CREATE INDEX IF NOT EXISTS idx_groups_comp ON groups(competition_id);
+CREATE INDEX IF NOT EXISTS idx_group_teams_group ON group_teams(group_id);
+CREATE INDEX IF NOT EXISTS idx_matches_venue ON matches(venue_id);
+CREATE INDEX IF NOT EXISTS idx_matches_group ON matches(group_id);
+CREATE INDEX IF NOT EXISTS idx_comp_registrations_comp ON competition_registrations(competition_id);
+CREATE INDEX IF NOT EXISTS idx_comp_registrations_player ON competition_registrations(player_id);
+CREATE INDEX IF NOT EXISTS idx_comp_reg_fields_comp ON competition_registration_fields(competition_id);
+CREATE INDEX IF NOT EXISTS idx_player_stats_comp ON player_competition_stats(competition_id);
+CREATE INDEX IF NOT EXISTS idx_player_stats_player ON player_competition_stats(player_id);
+CREATE INDEX IF NOT EXISTS idx_competitions_year ON competitions(year);
+CREATE INDEX IF NOT EXISTS idx_competitions_category ON competitions(category_id);
+CREATE INDEX IF NOT EXISTS idx_standings_group ON standings(group_id);
+
+-- ============================================
 -- STEP 3: FIX PROFILE TRIGGER (handles signup properly)
 -- ============================================
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -77,7 +280,7 @@ BEGIN
         NEW.id,
         COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email),
         NEW.raw_user_meta_data->>'avatar_url',
-        COALESCE((NEW.raw_user_meta_data->>'role')::TEXT, 'fan'),
+        COALESCE((NEW.raw_user_meta_data->>'role')::TEXT, 'organizer'),
         (NEW.raw_user_meta_data->>'organization_id')::UUID,
         COALESCE((NEW.raw_user_meta_data->>'approval_status')::TEXT, 'pending'),
         NOW(),
@@ -115,6 +318,14 @@ ALTER TABLE match_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE standings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE invites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE venues ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE championship_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE group_teams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE competition_registrations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE competition_registration_fields ENABLE ROW LEVEL SECURITY;
+ALTER TABLE player_competition_stats ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
 -- STEP 5: DROP ALL OLD POLICIES AND RECREATE
@@ -273,6 +484,109 @@ CREATE POLICY "audit_logs_select" ON audit_logs FOR SELECT USING (
     EXISTS (SELECT 1 FROM organizations WHERE id = organization_id AND owner_id = auth.uid())
 );
 CREATE POLICY "audit_logs_insert" ON audit_logs FOR INSERT WITH CHECK (true);
+
+-- VENUES
+DROP POLICY IF EXISTS "venues_select" ON venues;
+DROP POLICY IF EXISTS "venues_insert" ON venues;
+DROP POLICY IF EXISTS "venues_update" ON venues;
+DROP POLICY IF EXISTS "venues_delete" ON venues;
+CREATE POLICY "venues_select" ON venues FOR SELECT USING (true);
+CREATE POLICY "venues_insert" ON venues FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM organizations WHERE id = organization_id AND owner_id = auth.uid())
+);
+CREATE POLICY "venues_update" ON venues FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM organizations WHERE id = organization_id AND owner_id = auth.uid())
+);
+CREATE POLICY "venues_delete" ON venues FOR DELETE USING (
+    EXISTS (SELECT 1 FROM organizations WHERE id = organization_id AND owner_id = auth.uid())
+);
+
+-- CATEGORIES
+DROP POLICY IF EXISTS "categories_select" ON categories;
+DROP POLICY IF EXISTS "categories_insert" ON categories;
+DROP POLICY IF EXISTS "categories_update" ON categories;
+DROP POLICY IF EXISTS "categories_delete" ON categories;
+CREATE POLICY "categories_select" ON categories FOR SELECT USING (true);
+CREATE POLICY "categories_insert" ON categories FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM organizations WHERE id = organization_id AND owner_id = auth.uid())
+);
+CREATE POLICY "categories_update" ON categories FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM organizations WHERE id = organization_id AND owner_id = auth.uid())
+);
+CREATE POLICY "categories_delete" ON categories FOR DELETE USING (
+    EXISTS (SELECT 1 FROM organizations WHERE id = organization_id AND owner_id = auth.uid())
+);
+
+-- CHAMPIONSHIP CONFIG
+DROP POLICY IF EXISTS "config_select" ON championship_config;
+DROP POLICY IF EXISTS "config_insert" ON championship_config;
+DROP POLICY IF EXISTS "config_update" ON championship_config;
+CREATE POLICY "config_select" ON championship_config FOR SELECT USING (true);
+CREATE POLICY "config_insert" ON championship_config FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM competitions c JOIN organizations o ON o.id = c.organization_id WHERE c.id = competition_id AND o.owner_id = auth.uid())
+);
+CREATE POLICY "config_update" ON championship_config FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM competitions c JOIN organizations o ON o.id = c.organization_id WHERE c.id = competition_id AND o.owner_id = auth.uid())
+);
+
+-- GROUPS
+DROP POLICY IF EXISTS "groups_select" ON groups;
+DROP POLICY IF EXISTS "groups_insert" ON groups;
+DROP POLICY IF EXISTS "groups_update" ON groups;
+DROP POLICY IF EXISTS "groups_delete" ON groups;
+CREATE POLICY "groups_select" ON groups FOR SELECT USING (true);
+CREATE POLICY "groups_insert" ON groups FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM competitions c JOIN organizations o ON o.id = c.organization_id WHERE c.id = competition_id AND o.owner_id = auth.uid())
+);
+CREATE POLICY "groups_update" ON groups FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM competitions c JOIN organizations o ON o.id = c.organization_id WHERE c.id = competition_id AND o.owner_id = auth.uid())
+);
+CREATE POLICY "groups_delete" ON groups FOR DELETE USING (
+    EXISTS (SELECT 1 FROM competitions c JOIN organizations o ON o.id = c.organization_id WHERE c.id = competition_id AND o.owner_id = auth.uid())
+);
+
+-- GROUP TEAMS
+DROP POLICY IF EXISTS "group_teams_select" ON group_teams;
+DROP POLICY IF EXISTS "group_teams_insert" ON group_teams;
+DROP POLICY IF EXISTS "group_teams_delete" ON group_teams;
+CREATE POLICY "group_teams_select" ON group_teams FOR SELECT USING (true);
+CREATE POLICY "group_teams_insert" ON group_teams FOR INSERT WITH CHECK (true);
+CREATE POLICY "group_teams_delete" ON group_teams FOR DELETE USING (true);
+
+-- COMPETITION REGISTRATIONS
+DROP POLICY IF EXISTS "registrations_select" ON competition_registrations;
+DROP POLICY IF EXISTS "registrations_insert" ON competition_registrations;
+DROP POLICY IF EXISTS "registrations_update" ON competition_registrations;
+DROP POLICY IF EXISTS "registrations_delete" ON competition_registrations;
+CREATE POLICY "registrations_select" ON competition_registrations FOR SELECT USING (true);
+CREATE POLICY "registrations_insert" ON competition_registrations FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM organizations WHERE id = organization_id AND owner_id = auth.uid())
+    OR EXISTS (SELECT 1 FROM teams WHERE id = team_id AND manager_id = auth.uid())
+);
+CREATE POLICY "registrations_update" ON competition_registrations FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM organizations WHERE id = organization_id AND owner_id = auth.uid())
+);
+CREATE POLICY "registrations_delete" ON competition_registrations FOR DELETE USING (
+    EXISTS (SELECT 1 FROM organizations WHERE id = organization_id AND owner_id = auth.uid())
+);
+
+-- COMPETITION REGISTRATION FIELDS
+DROP POLICY IF EXISTS "reg_fields_select" ON competition_registration_fields;
+DROP POLICY IF EXISTS "reg_fields_insert" ON competition_registration_fields;
+DROP POLICY IF EXISTS "reg_fields_update" ON competition_registration_fields;
+DROP POLICY IF EXISTS "reg_fields_delete" ON competition_registration_fields;
+CREATE POLICY "reg_fields_select" ON competition_registration_fields FOR SELECT USING (true);
+CREATE POLICY "reg_fields_insert" ON competition_registration_fields FOR INSERT WITH CHECK (true);
+CREATE POLICY "reg_fields_update" ON competition_registration_fields FOR UPDATE USING (true);
+CREATE POLICY "reg_fields_delete" ON competition_registration_fields FOR DELETE USING (true);
+
+-- PLAYER COMPETITION STATS
+DROP POLICY IF EXISTS "player_stats_select" ON player_competition_stats;
+DROP POLICY IF EXISTS "player_stats_insert" ON player_competition_stats;
+DROP POLICY IF EXISTS "player_stats_update" ON player_competition_stats;
+CREATE POLICY "player_stats_select" ON player_competition_stats FOR SELECT USING (true);
+CREATE POLICY "player_stats_insert" ON player_competition_stats FOR INSERT WITH CHECK (true);
+CREATE POLICY "player_stats_update" ON player_competition_stats FOR UPDATE USING (true);
 
 -- ============================================
 -- STEP 6: GRANT PERMISSIONS

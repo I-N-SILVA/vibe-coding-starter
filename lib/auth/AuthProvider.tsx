@@ -129,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     // Sign Up
-    const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'fan', inviteToken?: string) => {
+    const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'organizer', inviteToken?: string) => {
         try {
             let options: { data: any } = { data: { full_name: fullName, role, approval_status: 'pending' } };
 
