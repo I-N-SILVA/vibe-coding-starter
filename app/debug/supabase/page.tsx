@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import type { Session, PostgrestError } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 
 /**
@@ -15,11 +16,11 @@ import { createClient } from '@/lib/supabase/client';
  */
 interface DebugStatus {
     loading: boolean;
-    session: any; // Supabase session type is complex, but we can at least avoid 'any' for the whole state
-    dbData: any[] | null;
-    authError: any;
-    dbError: any;
-    error: any;
+    session: Session | null;
+    dbData: Record<string, unknown>[] | null;
+    authError: Error | null;
+    dbError: PostgrestError | null;
+    error: unknown;
     env: {
         url: string;
         key: string;
@@ -112,12 +113,12 @@ export default function SupabaseDebugPage() {
                 )}
             </section>
 
-            {status.error && (
+            {status.error ? (
                 <section className="mb-8 p-4 bg-red-900/20 rounded-lg border border-red-500/50">
                     <h2 className="text-lg font-bold mb-4 text-red-500">Unhandled Exception</h2>
                     <pre className="text-xs">{JSON.stringify(status.error, null, 2)}</pre>
                 </section>
-            )}
+            ) : null}
 
             <div className="mt-12 text-[10px] text-white/30 tracking-widest uppercase">
                 PLYAZ Debug Tool • Dev Context Only
