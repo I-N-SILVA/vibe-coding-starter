@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Playfair_Display } from 'next/font/google';
 import { siteConfig } from '@/data/config/site.settings';
 import { ThemeProviders } from './theme-providers';
@@ -112,7 +113,13 @@ export default function RootLayout({
 
                 <SearchProvider>
                   <AuthProviderWrapper>
-                    {children}
+                    <Suspense fallback={
+                      <div className="min-h-screen flex items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    }>
+                      {children}
+                    </Suspense>
                   </AuthProviderWrapper>
                 </SearchProvider>
               </ErrorBoundary>

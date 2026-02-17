@@ -95,16 +95,15 @@ export default function OnboardingPage() {
         }
     };
 
-    if (isLoading) {
+    if (isLoading || (user && !profile)) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-white">
+            <div className="min-h-screen flex flex-col items-center justify-center bg-white space-y-4">
                 <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs font-bold tracking-widest uppercase text-secondary-main/40 animate-pulse">
+                    Initializing your profile...
+                </p>
             </div>
         );
-    }
-
-    if (!profile || profile.role !== 'organizer') {
-        return null; // or a minimal loading/redirecting state
     }
 
     return (

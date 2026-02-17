@@ -52,20 +52,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, []);
 
-    // Fetch profile from Supabase
-    const fetchProfile = useCallback(async (userId: string) => {
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', userId)
-                .single();
+    // Fetch profile from Supabase with retry logic to handle trigger race conditions
+    const fetchProfile = useCallback(async (userId: string, retries = 3, delay = 1000) => {
+        for (let i = 0; i <= retries; i++) {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
 
-            if (error) throw error;
-            return data as Profile;
-        } catch {
-            return null;
+                if (error) {
+                    // 406 Not Acceptable or 404/PGRST116 means it's likely not created yet
+                    if (i < retries) {
+                        console.log(`[Auth] Profile not found, retrying... (${i + 1}/${retries})`);
+                        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+                        continue;
+                    }
+                    throw error;
+                }
+                return data as Profile;
+            } catch (err) {
+                if (i === retries) {
+                    console.warn('[Auth] Final profile fetch attempt failed:', err);
+                    return null;
+                }
+            }
         }
+        return null;
     }, [supabase]);
 
     // Initialize auth state
