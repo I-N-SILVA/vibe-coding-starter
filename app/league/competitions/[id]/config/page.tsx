@@ -51,7 +51,7 @@ export default function ChampionshipConfigPage() {
         if (existingConfig && typeof existingConfig === 'object' && 'format' in existingConfig) {
             const c = existingConfig as Record<string, unknown>;
             setConfig({
-                format: (c.format as typeof config.format) || 'round_robin',
+                format: (c.format as 'round_robin' | 'knockout' | 'group_knockout') || 'round_robin',
                 groups_count: (c.groups_count as number) || 2,
                 teams_per_group: (c.teams_per_group as number) || 4,
                 advance_count: (c.advance_count as number) || 2,

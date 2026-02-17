@@ -13,11 +13,26 @@ import { createClient } from '@/lib/supabase/client';
  * 
  * IMPORTANT: This route should be removed or protected in production.
  */
+interface DebugStatus {
+    loading: boolean;
+    session: any; // Supabase session type is complex, but we can at least avoid 'any' for the whole state
+    dbData: any[] | null;
+    authError: any;
+    dbError: any;
+    error: any;
+    env: {
+        url: string;
+        key: string;
+    };
+}
+
 export default function SupabaseDebugPage() {
-    const [status, setStatus] = useState<any>({
+    const [status, setStatus] = useState<DebugStatus>({
         loading: true,
         session: null,
-        data: null,
+        dbData: null,
+        authError: null,
+        dbError: null,
         error: null,
         env: {
             url: process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ LOADED' : '❌ MISSING',
@@ -25,9 +40,8 @@ export default function SupabaseDebugPage() {
         }
     });
 
-    const supabase = createClient();
-
     useEffect(() => {
+        const supabase = createClient();
         async function runCheck() {
             try {
                 // 1. Check Session
@@ -40,20 +54,20 @@ export default function SupabaseDebugPage() {
                     .select('id, full_name, role')
                     .limit(3);
 
-                setStatus({
+                setStatus(prev => ({
+                    ...prev,
                     loading: false,
                     session,
                     dbData,
                     authError,
                     dbError,
-                    env: status.env
-                });
+                }));
             } catch (err) {
-                setStatus({
+                setStatus(prev => ({
+                    ...prev,
                     loading: false,
                     error: err,
-                    env: status.env
-                });
+                }));
             }
         }
 

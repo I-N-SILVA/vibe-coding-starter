@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { orgService } from '@/services/org';
 import {
