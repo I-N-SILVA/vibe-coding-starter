@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     }
 
     if (status) {
-        query = query.eq('status', status);
+        query = query.eq('status', status as 'completed' | 'upcoming' | 'live' | 'postponed' | 'cancelled');
     }
 
     const { data, error } = await query.order('scheduled_at', { ascending: true });

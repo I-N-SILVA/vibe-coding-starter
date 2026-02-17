@@ -43,9 +43,11 @@ export async function POST(request: Request) {
     const parsed = await parseBody(request, createOrganizationApiSchema);
     if (parsed.error) return parsed.error;
 
+    const slug = parsed.data.slug || parsed.data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
     const { data: org, error: orgError } = await supabase
         .from('organizations')
-        .insert([{ ...parsed.data, owner_id: auth.user!.id }])
+        .insert([{ ...parsed.data, slug, owner_id: auth.user!.id }])
         .select()
         .single();
 

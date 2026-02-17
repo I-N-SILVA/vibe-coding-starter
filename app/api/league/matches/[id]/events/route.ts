@@ -164,6 +164,6 @@ async function updatePlayerStats(
 
     await supabase
         .from('players')
-        .update({ stats })
+        .update({ stats: stats as unknown as import('@/lib/supabase/types').PlayerStats })
         .eq('id', playerId);
 }

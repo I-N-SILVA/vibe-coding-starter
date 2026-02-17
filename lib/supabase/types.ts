@@ -22,10 +22,12 @@ export type Organization = {
 
 export type Profile = {
     id: string;
+    email: string | null;
     full_name: string | null;
     avatar_url: string | null;
     role: 'admin' | 'organizer' | 'referee' | 'manager' | 'player' | 'fan';
     organization_id: string | null;
+    approval_status: 'approved' | 'pending' | 'rejected';
     phone: string | null;
     bio: string | null;
     position: string | null;
@@ -165,10 +167,22 @@ export type Invite = {
     team_id: string | null;
     type: 'team_join' | 'player_join' | 'referee_invite' | 'admin_invite';
     email: string | null;
+    invited_role: string | null;
     token: string;
     status: 'pending' | 'accepted' | 'expired' | 'revoked';
     expires_at: string;
     accepted_by: string | null;
+    accepted_at: string | null;
+    created_at: string;
+};
+
+export type AuditLog = {
+    id: string;
+    organization_id: string;
+    user_id: string | null;
+    target_user_id: string | null;
+    action: string;
+    details: Record<string, unknown>;
     created_at: string;
 };
 
@@ -446,10 +460,12 @@ export type Database = {
                 Row: Profile;
                 Insert: {
                     id: string;
+                    email?: string | null;
                     full_name?: string | null;
                     avatar_url?: string | null;
                     role?: Profile['role'];
                     organization_id?: string | null;
+                    approval_status?: Profile['approval_status'];
                     phone?: string | null;
                     bio?: string | null;
                     position?: string | null;
@@ -535,11 +551,11 @@ export type Database = {
                     photo_url?: string | null;
                     bio?: string | null;
                     status?: Player['status'];
-                    stats?: PlayerStats;
+                    stats?: PlayerStats | Record<string, unknown>;
                     created_at?: string;
                     updated_at?: string;
                 };
-                Update: Partial<Player>;
+                Update: Omit<Partial<Player>, 'stats'> & { stats?: PlayerStats | Record<string, unknown> };
                 Relationships: [];
             };
             matches: {
@@ -639,10 +655,12 @@ export type Database = {
                     team_id?: string | null;
                     type: Invite['type'];
                     email?: string | null;
+                    invited_role?: string | null;
                     token?: string;
                     status?: Invite['status'];
                     expires_at: string;
                     accepted_by?: string | null;
+                    accepted_at?: string | null;
                     created_at?: string;
                 };
                 Update: Partial<Invite>;
@@ -787,6 +805,20 @@ export type Database = {
                     updated_at?: string;
                 };
                 Update: Partial<PlayerCompetitionStats>;
+                Relationships: [];
+            };
+            audit_logs: {
+                Row: AuditLog;
+                Insert: {
+                    id?: string;
+                    organization_id: string;
+                    user_id?: string | null;
+                    target_user_id?: string | null;
+                    action: string;
+                    details?: Record<string, unknown>;
+                    created_at?: string;
+                };
+                Update: Partial<AuditLog>;
                 Relationships: [];
             };
         };

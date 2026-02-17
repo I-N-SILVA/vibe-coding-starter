@@ -14,8 +14,8 @@ export const createTeamApiSchema = z.object({
     name: z.string().min(1, 'Team name is required').max(100),
     short_name: z.string().max(10).optional(),
     competition_id: z.string().uuid('Invalid competition ID').optional().nullable(),
-    primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color').optional().nullable(),
-    secondary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color').optional().nullable(),
+    primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color').optional(),
+    secondary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color').optional(),
     logo_url: z.string().url().optional().nullable(),
     manager_id: z.string().uuid().optional().nullable(),
 });
@@ -35,8 +35,8 @@ export const createCompetitionApiSchema = z.object({
     category_id: z.string().uuid().optional().nullable(),
     start_date: z.string().optional().nullable(),
     end_date: z.string().optional().nullable(),
-    max_teams: z.number().int().min(2).max(128).optional().nullable(),
-    rules: z.record(z.string(), z.unknown()).optional().nullable(),
+    max_teams: z.number().int().min(2).max(128).optional(),
+    rules: z.record(z.string(), z.unknown()).optional(),
     status: z.enum(['draft', 'active', 'completed', 'archived']).optional(),
 });
 
@@ -54,8 +54,8 @@ export const createPlayerApiSchema = z.object({
     date_of_birth: z.string().optional().nullable(),
     nationality: z.string().max(100).optional().nullable(),
     bio: z.string().max(500).optional().nullable(),
-    status: z.enum(['active', 'injured', 'suspended', 'transferred']).optional(),
-    stats: z.record(z.string(), z.unknown()).optional().nullable(),
+    status: z.enum(['active', 'injured', 'suspended', 'released']).optional(),
+    stats: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const updatePlayerApiSchema = createPlayerApiSchema.partial();
@@ -108,7 +108,7 @@ export const createMatchEventApiSchema = z.object({
     player_name: z.string().max(100).optional().nullable(),
     minute: z.number().int().min(0).max(200).optional().nullable(),
     half: z.enum(['1st', '2nd', 'ET1', 'ET2', 'penalties']).optional().nullable(),
-    details: z.record(z.string(), z.unknown()).optional().nullable(),
+    details: z.record(z.string(), z.unknown()).optional(),
 });
 
 // ============================================

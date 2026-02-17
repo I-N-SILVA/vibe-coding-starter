@@ -79,7 +79,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const initAuth = async () => {
             try {
-                const { data: { user: authUser } } = await authService.getSession();
+                const { data: { session } } = await authService.getSession();
+                const authUser = session?.user;
                 if (authUser) {
                     const prof = await fetchProfile(authUser.id);
                     setUser({ id: authUser.id, email: authUser.email || '', profile: prof });

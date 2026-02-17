@@ -51,7 +51,7 @@ export async function POST(request: Request) {
         .from('profiles')
         .update({
             organization_id: invite.organization_id,
-            role: invite.invited_role, // Use the invited_role from the invite
+            role: (invite.invited_role || 'player') as 'admin' | 'organizer' | 'referee' | 'manager' | 'player' | 'fan',
             approval_status: 'approved', // Automatically approve upon invite acceptance
         })
         .eq('id', user.id);
