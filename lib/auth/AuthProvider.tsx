@@ -18,6 +18,7 @@ interface AuthContextType {
     user: AuthUser | null;
     profile: Profile | null;
     isLoading: boolean;
+    isAuthInitialized: boolean;
     isAuthenticated: boolean;
     role: Profile['role'];
     isAdmin: boolean;
@@ -40,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isAuthInitialized, setIsAuthInitialized] = useState(false);
 
     const supabase = createClient();
 
@@ -101,6 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
             } finally {
                 setIsLoading(false);
+                setIsAuthInitialized(true);
             }
         };
 
@@ -117,6 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setProfile(null);
             }
             setIsLoading(false);
+            setIsAuthInitialized(true);
         });
 
         return () => subscription.unsubscribe();
@@ -227,6 +231,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         profile,
         isLoading,
+        isAuthInitialized,
         isAuthenticated: !!user,
         role,
         isAdmin: role === 'admin',

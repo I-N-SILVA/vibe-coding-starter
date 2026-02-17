@@ -95,12 +95,64 @@ export default function OnboardingPage() {
         }
     };
 
-    if (isLoading || (user && !profile)) {
+    const [initTimedOut, setInitTimedOut] = useState(false);
+
+    // Profile Initialization Timeout
+    React.useEffect(() => {
+        let timeout: NodeJS.Timeout;
+        if (user && !profile && !isLoading) {
+            timeout = setTimeout(() => {
+                setInitTimedOut(true);
+            }, 10000); // 10 seconds timeout for profile initialization
+        }
+        return () => clearTimeout(timeout);
+    }, [user, profile, isLoading]);
+
+    if (isLoading || (user && !profile && !initTimedOut)) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-white space-y-4">
                 <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin" />
                 <p className="text-xs font-bold tracking-widest uppercase text-secondary-main/40 animate-pulse">
                     Initializing your profile...
+                </p>
+                <p className="text-[10px] text-secondary-main/20 uppercase tracking-tighter">
+                    Waiting for database sync...
+                </p>
+            </div>
+        );
+    }
+
+    if (user && !profile && initTimedOut) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4 space-y-6 text-center">
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">⚠️</span>
+                </div>
+                <div>
+                    <h2 className="text-xl font-black text-primary-main mb-2">Sync Connection Issues</h2>
+                    <p className="text-secondary-main/50 text-sm max-w-xs mx-auto">
+                        Your account was created, but we couldn&apos;t sync your profile settings yet. This usually happens if the database setup is incomplete.
+                    </p>
+                </div>
+                <div className="flex flex-col gap-3 w-full max-w-xs">
+                    <Button
+                        size="lg"
+                        onClick={() => window.location.reload()}
+                        className="h-14 font-bold tracking-widest"
+                    >
+                        RETRY SYNC
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="lg"
+                        onClick={() => router.push('/login')}
+                        className="h-14 font-bold tracking-widest"
+                    >
+                        BACK TO LOGIN
+                    </Button>
+                </div>
+                <p className="text-[10px] text-secondary-main/30 uppercase max-w-xs leading-relaxed">
+                    Check if you have run the <code className="bg-secondary-main/5 px-1 rounded">complete_fix.sql</code> in your Supabase Dashboard.
                 </p>
             </div>
         );
