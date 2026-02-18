@@ -3,8 +3,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, Badge } from '@/components/plyaz';
-import { Trophy, ChevronRight } from 'lucide-react';
+import { Card, CardContent } from '@/components/plyaz';
+import { Trophy } from 'lucide-react';
 
 export interface BracketMatchup {
     id: string;

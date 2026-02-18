@@ -10,7 +10,6 @@ import {
     Button,
     Input,
     Select,
-    Badge,
 } from '@/components/plyaz';
 import { playerNavItems } from '@/lib/constants/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';

@@ -55,7 +55,7 @@ export default function PublicStandings() {
     const searchParams = useSearchParams();
     const competitionId = searchParams.get('competitionId');
     const [format, setFormat] = useState<'league' | 'knockout'>('league');
-    const [isLoading, setIsLoading] = useState(true);
+    const [_isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // Toggle format for demo purposes if no competitionId, or fetch real data

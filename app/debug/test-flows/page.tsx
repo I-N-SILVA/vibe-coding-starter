@@ -7,10 +7,7 @@ import { LocalStore } from '@/lib/mock/store';
 import {
     Button,
     Card,
-    CardContent,
     Badge,
-    PageHeader,
-    Modal
 } from '@/components/plyaz';
 import {
     Shield,
@@ -26,7 +23,6 @@ import {
     ChevronRight,
     Eye,
     CheckCircle2,
-    AlertCircle,
     Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -37,7 +33,7 @@ type Persona = 'organizer' | 'referee' | 'player' | 'fan';
 export default function DebugFlowsPage() {
     const router = useRouter();
     const [stats, setStats] = useState<Record<string, number>>({});
-    const [isLoading, setIsLoading] = useState(false);
+    const [_isLoading, setIsLoading] = useState(false);
     const [activePersona, setActivePersona] = useState<Persona>('organizer');
     const [isSimulationEnabled, setIsSimulationEnabled] = useState(false);
 
@@ -100,7 +96,7 @@ export default function DebugFlowsPage() {
         });
 
         // 3. Create Round Robin Competition
-        const leagueComp = LocalStore.addItem('competitions', {
+        const _leagueComp = LocalStore.addItem('competitions', {
             name: 'Premier League 2026',
             organizationId: org.id,
             categoryId: catU16.id,
@@ -110,7 +106,7 @@ export default function DebugFlowsPage() {
         });
 
         // 4. Create Knockout Competition
-        const cupComp = LocalStore.addItem('competitions', {
+        const _cupComp = LocalStore.addItem('competitions', {
             name: 'Champions Cup',
             organizationId: org.id,
             categoryId: catU16.id,

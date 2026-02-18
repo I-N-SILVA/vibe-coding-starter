@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     PageLayout,
-    PageHeader,
     Card,
     CardContent,
     Button,
@@ -27,6 +26,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
     const { id: matchId } = use(params);
     const router = useRouter();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [match, setMatch] = useState<any>(null);
     const [clock, setClock] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
@@ -37,6 +37,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
         type: '',
         team: 'home'
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [teamPlayers, setTeamPlayers] = useState<any[]>([]);
     const [selectedPlayer, setSelectedPlayer] = useState<string>('');
     const [notes, setNotes] = useState('');
@@ -279,6 +280,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
                 <div className="space-y-4">
                     <h3 className="text-[10px] font-black tracking-[0.3em] text-gray-400 uppercase">Precision Match Feed</h3>
                     <AnimatePresence>
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         {match.events?.slice(0, 5).map((event: any, i: number) => (
                             <motion.div
                                 key={event.id || i}
@@ -292,7 +294,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm font-black">{event.type}</span>
-                                        <Badge variant="secondary" size="xs" className="text-[8px]">{event.team_id === match.home_team_id ? 'HOME' : 'AWAY'}</Badge>
+                                        <Badge variant="secondary" size="sm" className="text-[8px]">{event.team_id === match.home_team_id ? 'HOME' : 'AWAY'}</Badge>
                                     </div>
                                     <p className="text-xs text-gray-500 font-bold">{event.player?.full_name}</p>
                                 </div>
@@ -323,8 +325,8 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
                                     key={p.id}
                                     onClick={() => setSelectedPlayer(p.id)}
                                     className={`p-3 rounded-xl border text-left transition-all ${selectedPlayer === p.id
-                                            ? 'bg-black text-white border-black ring-2 ring-orange-500'
-                                            : 'bg-gray-50 border-gray-100 hover:border-gray-200 text-gray-900'
+                                        ? 'bg-black text-white border-black ring-2 ring-orange-500'
+                                        : 'bg-gray-50 border-gray-100 hover:border-gray-200 text-gray-900'
                                         }`}
                                 >
                                     <div className="text-[8px] font-black text-orange-500 mb-1">#{p.jersey_number || '??'}</div>
