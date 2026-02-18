@@ -38,7 +38,7 @@ export const authService = {
         const user = LocalStore.findOne<any>('auth', u => u.email === email);
         if (!user) return { data: { user: null }, error: { message: 'Invalid credentials' } as any };
 
-        LocalStore.updateItem('auth', user.id, { isActive: true });
+        LocalStore.updateItem<any>('auth', user.id, { isActive: true });
         return { data: { user, session: { user } as any }, error: null };
     },
 
@@ -71,7 +71,7 @@ export const authService = {
     async signOut() {
         const user = LocalStore.findOne<any>('auth', u => u.isActive);
         if (user) {
-            LocalStore.updateItem('auth', user.id, { isActive: false });
+            LocalStore.updateItem<any>('auth', user.id, { isActive: false });
         }
         return { error: null };
     }

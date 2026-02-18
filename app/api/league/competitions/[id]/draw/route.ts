@@ -34,7 +34,7 @@ export async function POST(request: Request, { params }: RouteParams) {
         return apiError('No groups found for this competition. Create groups first.', 400);
     }
 
-    const groupIds = groups.map((g) => g.id);
+    const groupIds = groups.map((g: { id: string }) => g.id);
 
     // Clear existing group_teams for this competition's groups
     const { error: clearError } = await supabase

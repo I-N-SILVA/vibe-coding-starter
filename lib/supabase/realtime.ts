@@ -36,7 +36,7 @@ export const subscribeToMatch = (
                 table: 'matches',
                 filter: `id=eq.${matchId}`,
             },
-            (payload) => {
+            (payload: any) => {
                 if (config.onMatchUpdate) {
                     config.onMatchUpdate(payload.new as Partial<Match>);
                 }
@@ -50,7 +50,7 @@ export const subscribeToMatch = (
                 table: 'match_events',
                 filter: `match_id=eq.${matchId}`,
             },
-            (payload) => {
+            (payload: any) => {
                 if (config.onEventNew) {
                     config.onEventNew(payload.new as MatchEvent);
                 }
@@ -78,7 +78,7 @@ export const subscribeToAllLiveMatches = (
                 table: 'matches',
                 filter: 'status=eq.live',
             },
-            (payload) => {
+            (payload: any) => {
                 onUpdate(payload.new as Partial<Match>);
             }
         )

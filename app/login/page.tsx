@@ -33,7 +33,7 @@ export default function LoginPage() {
 
 function LoginForm() {
     const router = useRouter();
-    const { signIn, signUp, forgotPassword, user, isLoading: authLoading } = useAuth();
+    const { signIn, signUp, forgotPassword, user, profile, isLoading: authLoading } = useAuth();
     const searchParams = useSearchParams();
     const modeParam = searchParams.get('mode');
     const initialMode: 'login' | 'signup' | 'forgot' = (modeParam === 'login' || modeParam === 'signup' || modeParam === 'forgot') ? modeParam : 'login';
@@ -85,7 +85,7 @@ function LoginForm() {
         setEnvCheck({ hasUrl, hasKey });
 
         if (user && !authLoading) {
-            if (user.profile?.organization_id) {
+            if (profile?.organization_id) {
                 router.push('/league');
             } else {
                 router.push('/onboarding');

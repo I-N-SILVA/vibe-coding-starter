@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const mockUser = LocalStore.findOne<any>('auth', (u) => u.email === email);
         if (!mockUser) return { error: 'User not found' };
 
-        LocalStore.updateItem('auth', mockUser.id, { isActive: true });
+        LocalStore.updateItem<any>('auth', mockUser.id, { isActive: true });
         setUser(mockUser);
         setSession({ user: mockUser } as any);
         const userProfile = LocalStore.findOne<Profile>('profiles', (p) => p.id === mockUser.id);
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const signOut = async () => {
         if (user) {
-            LocalStore.updateItem('auth', user.id, { isActive: false });
+            LocalStore.updateItem<any>('auth', user.id, { isActive: false });
         }
         setUser(null);
         setProfile(null);
