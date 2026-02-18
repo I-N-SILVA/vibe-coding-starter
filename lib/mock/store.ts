@@ -17,17 +17,17 @@ export const LocalStore = {
         localStorage.setItem(`plyaz_${key}`, JSON.stringify(data));
     },
 
-    addItem<T extends { id?: string }>(key: string, item: T): T {
-        const items = this.get<T>(key);
+    addItem<T extends Record<string, any>>(key: string, item: T): T & { id: string; created_at: string; updated_at: string } {
+        const items = this.get<any>(key);
         const newItem = {
             ...item,
             id: item.id || crypto.randomUUID(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-        } as T;
+        };
         items.push(newItem);
         this.set(key, items);
-        return newItem;
+        return newItem as any;
     },
 
     updateItem<T extends { id: string }>(key: string, id: string, updates: Partial<T>): T | null {

@@ -32,6 +32,7 @@ export { PageHeader } from './PageHeader';
 export { EmptyState } from './EmptyState';
 export { TabPills } from './TabPills';
 export { CompetitionSelector } from './CompetitionSelector';
+export { KnockoutBracket } from './KnockoutBracket';
 export {
     Skeleton,
     SkeletonStatCard,

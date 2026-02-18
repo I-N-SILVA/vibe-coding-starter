@@ -449,6 +449,7 @@
  */
 .safari-border-radius-fix {
   -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
 }
 
 [data-nextjs-scroll-focus-boundary] {
