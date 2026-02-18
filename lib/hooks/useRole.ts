@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation';
  * Future-proofs for real Supabase Auth roles
  */
 
-export type UserRole = 'admin' | 'referee' | 'fan' | 'guest';
+export type UserRole = 'admin' | 'referee' | 'fan' | 'player' | 'guest';
 
 interface UseRoleResult {
     role: UserRole;
@@ -28,11 +28,25 @@ export function useRole(): UseRoleResult {
     const isRefereePath = pathname.includes('/referee');
     const isFanPath = pathname.includes('/public');
 
-    // Determine role from path
+    // Determine role from path OR simulation persona
     let role: UserRole = 'guest';
-    if (isAdminPath) role = 'admin';
-    else if (isRefereePath) role = 'referee';
-    else if (isFanPath) role = 'fan';
+
+    // Check if simulation persona is active
+    if (typeof window !== 'undefined') {
+        const simulationPersona = localStorage.getItem('plyaz_debug_persona');
+        if (simulationPersona === 'organizer') {
+            role = 'admin';
+        } else if (simulationPersona === 'player' || simulationPersona === 'referee' || simulationPersona === 'fan') {
+            role = simulationPersona;
+        }
+    }
+
+    // Fallback to path detection if role is still guest
+    if (role === 'guest') {
+        if (isAdminPath) role = 'admin';
+        else if (isRefereePath) role = 'referee';
+        else if (isFanPath) role = 'fan';
+    }
 
     return {
         role,

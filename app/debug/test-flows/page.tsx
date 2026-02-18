@@ -26,7 +26,8 @@ import {
     ChevronRight,
     Eye,
     CheckCircle2,
-    AlertCircle
+    AlertCircle,
+    Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -38,13 +39,38 @@ export default function DebugFlowsPage() {
     const [stats, setStats] = useState<Record<string, number>>({});
     const [isLoading, setIsLoading] = useState(false);
     const [activePersona, setActivePersona] = useState<Persona>('organizer');
+    const [isSimulationEnabled, setIsSimulationEnabled] = useState(false);
 
     useEffect(() => {
         refreshStats();
+        // Check if simulation is enabled
+        const simEnabled = localStorage.getItem('plyaz_simulation_enabled') === 'true';
+        setIsSimulationEnabled(simEnabled);
+
         // Check if persona is already in localStorage
         const savedPersona = localStorage.getItem('plyaz_debug_persona') as Persona;
         if (savedPersona) setActivePersona(savedPersona);
     }, []);
+
+    const toggleSimulation = () => {
+        const newState = !isSimulationEnabled;
+        setIsSimulationEnabled(newState);
+        localStorage.setItem('plyaz_simulation_enabled', String(newState));
+        // Force reload to apply interceptors
+        if (confirm('Refreshing page to apply Simulation Mode changes...')) {
+            window.location.reload();
+        }
+    };
+
+    const autoPilot = async () => {
+        setIsLoading(true);
+        localStorage.setItem('plyaz_simulation_enabled', 'true');
+        seedMockData();
+        selectPersona('organizer');
+        refreshStats();
+        setIsLoading(false);
+        router.push('/league');
+    };
 
     const refreshStats = () => {
         const keys = ['organizations', 'competitions', 'teams', 'players', 'matches', 'categories'];
@@ -203,14 +229,25 @@ export default function DebugFlowsPage() {
                                 Experience PLYAZ through the eyes of every user. Seed data, switch roles, and verify the flow.
                             </p>
                         </div>
-                        <div className="flex gap-3">
+                        <div className="flex flex-wrap gap-3">
+                            <Button
+                                variant="secondary"
+                                onClick={toggleSimulation}
+                                className={cn(
+                                    "border-2 transition-all",
+                                    isSimulationEnabled ? "border-green-500 bg-green-50 text-green-700" : "border-gray-200"
+                                )}
+                            >
+                                <Zap className={cn("w-4 h-4 mr-2", isSimulationEnabled ? "fill-current" : "")} />
+                                Simulation: {isSimulationEnabled ? 'ON' : 'OFF'}
+                            </Button>
                             <Button variant="secondary" onClick={clearData} className="group">
                                 <RefreshCw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-500" />
                                 Reset Data
                             </Button>
-                            <Button onClick={seedMockData} className="bg-black text-white hover:bg-gray-800">
-                                <Database className="w-4 h-4 mr-2" />
-                                Seed World Data
+                            <Button onClick={autoPilot} className="bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-500/20">
+                                <Zap className="w-4 h-4 mr-2 fill-current" />
+                                Run Auto-Pilot
                             </Button>
                         </div>
                     </div>

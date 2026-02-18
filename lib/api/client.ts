@@ -5,7 +5,73 @@
 
 import type { ApiResponse, ApiError } from '@/types';
 
+import { LocalStore } from '@/lib/mock/store';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+
+// Simulation Mode Check
+const isSimulationMode = () => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('plyaz_simulation_enabled') === 'true' || !process.env.NEXT_PUBLIC_SUPABASE_URL;
+};
+
+/**
+ * Mock Handler for Simulation Mode
+ * Intercepts API calls and routes them to LocalStore
+ */
+const mockHandler = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
+    console.log(`[SIMULATION] Intercepting ${options.method || 'GET'} ${endpoint}`);
+
+    // Artificial latency
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const method = options.method || 'GET';
+    const body = options.body ? JSON.parse(options.body as string) : null;
+
+    // Competition Endpoints
+    if (endpoint.includes('/api/league/competitions')) {
+        const idMatch = endpoint.match(/\/competitions\/([^\/]+)/);
+        const compId = idMatch ? idMatch[1] : null;
+
+        if (method === 'GET') {
+            if (compId) {
+                if (endpoint.includes('/standings')) {
+                    // TODO: Compute real standings from matches? For now, return mock.
+                    return { data: LocalStore.get('standings').filter((s: any) => s.competitionId === compId) };
+                }
+                return LocalStore.findOne('competitions', (c: any) => c.id === compId);
+            }
+            return LocalStore.get('competitions');
+        }
+
+        if (method === 'POST') {
+            return LocalStore.addItem('competitions', { ...body, status: 'draft' });
+        }
+    }
+
+    // Team Endpoints
+    if (endpoint.includes('/api/league/teams')) {
+        if (method === 'GET') return LocalStore.get('teams');
+        if (method === 'POST') return LocalStore.addItem('teams', body);
+    }
+
+    // Match Endpoints
+    if (endpoint.includes('/api/league/matches')) {
+        if (method === 'GET') return LocalStore.get('matches');
+        if (method === 'POST') return LocalStore.addItem('matches', { ...body, status: 'scheduled' });
+    }
+
+    // Profile / Org Endpoints
+    if (endpoint.includes('/api/league/organizations')) {
+        if (method === 'GET') return LocalStore.findOne('organizations', () => true);
+    }
+
+    // Default Fallback
+    const key = endpoint.split('/').pop() || 'unknown';
+    if (method === 'GET') return LocalStore.get(key);
+
+    return { success: true, message: 'Simulated operation successful' };
+};
 
 /**
  * Custom error class for API errors
@@ -29,6 +95,11 @@ async function apiFetch<T>(
     endpoint: string,
     options: RequestInit = {}
 ): Promise<T> {
+    // Check for Simulation Mode
+    if (isSimulationMode() && endpoint.startsWith('/api')) {
+        return mockHandler(endpoint, options) as Promise<T>;
+    }
+
     const url = `${API_BASE_URL}${endpoint}`;
 
     const defaultHeaders: HeadersInit = {

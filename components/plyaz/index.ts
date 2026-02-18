@@ -33,6 +33,7 @@ export { EmptyState } from './EmptyState';
 export { TabPills } from './TabPills';
 export { CompetitionSelector } from './CompetitionSelector';
 export { KnockoutBracket } from './KnockoutBracket';
+export { SimulationBanner } from './SimulationBanner';
 export {
     Skeleton,
     SkeletonStatCard,

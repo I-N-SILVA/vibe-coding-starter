@@ -8,6 +8,7 @@ import { NavItem } from './types';
 import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
 import { MobileNav } from './MobileNav';
+import { SimulationBanner } from '../SimulationBanner';
 
 /**
  * PageLayout Component - PLYAZ Design System
@@ -62,6 +63,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
             </motion.main>
 
             <MobileNav items={navItems} />
+            <SimulationBanner />
         </div>
     );
 };
