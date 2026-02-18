@@ -11,6 +11,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { SportsTechHero } from '@/components/landing/SportsTechHero';
 import { MetricFeatureGrid } from '@/components/landing/MetricFeatureGrid';
+import { RolePreview } from '@/components/landing/RolePreview';
 
 /**
  * PLYAZ Landing Page - Ultra-Minimalist Sports Tech Revamp
@@ -120,6 +121,9 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Experience Every Role - Interactive Preview */}
+        <RolePreview />
 
         <MetricFeatureGrid />
 
