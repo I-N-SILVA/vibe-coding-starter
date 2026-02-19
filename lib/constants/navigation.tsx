@@ -27,8 +27,8 @@ export const publicNavItems: NavItem[] = [
 
 export const playerNavItems: NavItem[] = [
     { label: 'Dashboard', href: '/league/player/dashboard', icon: <NavIcons.Dashboard /> },
-    { label: 'My Stats', href: '/league/player/dashboard#stats', icon: <NavIcons.Analytics /> },
-    { label: 'Matchday', href: '/league/player/dashboard#schedule', icon: <NavIcons.Calendar /> },
+    { label: 'My Card', href: '/league/player/card', icon: <NavIcons.Statistics /> },
+    { label: 'Matchday', href: '/league/player/convocation', icon: <NavIcons.Calendar /> },
     { label: 'My Team', href: '/league/player/dashboard#team', icon: <NavIcons.Teams /> },
-    { label: 'Profile', href: '/league/player/profile', icon: <NavIcons.Statistics /> },
+    { label: 'Profile', href: '/league/player/profile', icon: <NavIcons.Settings /> },
 ];
