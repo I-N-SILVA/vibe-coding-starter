@@ -9,7 +9,6 @@ import {
     Card,
     KnockoutBracket
 } from '@/components/plyaz';
-import type { BracketRound } from '@/components/plyaz/KnockoutBracket';
 import { publicNavItems } from '@/lib/constants/navigation';
 import { cn } from '@/lib/utils';
 import { Trophy, LayoutGrid, List } from 'lucide-react';
@@ -19,13 +18,11 @@ export default function PublicStandings() {
     const searchParams = useSearchParams();
     const competitionId = searchParams.get('competitionId');
     const [format, setFormat] = useState<'league' | 'knockout'>('league');
-    const [_isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // Toggle format for demo purposes if no competitionId, or fetch real data
         if (!competitionId) {
             setFormat('league');
-            setIsLoading(false);
             return;
         }
 
@@ -43,7 +40,7 @@ export default function PublicStandings() {
             } catch (err) {
                 console.error('Failed to fetch format', err);
             } finally {
-                setIsLoading(false);
+
             }
         }
         fetchCompetition();

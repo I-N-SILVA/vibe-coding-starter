@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
@@ -58,8 +60,8 @@ async function testSignupAndProfile() {
       console.log('SUCCESS: Profile found!', JSON.stringify(profile, null, 2));
       return;
     }
-    
-    console.log(`Attempt ${i+1} failed, retrying in 2s...`);
+
+    console.log(`Attempt ${i + 1} failed, retrying in 2s...`);
     await new Promise(r => setTimeout(r, 2000));
   }
 

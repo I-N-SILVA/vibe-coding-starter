@@ -99,6 +99,11 @@ export interface CreatePlayerDto {
     date_of_birth?: string;
     nationality?: string;
     bio?: string;
+    socialLinks?: {
+        instagram?: string;
+        twitter?: string;
+        linkedin?: string;
+    };
 }
 
 export interface CreateMatchDto {

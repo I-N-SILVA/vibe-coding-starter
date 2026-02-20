@@ -1,4 +1,5 @@
 import * as React from "react";
+import NextImage from "next/image";
 import { cn } from "@/lib/utils";
 
 // Define the shape of a single profile object
@@ -52,9 +53,10 @@ export const ProfileSelector = ({
                                 <div className="absolute inset-0 rounded-full bg-muted transition-all duration-300 group-hover:shadow-lg group-hover:shadow-primary/20"></div>
                                 <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full">
                                     {typeof profile.icon === 'string' ? (
-                                        <img
+                                        <NextImage
                                             src={profile.icon}
                                             alt={`${profile.label} profile`}
+                                            fill
                                             className="h-full w-full object-cover"
                                         />
                                     ) : (

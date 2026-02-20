@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PageLayout, PageHeader, Card, CardContent, Button, Badge } from '@/components/plyaz';
+import { PageLayout, PageHeader, Button, Badge } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
 import { GripVertical, Check, RotateCcw, ChevronDown } from 'lucide-react';
 
@@ -284,10 +284,10 @@ export default function LineupBuilderPage() {
                                     style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
                                 >
                                     <div className={`w-11 h-11 rounded-full flex items-center justify-center text-xs font-black shadow-xl transition-all ${pos.player
-                                            ? 'bg-white text-gray-900 group-hover:ring-2 group-hover:ring-orange-400'
-                                            : selectedPitchIndex === i
-                                                ? 'bg-orange-500 text-white ring-4 ring-orange-300/50 animate-pulse'
-                                                : 'bg-white/20 text-white/60 border-2 border-dashed border-white/30 group-hover:border-orange-400 group-hover:text-orange-400'
+                                        ? 'bg-white text-gray-900 group-hover:ring-2 group-hover:ring-orange-400'
+                                        : selectedPitchIndex === i
+                                            ? 'bg-orange-500 text-white ring-4 ring-orange-300/50 animate-pulse'
+                                            : 'bg-white/20 text-white/60 border-2 border-dashed border-white/30 group-hover:border-orange-400 group-hover:text-orange-400'
                                         }`}>
                                         {pos.player ? pos.player.number : '+'}
                                     </div>
@@ -327,8 +327,8 @@ export default function LineupBuilderPage() {
                                     key={player.id}
                                     layout
                                     className={`flex items-center gap-3 p-3 rounded-2xl border transition-all cursor-pointer ${selectedPitchIndex !== null
-                                            ? 'bg-white border-orange-200 hover:bg-orange-50 hover:border-orange-400'
-                                            : 'bg-white border-gray-100 opacity-60'
+                                        ? 'bg-white border-orange-200 hover:bg-orange-50 hover:border-orange-400'
+                                        : 'bg-white border-gray-100 opacity-60'
                                         }`}
                                     onClick={() => handlePlayerAssign(player)}
                                 >

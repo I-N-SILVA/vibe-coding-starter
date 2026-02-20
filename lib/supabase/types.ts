@@ -86,6 +86,11 @@ export type Player = {
     bio: string | null;
     status: 'active' | 'injured' | 'suspended' | 'released';
     stats: PlayerStats;
+    social_links?: {
+        instagram?: string;
+        twitter?: string;
+        linkedin?: string;
+    };
     created_at: string;
     updated_at: string;
     // camelCase aliases (populated by mapper layer / legacy UI code)

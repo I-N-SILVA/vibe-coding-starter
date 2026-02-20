@@ -12,9 +12,6 @@ import {
 import {
     Shield,
     Users,
-    Trophy,
-    Calendar,
-    Settings,
     User,
     PlayCircle,
     Database,
@@ -27,6 +24,7 @@ import {
     ClipboardList
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { Profile } from '@/lib/supabase/types';
 
 // Types for our internal debug state
 type Persona = 'organizer' | 'referee' | 'coach' | 'player' | 'fan';
@@ -34,7 +32,6 @@ type Persona = 'organizer' | 'referee' | 'coach' | 'player' | 'fan';
 export default function DebugFlowsPage() {
     const router = useRouter();
     const [stats, setStats] = useState<Record<string, number>>({});
-    const [_isLoading, setIsLoading] = useState(false);
     const [activePersona, setActivePersona] = useState<Persona>('organizer');
     const [isSimulationEnabled, setIsSimulationEnabled] = useState(false);
 
@@ -60,12 +57,10 @@ export default function DebugFlowsPage() {
     };
 
     const autoPilot = async () => {
-        setIsLoading(true);
         localStorage.setItem('plyaz_simulation_enabled', 'true');
         seedMockData();
         selectPersona('organizer');
         refreshStats();
-        setIsLoading(false);
         router.push('/league');
     };
 
@@ -79,48 +74,63 @@ export default function DebugFlowsPage() {
     };
 
     const seedMockData = () => {
-        setIsLoading(true);
+        // 0. Clear existing specific keys to avoid duplicates in sim
+        ['organizations', 'profiles', 'auth', 'competitions', 'teams', 'players', 'categories'].forEach(k => localStorage.removeItem(`plyaz_${k}`));
 
-        // 1. Create Organization
+        // 1. Create Profile & Auth for the Simulation
+        const userId = 'debug-user-123';
+        LocalStore.addItem('profiles', {
+            id: userId,
+            full_name: 'Debug Manager',
+            role: 'organizer',
+            approval_status: 'approved'
+        });
+
+        LocalStore.addItem('auth', {
+            id: userId,
+            email: 'organizer@plyaz.com',
+            isActive: true
+        });
+
+        // 2. Create Organization linked to the profile
         const org = LocalStore.addItem('organizations', {
             name: 'PLYAZ Youth League',
             slug: 'plyaz-youth',
+            owner_id: userId,
             description: 'The premier championship for professional youth teams.'
         });
 
-        // 2. Create Categories
+        // Update profile with orgId
+        LocalStore.updateItem<Profile>('profiles', userId, { organization_id: org.id });
+
+        // 3. Create Categories
         const catU16 = LocalStore.addItem('categories', {
             name: 'U-16 Elite',
             organizationId: org.id,
+            organization_id: org.id,
             minAge: 14,
             maxAge: 16
         });
 
-        // 3. Create Round Robin Competition
-        const _leagueComp = LocalStore.addItem('competitions', {
+        // 4. Create Round Robin Competition
+        LocalStore.addItem('competitions', {
             name: 'Premier League 2026',
             organizationId: org.id,
+            organization_id: org.id,
             categoryId: catU16.id,
+            category_id: catU16.id,
             type: 'league',
             status: 'active',
             startDate: '2026-02-01'
-        });
-
-        // 4. Create Knockout Competition
-        const _cupComp = LocalStore.addItem('competitions', {
-            name: 'Champions Cup',
-            organizationId: org.id,
-            categoryId: catU16.id,
-            type: 'knockout',
-            status: 'active',
-            startDate: '2026-03-15'
         });
 
         // 5. Create Teams
         const teams = ['Phoenix FC', 'City Rangers', 'Eagles', 'Rovers', 'United', 'Strikers'].map(name =>
             LocalStore.addItem('teams', {
                 name,
+                organization_id: org.id,
                 organizationId: org.id,
+                short_name: name.substring(0, 3).toUpperCase(),
                 shortName: name.substring(0, 3).toUpperCase()
             })
         );
@@ -128,17 +138,27 @@ export default function DebugFlowsPage() {
         // 6. Create Players for first team
         ['John Doe', 'Mike Smith', 'Alex Wong'].forEach((name, i) => {
             LocalStore.addItem('players', {
-                firstName: name.split(' ')[0],
-                lastName: name.split(' ')[1],
-                displayName: name,
+                id: `player-${i}`,
+                name: name,
+                full_name: name,
+                team_id: teams[0].id,
                 teamId: teams[0].id,
-                position: i === 0 ? 'goalkeeper' : 'forward',
-                number: 1 + i
+                organization_id: org.id,
+                organizationId: org.id,
+                position: i === 0 ? 'GK' : 'ST',
+                jersey_number: 1 + i,
+                jerseyNumber: 1 + i,
+                stats: {
+                    goals: i === 1 ? 12 : 2,
+                    assists: 4,
+                    appearances: 8,
+                    yellow_cards: 0,
+                    red_cards: 0
+                }
             });
         });
 
         refreshStats();
-        setIsLoading(false);
     };
 
     const clearData = () => {
