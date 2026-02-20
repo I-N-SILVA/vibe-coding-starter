@@ -1,6 +1,6 @@
 import clsx from 'clsx';
-import Image from '@/components/shared/Image';
-import { GlowBg } from '@/components/shared/ui/glow-bg';
+import Image from '@/components/app/Image';
+import { GlowBg } from '@/components/ui/glow-bg';
 
 /**
  * A component for the About Us section of the landing page.

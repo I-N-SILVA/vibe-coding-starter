@@ -5,7 +5,7 @@ import * as TabsPrimitive from '@radix-ui/react-tabs';
 
 import { cn } from '@/lib/utils';
 import clsx from 'clsx';
-import { GlowBg } from '@/components/shared/ui/glow-bg';
+import { GlowBg } from '@/components/ui/glow-bg';
 
 interface LandingProductTourProps
   extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root> {

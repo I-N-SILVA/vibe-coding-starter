@@ -88,6 +88,17 @@ export type Player = {
     stats: PlayerStats;
     created_at: string;
     updated_at: string;
+    // camelCase aliases (populated by mapper layer / legacy UI code)
+    teamId?: string | null;
+    profileId?: string | null;
+    organizationId?: string;
+    jerseyNumber?: number | null;
+    dateOfBirth?: string | null;
+    photoUrl?: string | null;
+    firstName?: string;
+    lastName?: string;
+    number?: number | null;
+    [key: string]: unknown;
 };
 
 export type PlayerPosition = 'GK' | 'CB' | 'LB' | 'RB' | 'CDM' | 'CM' | 'CAM' | 'LM' | 'RM' | 'LW' | 'RW' | 'ST' | 'CF';
@@ -110,7 +121,7 @@ export type Match = {
     round: string | null;
     home_score: number;
     away_score: number;
-    status: 'upcoming' | 'live' | 'completed' | 'postponed' | 'cancelled';
+    status: 'upcoming' | 'scheduled' | 'live' | 'completed' | 'postponed' | 'cancelled';
     match_time: string | null;
     venue: string | null;
     venue_id: string | null;
@@ -122,10 +133,29 @@ export type Match = {
     notes: string | null;
     created_at: string;
     updated_at: string;
-    // Joined
+    // Joined (snake_case)
     home_team?: Team;
     away_team?: Team;
     referee?: Profile;
+    // camelCase aliases (populated by mapper layer / legacy UI code)
+    competitionId?: string;
+    organizationId?: string;
+    homeTeamId?: string;
+    awayTeamId?: string;
+    homeScore?: number;
+    awayScore?: number;
+    matchTime?: string | null;
+    venueId?: string | null;
+    groupId?: string | null;
+    refereeId?: string | null;
+    scheduledAt?: string | null;
+    startedAt?: string | null;
+    endedAt?: string | null;
+    // Joined (camelCase)
+    homeTeam?: { id: string; name: string; shortName?: string; short_name?: string | null;[key: string]: unknown };
+    awayTeam?: { id: string; name: string; shortName?: string; short_name?: string | null;[key: string]: unknown };
+    events?: MatchEvent[];
+    [key: string]: unknown;
 };
 
 export type MatchEvent = {
@@ -139,6 +169,12 @@ export type MatchEvent = {
     half: '1st' | '2nd' | 'ET1' | 'ET2' | 'penalties' | null;
     details: Record<string, unknown>;
     created_at: string;
+    // camelCase aliases
+    matchId?: string;
+    teamId?: string | null;
+    playerId?: string | null;
+    playerName?: string | null;
+    [key: string]: unknown;
 };
 
 export type StandingsEntry = {

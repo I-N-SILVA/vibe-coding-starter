@@ -47,7 +47,10 @@ export const useLiveMatch = (initialMatch: Match) => {
 
                 // Visual feedback (Quick Win integrated)
                 if (event.type === 'goal') {
-                    info(`GOAL! ${event.playerName} scores for ${event.teamId === match.homeTeam.id ? match.homeTeam.shortName : match.awayTeam.shortName}`);
+                    const homeTeam = match?.homeTeam;
+                    const awayTeam = match?.awayTeam;
+                    const scoringTeam = event.teamId === (homeTeam?.id || match?.home_team_id) ? (homeTeam?.shortName || match?.home_team?.short_name || 'HOME') : (awayTeam?.shortName || match?.away_team?.short_name || 'AWAY');
+                    info(`GOAL! ${event.playerName || event.player_name || 'Someone'} scores for ${scoringTeam}`);
                 }
             },
         });
@@ -55,7 +58,7 @@ export const useLiveMatch = (initialMatch: Match) => {
         return () => {
             channel.unsubscribe();
         };
-    }, [match.id, match.homeTeam.id, match.homeTeam.shortName, match.awayTeam.id, match.awayTeam.shortName, info]);
+    }, [match?.id, match?.homeTeam?.id, match?.homeTeam?.shortName, match?.awayTeam?.id, match?.awayTeam?.shortName, info]);
 
     return {
         match,

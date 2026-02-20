@@ -2,7 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { OrbitIcon } from 'lucide-react';
-import { GlowBg } from '@/components/shared/ui/glow-bg';
+import { GlowBg } from '@/components/ui/glow-bg';
 
 /**
  * A footer component meant to be used in the landing page.

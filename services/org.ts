@@ -1,17 +1,15 @@
 import { LocalStore } from '@/lib/mock/store';
-import type { Database } from '@/lib/supabase/types';
-
-type Organization = Database['public']['Tables']['organizations']['Row'];
-type Competition = Database['public']['Tables']['competitions']['Row'];
-type Profile = Database['public']['Tables']['profiles']['Row'];
+import { repositories } from '@/lib/repositories';
+import { toCamelCase } from '@/lib/mappers';
+import type { Database, Competition, Organization } from '@/lib/supabase/types';
 
 /**
- * Organization Service (Mock)
- * Centralizes all league and organization related data calls using localStorage.
+ * Organization Service
+ * Orchestrates domain operations using the repository layer.
  */
 export const orgService = {
     /**
-     * Map database organization to UI organization
+     * Map database organization to UI representation (Legacy support)
      */
     mapOrganization(org: any) {
         if (!org) return null;
@@ -23,7 +21,7 @@ export const orgService = {
     },
 
     /**
-     * Map database competition to UI competition
+     * Map database competition to UI representation (Legacy support)
      */
     mapCompetition(comp: any) {
         if (!comp) return null;
@@ -35,6 +33,7 @@ export const orgService = {
             endDate: comp.end_date,
             maxTeams: comp.max_teams,
             inviteCode: comp.invite_code,
+            // Re-fetch organization if needed for legacy support
             organization: comp.organization_id ? orgService.mapOrganization(LocalStore.findOne('organizations', o => (o as any).id === comp.organization_id)) : undefined,
         };
     },
@@ -46,14 +45,14 @@ export const orgService = {
         const user = LocalStore.findOne<any>('auth', u => u.isActive);
         if (!user) throw new Error('User not authenticated');
 
-        // 1. Insert Org
-        const org = LocalStore.addItem<any>('organizations', {
+        // 1. Insert Org via Repo
+        const org = await repositories.organization.create({
             name,
             slug,
             owner_id: user.id
         });
 
-        // 2. Update current user's profile
+        // 2. Update current user's profile (still using LocalStore for auth/profile shim)
         LocalStore.updateItem<any>('profiles', user.id, {
             organization_id: org.id,
             role: 'organizer'
@@ -76,7 +75,7 @@ export const orgService = {
             orgId = profile.organization_id;
         }
 
-        const org = LocalStore.findOne<any>('organizations', o => o.id === orgId);
+        const org = await repositories.organization.findById(orgId);
         return orgService.mapOrganization(org);
     },
 
@@ -84,7 +83,7 @@ export const orgService = {
      * Get a single competition
      */
     async getCompetition(id: string) {
-        const comp = LocalStore.findOne<any>('competitions', c => c.id === id);
+        const comp = await repositories.competition.findById(id);
         return orgService.mapCompetition(comp);
     },
 
@@ -92,7 +91,7 @@ export const orgService = {
      * Update a competition
      */
     async updateCompetition(id: string, data: Partial<Competition>) {
-        const updated = LocalStore.updateItem<any>('competitions', id, data);
+        const updated = await repositories.competition.update(id, data);
         return orgService.mapCompetition(updated);
     },
 
@@ -100,7 +99,7 @@ export const orgService = {
      * Delete a competition
      */
     async deleteCompetition(id: string) {
-        return LocalStore.deleteItem('competitions', id);
+        return repositories.competition.delete(id);
     },
 
     /**
@@ -117,7 +116,7 @@ export const orgService = {
             targetOrgId = profile.organization_id;
         }
 
-        const comp = LocalStore.addItem<any>('competitions', {
+        const comp = await repositories.competition.create({
             organization_id: targetOrgId,
             name,
             type: type as any,
@@ -143,7 +142,7 @@ export const orgService = {
 
         if (!targetOrgId) return [];
 
-        const comps = LocalStore.find<any>('competitions', c => c.organization_id === targetOrgId);
+        const comps = await repositories.competition.findByOrganization(targetOrgId);
         return comps.map(c => orgService.mapCompetition(c));
     },
 
@@ -151,9 +150,15 @@ export const orgService = {
      * Get recent activity for the organization
      */
     async getActivity() {
-        const events = LocalStore.get<any>('match_events');
-        // Sort and map similarly to the real service
-        return events
+        // This remains slightly complex as it joins match_events, matches, and competitions
+        // In a real repo, this would be a single query.
+        // For now, we'll keep the mock logic but use repos if possible.
+        const events = await repositories.match.findAll();
+        // Actually, we need match_events. The MatchRepo has getEvents(matchId) but not a generic list.
+        // Let's use LocalStore for this complex mock join for now.
+        const allEvents = LocalStore.get<any>('match_events');
+
+        return allEvents
             .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
             .slice(0, 10)
             .map((e: any) => {

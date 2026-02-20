@@ -1,4 +1,4 @@
-import { GlowBg } from '@/components/shared/ui/glow-bg';
+import { GlowBg } from '@/components/ui/glow-bg';
 import clsx from 'clsx';
 
 /**

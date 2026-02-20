@@ -1,15 +1,14 @@
 import { LocalStore } from '@/lib/mock/store';
-import type { Database } from '@/lib/supabase/types';
-
-type Team = Database['public']['Tables']['teams']['Row'];
+import { repositories } from '@/lib/repositories';
+import type { Database, Team } from '@/lib/supabase/types';
 
 /**
- * Team Service (Mock)
- * Handles team creation, roster management, and statistics using localStorage.
+ * Team Service
+ * Handles team creation, roster management, and statistics using the repository layer.
  */
 export const teamService = {
     /**
-     * Map database team to UI team
+     * Map database team to UI team (Legacy support)
      */
     mapTeam(team: any) {
         if (!team) return null;
@@ -25,33 +24,29 @@ export const teamService = {
      * Get teams for an organization or competition
      */
     async getTeams(competitionId?: string) {
-        let teams: any[] = [];
+        let teams: Team[] = [];
 
         if (competitionId) {
-            // Teams are usually linked to competitions through groups or registrations
-            // For mock, let's look at all teams that might be in this competition
-            // This is a bit simplified for now
-            teams = LocalStore.get<any>('teams');
-            // If we had a group_teams store, we would filter here.
+            teams = await repositories.team.findByCompetition(competitionId);
         } else {
             // Get current user's org teams
             const user = LocalStore.findOne<any>('auth', u => u.isActive);
             if (user) {
                 const profile = LocalStore.findOne<any>('profiles', p => p.id === user.id);
                 if (profile?.organization_id) {
-                    teams = LocalStore.find<any>('teams', t => t.organization_id === profile.organization_id);
+                    teams = await repositories.team.findAll({ organization_id: profile.organization_id });
                 }
             }
         }
 
-        return teams.sort((a, b) => a.name.localeCompare(b.name)).map(t => teamService.mapTeam(t));
+        return teams.sort((a, b) => (a.name || '').localeCompare(b.name || '')).map(t => teamService.mapTeam(t));
     },
 
     /**
      * Get a single team
      */
     async getTeam(id: string) {
-        const team = LocalStore.findOne<any>('teams', t => t.id === id);
+        const team = await repositories.team.findById(id);
         return teamService.mapTeam(team);
     },
 
@@ -59,7 +54,7 @@ export const teamService = {
      * Create a new team
      */
     async createTeam(data: any) {
-        const team = LocalStore.addItem<any>('teams', {
+        const team = await repositories.team.create({
             name: data.name,
             short_name: data.shortName,
             logo_url: data.logoUrl,
@@ -73,7 +68,7 @@ export const teamService = {
      * Update a team
      */
     async updateTeam(id: string, data: Partial<Team>) {
-        const updated = LocalStore.updateItem<any>('teams', id, data);
+        const updated = await repositories.team.update(id, data);
         return teamService.mapTeam(updated);
     },
 
@@ -81,6 +76,6 @@ export const teamService = {
      * Delete a team
      */
     async deleteTeam(id: string) {
-        return LocalStore.deleteItem('teams', id);
+        return repositories.team.delete(id);
     }
 };

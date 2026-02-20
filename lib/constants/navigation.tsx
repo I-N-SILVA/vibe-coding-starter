@@ -32,3 +32,18 @@ export const playerNavItems: NavItem[] = [
     { label: 'My Team', href: '/league/player/dashboard#team', icon: <NavIcons.Teams /> },
     { label: 'Profile', href: '/league/player/profile', icon: <NavIcons.Settings /> },
 ];
+
+export const refereeNavItems: NavItem[] = [
+    { label: 'My Matches', href: '/league/referee', icon: <NavIcons.Whistle /> },
+    { label: 'Schedule', href: '/league/matches', icon: <NavIcons.Calendar /> },
+    { label: 'Analytics', href: '/league/analytics', icon: <NavIcons.Analytics /> },
+    { label: 'Settings', href: '/league/settings', icon: <NavIcons.Settings /> },
+];
+
+export const coachNavItems: NavItem[] = [
+    { label: 'Dashboard', href: '/league/coach/dashboard', icon: <NavIcons.Dashboard /> },
+    { label: 'Roster', href: '/league/coach/roster', icon: <NavIcons.Teams /> },
+    { label: 'Schedule', href: '/league/matches', icon: <NavIcons.Calendar /> },
+    { label: 'Standings', href: '/league/standings', icon: <NavIcons.Standings /> },
+    { label: 'Settings', href: '/league/settings', icon: <NavIcons.Settings /> },
+];

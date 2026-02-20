@@ -23,12 +23,13 @@ import {
     ChevronRight,
     Eye,
     CheckCircle2,
-    Zap
+    Zap,
+    ClipboardList
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Types for our internal debug state
-type Persona = 'organizer' | 'referee' | 'player' | 'fan';
+type Persona = 'organizer' | 'referee' | 'coach' | 'player' | 'fan';
 
 export default function DebugFlowsPage() {
     const router = useRouter();
@@ -172,6 +173,18 @@ export default function DebugFlowsPage() {
                 { name: 'Referee Portal', path: '/league/referee', desc: 'Match assignment list' },
                 { name: 'Live Scoreboard', path: '/league/matches/live', desc: 'Real-time event entry' },
                 { name: 'Match Schedule', path: '/league/matches/schedule', desc: 'Upcoming assignments' }
+            ]
+        },
+        {
+            id: 'coach',
+            name: 'The Coach',
+            icon: <ClipboardList className="w-5 h-5" />,
+            description: 'Roster management, team tactics, and match preparation.',
+            color: 'bg-teal-500',
+            flows: [
+                { name: 'Coach Dashboard', path: '/league/coach/dashboard', desc: 'Team overview and next match' },
+                { name: 'Squad Roster', path: '/league/coach/roster', desc: 'Player roster management' },
+                { name: 'Match Schedule', path: '/league/matches', desc: 'Upcoming fixtures' }
             ]
         },
         {

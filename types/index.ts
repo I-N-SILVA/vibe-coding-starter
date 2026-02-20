@@ -1,12 +1,13 @@
 /**
- * Type Exports - PLYAZ League Manager
- * Central export point for UI-facing types (camelCase).
- *
- * Architecture:
- * - types/models.ts    → camelCase types for UI components (exported here)
- * - lib/supabase/types.ts → snake_case types for DB/API routes (imported directly)
- * - types/api.ts       → API response wrapper types
+ * Type Exports — PLYAZ League Manager
+ * 
+ * ARCHITECTURE:
+ * - lib/supabase/types.ts  → Single source of truth (snake_case, matches DB exactly)
+ * - types/models.ts        → Re-exports + backward-compatible camelCase aliases + DTOs
+ * - lib/mappers/index.ts   → Runtime snake↔camel converters for data
+ * 
+ * Import from '@/types' in UI code. Import from '@/lib/supabase/types' only in
+ * data-access layers (repositories, API routes).
  */
 
 export * from './models';
-export * from './api';

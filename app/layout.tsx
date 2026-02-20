@@ -6,14 +6,15 @@ import { Metadata } from 'next';
 
 import { colors } from '@/data/config/colors.js';
 
-import '@/css/globals.css';
-import { SearchProvider } from '@/components/shared/SearchProvider';
-import { AnalyticsWrapper } from '@/components/shared/Analytics';
+import './globals.css';
+import { SearchProvider } from '@/components/app/SearchProvider';
+import { AnalyticsWrapper } from '@/components/app/Analytics';
 import { QueryProvider, ToastProvider } from '@/components/providers';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { ClientShortcuts } from '@/components/shared/ClientShortcuts';
-import { PWARegistration } from '@/components/shared/PWARegistration';
+import { ClientShortcuts } from '@/components/app/ClientShortcuts';
+import { PWARegistration } from '@/components/app/PWARegistration';
 import { AuthProviderWrapper } from '@/components/providers/AuthProviderWrapper';
+import { OrgProvider } from '@/components/providers/OrgProvider';
 
 const displayFont = Playfair_Display({
   subsets: ['latin'],
@@ -113,13 +114,15 @@ export default function RootLayout({
 
                 <SearchProvider>
                   <AuthProviderWrapper>
-                    <Suspense fallback={
-                      <div className="min-h-screen flex items-center justify-center">
-                        <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                      </div>
-                    }>
-                      {children}
-                    </Suspense>
+                    <OrgProvider>
+                      <Suspense fallback={
+                        <div className="min-h-screen flex items-center justify-center">
+                          <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      }>
+                        {children}
+                      </Suspense>
+                    </OrgProvider>
                   </AuthProviderWrapper>
                 </SearchProvider>
               </ErrorBoundary>

@@ -1,6 +1,6 @@
 import clsx from 'clsx';
-import { VideoPlayer } from '@/components/shared/VideoPlayer';
-import { GlowBg } from '@/components/shared/ui/glow-bg';
+import { VideoPlayer } from '@/components/app/VideoPlayer';
+import { GlowBg } from '@/components/ui/glow-bg';
 
 /**
  * A component meant to be used in the landing page.

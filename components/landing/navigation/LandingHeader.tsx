@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { MenuIcon, OrbitIcon } from 'lucide-react';
-import { Button } from '@/components/shared/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
-} from '@/components/shared/ui/sheet';
+} from '@/components/ui/sheet';
 import clsx from 'clsx';
 
 /**

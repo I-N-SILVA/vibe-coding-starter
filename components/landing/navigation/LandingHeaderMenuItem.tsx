@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import { Button } from '@/components/shared/ui/button';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 /**

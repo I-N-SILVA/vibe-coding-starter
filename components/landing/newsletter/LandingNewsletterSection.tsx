@@ -1,8 +1,8 @@
 'use client';
 
 import clsx from 'clsx';
-import Image from '@/components/shared/Image';
-import { GlowBg } from '@/components/shared/ui/glow-bg';
+import Image from '@/components/app/Image';
+import { GlowBg } from '@/components/ui/glow-bg';
 import { LandingNewsletterInput } from '@/components/landing/newsletter/LandingNewsletterInput';
 
 /**

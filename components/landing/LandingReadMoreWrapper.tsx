@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import clsx from 'clsx';
-import { Button } from '@/components/shared/ui/button';
+import { Button } from '@/components/ui/button';
 
 /**
  * Wraps any section and adds a "Read more" button (truncates to the given height).

@@ -1,15 +1,18 @@
 import { LocalStore } from '@/lib/mock/store';
+import { repositories } from '@/lib/repositories';
 import type { Profile } from '@/lib/supabase/types';
 
 /**
- * Authentication Service (Mock)
+ * Authentication Service
  * Simulates authentication logic using localStorage.
+ * Integrates with the repository layer for profile management.
  */
 export const authService = {
     /**
      * Get current session
      */
     async getSession() {
+        // Auth store remains separate for now as it simulates Supabase Auth
         const user = LocalStore.findOne<any>('auth', u => u.isActive);
         if (!user) return { data: { session: null }, error: null };
         return {
@@ -27,7 +30,7 @@ export const authService = {
         const user = LocalStore.findOne<any>('auth', u => u.isActive);
         if (!user) return { user: null, profile: null };
 
-        const profile = LocalStore.findOne<Profile>('profiles', p => p.id === user.id);
+        const profile = await repositories.profile.findById(user.id);
         return { user, profile };
     },
 
@@ -49,18 +52,18 @@ export const authService = {
         const existing = LocalStore.findOne<any>('auth', u => u.email === email);
         if (existing) return { data: { user: null }, error: { message: 'User already exists' } as any };
 
+        // 1. Create Auth User
         const newUser = LocalStore.addItem<any>('auth', {
             email,
             isActive: true,
         });
 
-        LocalStore.addItem<Profile>('profiles', {
+        // 2. Create Profile via Repository
+        await repositories.profile.create({
             id: newUser.id,
             full_name: fullName,
             role: role as any,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-        } as any);
+        });
 
         return { data: { user: newUser, session: { user: newUser } as any }, error: null };
     },

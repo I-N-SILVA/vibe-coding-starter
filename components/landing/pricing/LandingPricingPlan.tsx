@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@/components/shared/ui/button';
-import { GlowBg } from '@/components/shared/ui/glow-bg';
+import { Button } from '@/components/ui/button';
+import { GlowBg } from '@/components/ui/glow-bg';
 import { clsx } from 'clsx';
 import { CheckIcon } from 'lucide-react';
 import Link from 'next/link';

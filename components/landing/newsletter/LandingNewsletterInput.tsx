@@ -1,9 +1,9 @@
 'use client';
 
 import clsx from 'clsx';
-import { Button } from '@/components/shared/ui/button';
-import { Input } from '@/components/shared/ui/input';
-import { Label } from '@/components/shared/ui/label';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 /**
  * A newsletter input and button, used in LandingNewsletterSection, but can also be used as a standalone component in LandingPrimaryCta sections.

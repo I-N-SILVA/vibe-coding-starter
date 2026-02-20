@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { LandingStatItem } from '@/components/landing/stats/LandingStatItem';
-import { GlowBg } from '@/components/shared/ui/glow-bg';
+import { GlowBg } from '@/components/ui/glow-bg';
 
 /**
  * A component that displays a grid of statistics.

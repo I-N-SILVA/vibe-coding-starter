@@ -1,4 +1,4 @@
-import Image from '@/components/shared/Image';
+import Image from '@/components/app/Image';
 import Link from 'next/link';
 import { clsx } from 'clsx';
 

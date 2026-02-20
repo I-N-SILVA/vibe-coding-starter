@@ -1,6 +1,6 @@
 import { clsx } from 'clsx';
 import { CheckIcon, XIcon } from 'lucide-react';
-import { GlowBg } from '@/components/shared/ui/glow-bg';
+import { GlowBg } from '@/components/ui/glow-bg';
 import {
   KeyPoint,
   LandingProductFeatureKeyPoints,
