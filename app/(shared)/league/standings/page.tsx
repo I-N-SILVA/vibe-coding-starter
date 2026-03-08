@@ -15,31 +15,77 @@ import {
 import { adminNavItems } from '@/lib/constants/navigation';
 import { cn } from '@/lib/utils';
 
-const DEMO_STANDINGS = [
-    { rank: 1, team: 'FC United', shortName: 'FCU', played: 12, won: 9, drawn: 2, lost: 1, gf: 28, ga: 10, gd: 18, points: 29, form: ['W', 'W', 'D', 'W', 'L'] },
-    { rank: 2, team: 'Phoenix FC', shortName: 'PHX', played: 12, won: 8, drawn: 3, lost: 1, gf: 24, ga: 12, gd: 12, points: 27, form: ['W', 'D', 'W', 'W', 'W'] },
-    { rank: 3, team: 'City Rangers', shortName: 'CRG', played: 12, won: 7, drawn: 2, lost: 3, gf: 20, ga: 15, gd: 5, points: 23, form: ['L', 'W', 'W', 'D', 'W'] },
-    { rank: 4, team: 'Eagles', shortName: 'EGL', played: 12, won: 6, drawn: 3, lost: 3, gf: 18, ga: 16, gd: 2, points: 21, form: ['D', 'W', 'L', 'W', 'D'] },
-    { rank: 5, team: 'Rovers', shortName: 'ROV', played: 12, won: 5, drawn: 2, lost: 5, gf: 15, ga: 18, gd: -3, points: 17, form: ['L', 'D', 'W', 'L', 'W'] },
-    { rank: 6, team: 'Athletic', shortName: 'ATH', played: 12, won: 4, drawn: 3, lost: 5, gf: 14, ga: 17, gd: -3, points: 15, form: ['W', 'L', 'L', 'D', 'W'] },
-];
-
-const DEMO_COMPETITIONS = [
-    { id: '1', name: 'Premier Division' },
-    { id: '2', name: 'Sunday Cup' },
-];
+type StandingsRow = {
+    rank: number;
+    team: string;
+    shortName: string;
+    played: number;
+    won: number;
+    drawn: number;
+    lost: number;
+    gf: number;
+    ga: number;
+    gd: number;
+    points: number;
+    form: string[];
+};
 
 export default function AdminStandings() {
-    const [selectedComp, setSelectedComp] = useState('1');
+    const [selectedComp, setSelectedComp] = useState('');
 
-    const { data: fetchedCompetitions = [] } = useCompetitions();
+    const { data: competitions = [], isLoading: competitionsLoading } = useCompetitions();
     const { data: fetchedStandings, isLoading: standingsLoading } = useStandings(selectedComp);
 
-    const competitions = fetchedCompetitions.length > 0 ? fetchedCompetitions : DEMO_COMPETITIONS;
-    const standings = (fetchedStandings && (fetchedStandings as unknown[]).length > 0)
-        ? fetchedStandings as unknown as typeof DEMO_STANDINGS
-        : DEMO_STANDINGS;
-    const isLoading = standingsLoading;
+    // Set the first competition as default when loaded
+    React.useEffect(() => {
+        if (competitions.length > 0 && !selectedComp) {
+            setSelectedComp(competitions[0].id);
+        }
+    }, [competitions, selectedComp]);
+
+    const standings: StandingsRow[] = Array.isArray(fetchedStandings)
+        ? (fetchedStandings as Array<{
+            id: string;
+            played: number;
+            won: number;
+            drawn: number;
+            lost: number;
+            goals_for: number;
+            goals_against: number;
+            goal_difference: number;
+            points: number;
+            form: string[];
+            team?: { id: string; name: string; short_name: string };
+          }>).map((entry, idx) => ({
+            rank: idx + 1,
+            team: entry.team?.name ?? '',
+            shortName: entry.team?.short_name ?? '',
+            played: entry.played,
+            won: entry.won,
+            drawn: entry.drawn,
+            lost: entry.lost,
+            gf: entry.goals_for,
+            ga: entry.goals_against,
+            gd: entry.goal_difference,
+            points: entry.points,
+            form: entry.form ?? [],
+          }))
+        : [];
+
+    const isLoading = competitionsLoading || standingsLoading;
+
+    if (!competitionsLoading && competitions.length === 0) {
+        return (
+            <PageLayout navItems={adminNavItems} title="STANDINGS">
+                <PageHeader label="Competitions" title="Current Rankings" />
+                <EmptyState
+                    icon={<NavIcons.Standings />}
+                    title="No Competitions"
+                    description="Create a competition to start tracking standings."
+                />
+            </PageLayout>
+        );
+    }
 
     return (
         <PageLayout navItems={adminNavItems} title="STANDINGS">
@@ -47,11 +93,13 @@ export default function AdminStandings() {
                 label="Competitions"
                 title="Current Rankings"
                 rightAction={
-                    <CompetitionSelector
-                        competitions={competitions}
-                        selected={selectedComp}
-                        onChange={setSelectedComp}
-                    />
+                    competitions.length > 0 ? (
+                        <CompetitionSelector
+                            competitions={competitions}
+                            selected={selectedComp}
+                            onChange={setSelectedComp}
+                        />
+                    ) : undefined
                 }
             />
 
@@ -112,7 +160,7 @@ export default function AdminStandings() {
                                 <tbody>
                                     {standings.map((row, idx) => (
                                         <motion.tr
-                                            key={row.team}
+                                            key={`${row.team}-${row.rank}`}
                                             initial={{ opacity: 0, x: -8 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ delay: idx * 0.04, duration: 0.3 }}

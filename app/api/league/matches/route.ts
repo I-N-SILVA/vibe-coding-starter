@@ -83,6 +83,7 @@ export async function PATCH(request: Request) {
         .from('matches')
         .update(parsed.data)
         .eq('id', id)
+        .eq('organization_id', auth.orgId)
         .select()
         .single();
 

@@ -23,7 +23,7 @@ import type {
  * Base Repository Interface
  */
 export interface IRepository<T> {
-    findAll(filters?: Record<string, any>): Promise<T[]>;
+    findAll(filters?: Record<string, unknown>): Promise<T[]>;
     findById(id: string): Promise<T | null>;
     create(data: Partial<T>): Promise<T>;
     update(id: string, data: Partial<T>): Promise<T>;
@@ -60,7 +60,9 @@ export interface IMatchRepository extends IRepository<Match> {
     addEvent(event: Partial<MatchEvent>): Promise<MatchEvent>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IVenueRepository extends IRepository<Venue> { }
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ICategoryRepository extends IRepository<Category> { }
 export interface IProfileRepository extends IRepository<Profile> {
     findByUserId(userId: string): Promise<Profile | null>;

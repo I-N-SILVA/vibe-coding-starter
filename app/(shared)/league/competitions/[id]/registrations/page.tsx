@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
 import {
     Card,
     CardContent,
@@ -15,6 +16,7 @@ import { adminNavItems } from '@/lib/constants/navigation';
 import { useToast } from '@/components/providers';
 import { stagger, fadeUp } from '@/lib/animations';
 import { useRegistrations } from '@/lib/hooks';
+import { queryKeys } from '@/lib/hooks/query-keys';
 
 type ApiRegistration = {
     id: string;
@@ -38,6 +40,7 @@ const statusColors: Record<string, string> = {
 export default function RegistrationsPage() {
     const { id: competitionId } = useParams<{ id: string }>();
     const toast = useToast();
+    const queryClient = useQueryClient();
     const { data: registrations = [], isLoading, error } = useRegistrations(competitionId);
     const [filter, setFilter] = useState<string>('all');
 
@@ -53,7 +56,7 @@ export default function RegistrationsPage() {
             });
             if (!res.ok) throw new Error('Failed to update');
             toast.success(`Registration ${newStatus}`);
-            window.location.reload();
+            await queryClient.invalidateQueries({ queryKey: queryKeys.registrations(competitionId) });
         } catch (err: unknown) {
             toast.error(err instanceof Error ? err.message : 'Failed to update registration');
         }

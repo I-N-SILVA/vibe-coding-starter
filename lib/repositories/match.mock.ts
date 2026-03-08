@@ -25,6 +25,6 @@ export class MatchMockRepository extends BaseMockRepository<Match> implements IM
     }
 
     async addEvent(event: Partial<MatchEvent>): Promise<MatchEvent> {
-        return LocalStore.addItem('match_events', event as any) as unknown as MatchEvent;
+        return LocalStore.addItem('match_events', event as Record<string, unknown>) as unknown as MatchEvent;
     }
 }

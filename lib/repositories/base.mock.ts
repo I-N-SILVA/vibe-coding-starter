@@ -10,13 +10,13 @@ import { IRepository } from './types';
 export abstract class BaseMockRepository<T extends { id: string }> implements IRepository<T> {
     constructor(protected storeKey: string) { }
 
-    async findAll(filters?: Record<string, any>): Promise<T[]> {
+    async findAll(filters?: Record<string, unknown>): Promise<T[]> {
         const items = LocalStore.get<T>(this.storeKey);
         if (!filters) return items;
 
         return items.filter(item => {
             return Object.entries(filters).every(([key, value]) => {
-                return (item as any)[key] === value;
+                return (item as Record<string, unknown>)[key] === value;
             });
         });
     }
@@ -26,11 +26,11 @@ export abstract class BaseMockRepository<T extends { id: string }> implements IR
     }
 
     async create(data: Partial<T>): Promise<T> {
-        return LocalStore.addItem(this.storeKey, data as any) as unknown as T;
+        return LocalStore.addItem(this.storeKey, data as Record<string, unknown>) as unknown as T;
     }
 
     async update(id: string, data: Partial<T>): Promise<T> {
-        const updated = LocalStore.updateItem(this.storeKey, id, data as any);
+        const updated = LocalStore.updateItem(this.storeKey, id, data as Record<string, unknown>);
         if (!updated) throw new Error(`Item with id ${id} not found in ${this.storeKey}`);
         return updated as unknown as T;
     }

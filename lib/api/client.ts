@@ -3,7 +3,7 @@
  * Base configuration and utilities for API calls
  */
 
-import type { ApiResponse, ApiError } from '@/types';
+import type { ApiError } from '@/types';
 
 import { LocalStore } from '@/lib/mock/store';
 
@@ -19,8 +19,8 @@ const isSimulationMode = () => {
  * Mock Handler for Simulation Mode
  * Intercepts API calls and routes them to LocalStore
  */
-const mockHandler = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
-    console.log(`[SIMULATION] Intercepting ${options.method || 'GET'} ${endpoint}`);
+const mockHandler = async (endpoint: string, options: RequestInit = {}): Promise<unknown> => {
+    console.warn(`[SIMULATION] Intercepting ${options.method || 'GET'} ${endpoint}`);
 
     // Artificial latency
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -37,9 +37,9 @@ const mockHandler = async (endpoint: string, options: RequestInit = {}): Promise
             if (compId) {
                 if (endpoint.includes('/standings')) {
                     // TODO: Compute real standings from matches? For now, return mock.
-                    return { data: LocalStore.get('standings').filter((s: any) => s.competitionId === compId) };
+                    return { data: LocalStore.get<{ competitionId: string }>('standings').filter((s) => s.competitionId === compId) };
                 }
-                return LocalStore.findOne('competitions', (c: any) => c.id === compId);
+                return LocalStore.findOne<{ id: string }>('competitions', (c) => c.id === compId);
             }
             return LocalStore.get('competitions');
         }

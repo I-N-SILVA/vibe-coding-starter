@@ -17,17 +17,17 @@ export const LocalStore = {
         localStorage.setItem(`plyaz_${key}`, JSON.stringify(data));
     },
 
-    addItem<T extends Record<string, any>>(key: string, item: T): T & { id: string; created_at: string; updated_at: string } {
-        const items = this.get<any>(key);
+    addItem<T extends Record<string, unknown>>(key: string, item: T): T & { id: string; created_at: string; updated_at: string } {
+        const items = this.get<Record<string, unknown>>(key);
         const newItem = {
             ...item,
-            id: item.id || crypto.randomUUID(),
+            id: (item.id as string) || crypto.randomUUID(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-        };
+        } as T & { id: string; created_at: string; updated_at: string };
         items.push(newItem);
         this.set(key, items);
-        return newItem as any;
+        return newItem;
     },
 
     updateItem<T extends { id: string }>(key: string, id: string, updates: Partial<T>): T | null {
@@ -46,7 +46,9 @@ export const LocalStore = {
     },
 
     deleteItem(key: string, id: string): boolean {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const items = this.get<any>(key);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const filtered = items.filter((item: any) => item.id !== id);
         if (filtered.length === items.length) return false;
         this.set(key, filtered);

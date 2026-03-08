@@ -91,7 +91,7 @@ function LoginForm() {
                 router.push('/onboarding');
             }
         }
-    }, [user, authLoading, router]);
+    }, [user, authLoading, router, profile?.organization_id]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

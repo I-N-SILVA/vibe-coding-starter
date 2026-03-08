@@ -15,7 +15,7 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions): Promis
     log.info('Email send requested', { to, subject, htmlLength: html.length });
 
     if (process.env.NODE_ENV === 'development') {
-        console.log(`[Email] To: ${to} | Subject: ${subject}`);
+        console.warn(`[Email] To: ${to} | Subject: ${subject}`);
     }
 }
 

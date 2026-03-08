@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Structured Logger - PLYAZ League Manager
  * JSON output in production, formatted in development.

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { Profile } from '@/lib/supabase/types';
 import { LocalStore } from '@/lib/mock/store';
@@ -9,6 +9,14 @@ import { useRouter } from 'next/navigation';
 // ============================================
 // TYPES
 // ============================================
+
+interface MockAuthUser {
+    id: string;
+    email: string;
+    isActive: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
 
 interface AuthUser extends Partial<User> {
     id: string;
@@ -45,11 +53,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         // Load mock auth state from localStorage
-        const storedUser = LocalStore.findOne<any>('auth', (u) => u.isActive);
+        const storedUser = LocalStore.findOne<MockAuthUser>('auth', (u) => u.isActive);
 
         if (storedUser) {
             setUser(storedUser as unknown as AuthUser);
-            setSession({ user: storedUser } as any);
+            setSession({ user: storedUser } as unknown as Session);
 
             // Get profile
             const userProfile = LocalStore.findOne<Profile>('profiles', (p) => p.id === storedUser.id);
@@ -60,47 +68,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsAuthInitialized(true);
     }, []);
 
-    const signIn = async (email: string, password: string) => {
-        const mockUser = LocalStore.findOne<any>('auth', (u) => u.email === email);
+    const signIn = async (email: string, _password: string) => {
+        const mockUser = LocalStore.findOne<MockAuthUser>('auth', (u) => u.email === email);
         if (!mockUser) return { error: 'User not found' };
 
-        LocalStore.updateItem<any>('auth', mockUser.id, { isActive: true });
-        setUser(mockUser);
-        setSession({ user: mockUser } as any);
+        LocalStore.updateItem<MockAuthUser>('auth', mockUser.id, { isActive: true });
+        setUser(mockUser as unknown as AuthUser);
+        setSession({ user: mockUser } as unknown as Session);
         const userProfile = LocalStore.findOne<Profile>('profiles', (p) => p.id === mockUser.id);
         setProfile(userProfile);
 
         return { error: null };
     };
 
-    const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'organizer') => {
+    const signUp = async (email: string, _password: string, fullName: string, role: Profile['role'] = 'organizer') => {
         // Check if exists
-        const existing = LocalStore.findOne<any>('auth', (u) => u.email === email);
+        const existing = LocalStore.findOne<MockAuthUser>('auth', (u) => u.email === email);
         if (existing) return { error: 'Email already exists' };
 
-        const newUser = LocalStore.addItem<any>('auth', {
+        const newUser = LocalStore.addItem<{ email: string; isActive: boolean }>('auth', {
             email,
             isActive: true,
         });
 
-        const newProfile = LocalStore.addItem<Profile>('profiles', {
+        const newProfile = LocalStore.addItem<{ id: string; full_name: string; role: Profile['role']; created_at: string; updated_at: string }>('profiles', {
             id: newUser.id,
             full_name: fullName,
             role,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-        } as any);
+        });
 
-        setUser(newUser);
-        setProfile(newProfile);
-        setSession({ user: newUser } as any);
+        setUser(newUser as unknown as AuthUser);
+        setProfile(newProfile as unknown as Profile);
+        setSession({ user: newUser } as unknown as Session);
 
         return { error: null };
     };
 
     const signOut = async () => {
         if (user) {
-            LocalStore.updateItem<any>('auth', user.id, { isActive: false });
+            LocalStore.updateItem<MockAuthUser>('auth', user.id, { isActive: false });
         }
         setUser(null);
         setProfile(null);
@@ -108,7 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         router.push('/login');
     };
 
-    const forgotPassword = async (email: string) => {
+    const forgotPassword = async (_email: string) => {
         return { error: null };
     };
 

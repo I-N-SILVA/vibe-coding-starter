@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 
 interface EmailOptions {
     to: string;
@@ -7,15 +6,10 @@ interface EmailOptions {
 }
 
 // In a real application, this would use an email provider like Resend, SendGrid, etc.
-// For this example, we'll just log the email to the console.
+// For this example, we'll just warn the email to the console.
 export async function sendEmail({ to, subject, html }: EmailOptions) {
-    console.log('--- Sending Email ---');
-    console.log(`To: ${to}`);
-    console.log(`Subject: ${subject}`);
-    console.log('Body:');
-    console.log(html);
-    console.log('--- Email Sent (Logged to Console) ---');
-    
+    console.warn(`[Email] To: ${to} | Subject: ${subject} | Length: ${html.length}`);
+
     // Simulate a successful email send
     return { data: { id: 'mock_email_id' }, error: null };
 }

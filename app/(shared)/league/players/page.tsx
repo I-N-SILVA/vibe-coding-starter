@@ -10,6 +10,7 @@ import {
 } from '@/components/plyaz';
 import { PageLayout } from '@/components/plyaz/navigation/PageLayout';
 import { adminNavItems } from '@/lib/constants/navigation';
+import { useToast } from '@/components/providers';
 
 interface Player {
     id: string;
@@ -21,17 +22,6 @@ interface Player {
     stats?: Record<string, number>;
 }
 
-const DEMO_PLAYERS: Player[] = [
-    { id: '1', name: 'Marcus Johnson', position: 'ST', jersey_number: 9, team_name: 'FC United', status: 'active', stats: { goals: 12, assists: 5 } },
-    { id: '2', name: 'David Chen', position: 'GK', jersey_number: 1, team_name: 'City Rangers', status: 'active', stats: { goals: 0, assists: 0 } },
-    { id: '3', name: 'James Obi', position: 'CM', jersey_number: 8, team_name: 'Phoenix FC', status: 'active', stats: { goals: 4, assists: 11 } },
-    { id: '4', name: 'Ryan Williams', position: 'CB', jersey_number: 4, team_name: 'FC United', status: 'active', stats: { goals: 1, assists: 2 } },
-    { id: '5', name: 'Ahmed Hassan', position: 'LW', jersey_number: 11, team_name: 'Eagles', status: 'suspended', stats: { goals: 7, assists: 8 } },
-    { id: '6', name: 'Tom Clarke', position: 'RB', jersey_number: 2, team_name: 'Rovers', status: 'injured', stats: { goals: 0, assists: 4 } },
-    { id: '7', name: 'Kai Patel', position: 'CAM', jersey_number: 10, team_name: 'Athletic', status: 'active', stats: { goals: 9, assists: 14 } },
-    { id: '8', name: 'Leo Martinez', position: 'CDM', jersey_number: 6, team_name: 'City Rangers', status: 'active', stats: { goals: 2, assists: 6 } },
-];
-
 const statusColors: Record<string, string> = {
     active: 'bg-green-100 text-green-700',
     suspended: 'bg-red-100 text-red-700',
@@ -39,6 +29,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function PlayersAdminPage() {
+    const toast = useToast();
     const [players, setPlayers] = useState<Player[]>([]);
     const [search, setSearch] = useState('');
     const [filterTeam, setFilterTeam] = useState('');
@@ -48,11 +39,14 @@ export default function PlayersAdminPage() {
         fetch('/api/league/players')
             .then((r) => r.json())
             .then((data) => {
-                setPlayers(Array.isArray(data) ? data : DEMO_PLAYERS);
+                setPlayers(Array.isArray(data) ? data : []);
             })
-            .catch(() => setPlayers(DEMO_PLAYERS))
+            .catch((err: unknown) => {
+                toast.error(err instanceof Error ? err.message : 'Failed to load players');
+                setPlayers([]);
+            })
             .finally(() => setIsLoading(false));
-    }, []);
+    }, [toast]);
 
     const teams = [...new Set(players.map((p) => p.team_name).filter(Boolean))];
 

@@ -56,6 +56,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         .from('competitions')
         .update(parsed.data)
         .eq('id', id)
+        .eq('organization_id', auth.orgId)
         .select()
         .single();
 
@@ -75,7 +76,8 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
     const { error } = await supabase
         .from('competitions')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('organization_id', auth.orgId);
 
     if (error) {
         return apiError(error.message, 500);

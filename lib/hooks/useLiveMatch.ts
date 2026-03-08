@@ -58,7 +58,15 @@ export const useLiveMatch = (initialMatch: Match) => {
         return () => {
             channel.unsubscribe();
         };
-    }, [match?.id, match?.homeTeam?.id, match?.homeTeam?.shortName, match?.awayTeam?.id, match?.awayTeam?.shortName, info]);
+    }, [
+        match?.id,
+        match?.homeTeam,
+        match?.awayTeam,
+        match?.home_team_id,
+        match?.home_team?.short_name,
+        match?.away_team?.short_name,
+        info
+    ]);
 
     return {
         match,
