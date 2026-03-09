@@ -5,19 +5,21 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' *.vercel-analytics.com *.vercel-scripts.com *.cloudflareinsights.com vercel.live;
-  style-src 'self' 'unsafe-inline' api.fontshare.com fonts.googleapis.com;
-  img-src 'self' *.supabase.co blob: data:;
-  media-src *.s3.amazonaws.com *.shipixen.com;
-  connect-src 'self' *.supabase.co *.vercel-analytics.com *.vercel-scripts.com vercel.live api.fontshare.com fonts.googleapis.com cdn.fontshare.com;
-  font-src 'self' fonts.gstatic.com r2cdn.perplexity.ai cdn.fontshare.com data:;
-`;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.vercel-analytics.com https://*.vercel-scripts.com https://*.cloudflareinsights.com https://vercel.live;
+  style-src 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com;
+  img-src 'self' https://*.supabase.co blob: data:;
+  media-src 'self' https://*.s3.amazonaws.com https://*.shipixen.com;
+  connect-src 'self' https://*.supabase.co https://*.vercel-analytics.com https://*.vercel-scripts.com https://vercel.live https://api.fontshare.com https://fonts.googleapis.com https://cdn.fontshare.com;
+  font-src 'self' data: https://fonts.gstatic.com https://r2cdn.perplexity.ai https://cdn.fontshare.com https://api.fontshare.com;
+`
+  .replace(/\s{2,}/g, ' ')
+  .trim();
 
 const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
   {
     key: 'Content-Security-Policy',
-    value: ContentSecurityPolicy.replace(/\n/g, ''),
+    value: ContentSecurityPolicy,
   },
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
   {
