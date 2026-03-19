@@ -11,6 +11,7 @@ export function useTeams(competitionId?: string) {
     return useQuery({
         queryKey: queryKeys.teams(competitionId),
         queryFn: () => teamService.getTeams(competitionId),
+        staleTime: 30_000,
     });
 }
 
@@ -19,6 +20,7 @@ export function useTeam(id: string) {
         queryKey: queryKeys.team(id),
         queryFn: () => teamService.getTeam(id),
         enabled: !!id,
+        staleTime: 30_000,
     });
 }
 

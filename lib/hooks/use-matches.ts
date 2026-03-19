@@ -19,6 +19,7 @@ export function useMatches(params?: { status?: string; competitionId?: string })
     return useQuery({
         queryKey: queryKeys.matches(params),
         queryFn: () => matchService.getMatches(params),
+        staleTime: 30_000,
     });
 }
 
@@ -26,7 +27,8 @@ export function useLiveMatches() {
     return useQuery({
         queryKey: queryKeys.matches({ status: 'live' }),
         queryFn: () => matchService.getMatches({ status: 'live' }),
-        refetchInterval: 30000,
+        refetchInterval: 30_000,
+        staleTime: 10_000,
     });
 }
 
@@ -35,6 +37,7 @@ export function useMatch(id: string) {
         queryKey: queryKeys.match(id),
         queryFn: () => matchService.getMatch(id),
         enabled: !!id,
+        staleTime: 30_000,
     });
 }
 

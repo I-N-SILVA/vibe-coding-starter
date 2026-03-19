@@ -11,6 +11,7 @@ import {
     Badge,
 } from '@/components/plyaz';
 import { refereeNavItems } from '@/lib/constants/navigation';
+import { DiscoveryBoard } from '@/components/plyaz/DiscoveryBoard';
 
 /**
  * Referee Live Match Control Panel
@@ -102,6 +103,11 @@ export default function RefereeDashboard() {
                 label="Match Control"
                 title="Live Panel"
             />
+
+            {/* Find Tournaments - Discovery Board */}
+            <div className="mb-8">
+                <DiscoveryBoard type="competition" userRole="referee" />
+            </div>
 
             {/* Scoreboard */}
             <Card elevated className="mb-8 overflow-hidden">

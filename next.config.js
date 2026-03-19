@@ -3,6 +3,9 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 // You might need to insert additional domains in script-src if you are using external services
+// NOTE: 'unsafe-eval' is currently required for some development tools and specific 
+// framer-motion/lucide-react patterns. In a highly secure production environment, 
+// this should be reviewed and removed if possible by using pre-compiled templates.
 const ContentSecurityPolicy = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.vercel-analytics.com https://*.vercel-scripts.com https://*.cloudflareinsights.com https://vercel.live;

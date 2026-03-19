@@ -52,8 +52,11 @@ export default function AdminTeams() {
                 label="Management"
                 title="Registered Teams"
                 rightAction={
-                    <Button onClick={() => setIsAddModalOpen(true)}>
-                        Add New Team
+                    <Button 
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="h-10 md:h-9 text-xs"
+                    >
+                        + Add Team
                     </Button>
                 }
             />
@@ -63,7 +66,7 @@ export default function AdminTeams() {
                     variants={stagger}
                     initial="hidden"
                     animate="show"
-                    className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
                     {[1, 2, 3, 4, 5, 6].map((i) => (
                         <motion.div key={i} variants={fadeUp}>
@@ -76,7 +79,7 @@ export default function AdminTeams() {
                     variants={stagger}
                     initial="hidden"
                     animate="show"
-                    className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
                     {teams.map((team) => (
                         <motion.div key={team.id} variants={fadeUp}>

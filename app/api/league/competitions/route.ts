@@ -29,6 +29,20 @@ export async function POST(request: Request) {
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
+    const { orgId } = auth;
+
+    // Plan Enforcement
+    const { data: org } = await supabase.from('organizations').select('plan').eq('id', orgId).single();
+    const { count } = await supabase.from('competitions').select('*', { count: 'exact', head: true }).eq('organization_id', orgId);
+    const { checkPlanLimit } = await import('@/lib/billing/check-limits');
+    const limitCheck = await checkPlanLimit(org?.plan || 'free', 'competitions', count ?? 0);
+    
+    if (!limitCheck.allowed) {
+        return NextResponse.json({ 
+            error: limitCheck.message + ' Upgrade at /pricing',
+            upgrade_required: true 
+        }, { status: 403 });
+    }
 
     const parsed = await parseBody(request, createCompetitionApiSchema);
     if (parsed.error) return parsed.error;

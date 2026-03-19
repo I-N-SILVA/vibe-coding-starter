@@ -16,6 +16,7 @@ import {
 export default function OnboardingPage() {
     const router = useRouter();
     const { user, profile, isLoading } = useAuth();
+    const [role, setRole] = useState('organizer');
     const [leagueName, setLeagueName] = useState('');
     const [leagueType, setLeagueType] = useState('league');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,39 +35,57 @@ export default function OnboardingPage() {
                 router.push('/league');
                 return;
             }
-            if (profile && profile.role !== 'organizer') {
-                router.push('/league/public/matches');
-            }
+            // If they are not an organizer and already have a role set, they might have already completed onboarding
+            // But we can let them change it if they want until they join an org?
+            // Actually, if we just let them stay on onboarding until they submit, it's fine.
         }
     }, [user, profile, isLoading, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!leagueName.trim()) return;
+        if (role === 'organizer' && !leagueName.trim()) return;
 
         setIsSubmitting(true);
         setError(null);
 
         try {
-            // Derive slug from league name
-            const orgSlug = leagueName.toLowerCase()
-                .replace(/[^a-z0-9]/g, '-')
-                .replace(/-+/g, '-')
-                .replace(/^-|-$/g, '');
+            // 1. Update Profile Role via API
+            const roleRes = await fetch('/api/profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role })
+            });
 
-            // 1. Create Organization (and link to profile) via service
-            const org = await orgService.createOrganization(leagueName, orgSlug);
+            if (!roleRes.ok) {
+                const errorData = await roleRes.json();
+                throw new Error(errorData.error || 'Failed to update profile role');
+            }
 
-            // 2. Success screen
+            // 2. If organizer, create Organization and Competition
+            if (role === 'organizer') {
+                const orgSlug = leagueName.toLowerCase()
+                    .replace(/[^a-z0-9]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+
+                const org = await orgService.createOrganization(leagueName, orgSlug);
+
+                orgService.createCompetition(org.id, leagueName, leagueType)
+                    .catch(err => console.warn('Background league creation failed:', err));
+            }
+
+            // 3. Success screen
             setIsSuccess(true);
 
-            // 3. Create Initial League (Fire and forget)
-            orgService.createCompetition(org.id, leagueName, leagueType)
-                .catch(err => console.warn('Background league creation failed:', err));
-
-            // Redirect after celebration delay
+            // 4. Redirect after delay
             setTimeout(() => {
-                router.push('/league');
+                let destination = '/league';
+                if (role === 'manager') destination = '/league/coach/dashboard';
+                else if (role === 'player') destination = '/league/player/dashboard';
+                else if (role === 'referee') destination = '/league/referee';
+                else if (role === 'admin') destination = '/league';
+
+                router.push(destination);
                 router.refresh();
             }, 2500);
         } catch (err) {
@@ -200,36 +219,54 @@ export default function OnboardingPage() {
                                         <div className="flex-1 h-1 rounded-full bg-secondary-main/10" />
                                     </div>
 
-                                    <h1 className="text-2xl font-black text-primary-main mb-2">Create Your First League</h1>
+                                    <h1 className="text-2xl font-black text-primary-main mb-2">Welcome to PLYAZ</h1>
                                     <p className="text-secondary-main/50 text-sm mb-8">
-                                        Welcome to PLYAZ! Let&apos;s get your first competition set up and launch your organization.
+                                        Let&apos;s get your profile set up and launch your journey.
                                     </p>
 
                                     <form onSubmit={handleSubmit} className="space-y-6">
-                                        <Input
-                                            label="League Name"
-                                            placeholder="e.g., Sunday Premier League"
-                                            value={leagueName}
-                                            onChange={(e) => setLeagueName(e.target.value)}
-                                            autoFocus
-                                            required
-                                        />
-
                                         <div className="space-y-2">
                                             <Select
-                                                label="Competition Type"
-                                                value={leagueType}
-                                                onChange={(e) => setLeagueType(e.target.value)}
+                                                label="I am joining as..."
+                                                value={role}
+                                                onChange={(e) => setRole(e.target.value)}
                                                 options={[
-                                                    { value: 'league', label: 'League (Round Robin)' },
-                                                    { value: 'knockout', label: 'Cup (Knockout)' },
-                                                    { value: 'group_knockout', label: 'Group Stage + Knockout' },
+                                                    { value: 'organizer', label: 'League Organizer' },
+                                                    { value: 'manager', label: 'Team Manager / Coach' },
+                                                    { value: 'player', label: 'Player' },
+                                                    { value: 'referee', label: 'Referee' },
                                                 ]}
                                             />
-                                            <p className="text-[10px] text-secondary-main/40 uppercase font-medium tracking-wider">
-                                                💡 Recommended: League for season-long points
-                                            </p>
                                         </div>
+
+                                        {role === 'organizer' && (
+                                            <>
+                                                <Input
+                                                    label="League Name"
+                                                    placeholder="e.g., Sunday Premier League"
+                                                    value={leagueName}
+                                                    onChange={(e) => setLeagueName(e.target.value)}
+                                                    autoFocus
+                                                    required
+                                                />
+
+                                                <div className="space-y-2">
+                                                    <Select
+                                                        label="Competition Type"
+                                                        value={leagueType}
+                                                        onChange={(e) => setLeagueType(e.target.value)}
+                                                        options={[
+                                                            { value: 'league', label: 'League (Round Robin)' },
+                                                            { value: 'knockout', label: 'Cup (Knockout)' },
+                                                            { value: 'group_knockout', label: 'Group Stage + Knockout' },
+                                                        ]}
+                                                    />
+                                                    <p className="text-[10px] text-secondary-main/40 uppercase font-medium tracking-wider">
+                                                        💡 Recommended: League for season-long points
+                                                    </p>
+                                                </div>
+                                            </>
+                                        )}
 
                                         {error && (
                                             <p className="text-xs text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 italic">
@@ -241,7 +278,7 @@ export default function OnboardingPage() {
                                             type="submit"
                                             fullWidth
                                             size="lg"
-                                            disabled={!leagueName.trim() || isSubmitting}
+                                            disabled={(role === 'organizer' && !leagueName.trim()) || isSubmitting}
                                             isLoading={isSubmitting}
                                             className="h-14 text-sm font-bold tracking-widest"
                                         >

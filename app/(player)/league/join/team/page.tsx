@@ -9,9 +9,11 @@ import {
     Button,
     Input,
 } from '@/components/plyaz';
+import { useToast } from '@/components/providers/ToastProvider';
 
 export default function JoinTeamPage() {
     const router = useRouter();
+    const toast = useToast();
     const searchParams = useSearchParams();
     const inviteCode = searchParams?.get('code') || '';
 
@@ -30,6 +32,7 @@ export default function JoinTeamPage() {
         setIsLoading(true);
         // In production, this would validate the invite code against the API
         setTimeout(() => {
+            toast.success('Joined team successfully! 🤝');
             setResult({ name: 'Demo Team', code: joinCode });
             setStep('success');
             setIsLoading(false);
@@ -37,6 +40,11 @@ export default function JoinTeamPage() {
     };
 
     const handleCreateTeam = async () => {
+        if (!newTeam.name || newTeam.name.length < 3) {
+            toast.error('Team name must be at least 3 characters');
+            return;
+        }
+
         setIsLoading(true);
         try {
             const res = await fetch('/api/league/teams', {
@@ -46,10 +54,15 @@ export default function JoinTeamPage() {
             });
             if (res.ok) {
                 const team = await res.json();
+                toast.success('Team created successfully! 🏟️');
                 setResult(team);
                 setStep('success');
+            } else {
+                const error = await res.json();
+                toast.error(error.message || 'Failed to create team');
             }
-        } catch (err) {
+        } catch (err: any) {
+            toast.error(err.message || 'An unexpected error occurred');
             console.error(err);
         } finally {
             setIsLoading(false);

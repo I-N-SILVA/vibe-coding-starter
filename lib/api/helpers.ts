@@ -74,3 +74,29 @@ export async function parseBody<T>(
         return { data: null, error: apiError('Invalid JSON body', 400) };
     }
 }
+
+/**
+ * Verify that a resource (by ID and Table) belongs to the user's organization.
+ */
+export async function validateResourceOwner(
+    supabase: SupabaseClient,
+    table: string,
+    id: string,
+    orgId: string
+) {
+    const { data: resource, error } = await supabase
+        .from(table)
+        .select('organization_id')
+        .eq('id', id)
+        .single();
+
+    if (error || !resource) {
+        return apiError('Resource not found', 404);
+    }
+
+    if (resource.organization_id !== orgId) {
+        return apiError('Forbidden: Resource belongs to another organization', 403);
+    }
+
+    return null;
+}

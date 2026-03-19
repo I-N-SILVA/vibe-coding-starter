@@ -18,6 +18,9 @@ export const createTeamApiSchema = z.object({
     secondary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color').optional(),
     logo_url: z.string().url().optional().nullable(),
     manager_id: z.string().uuid().optional().nullable(),
+    is_recruiting_players: z.boolean().optional(),
+    needed_positions: z.array(z.string()).optional(),
+    recruitment_message: z.string().max(500).optional().nullable(),
 });
 
 export const updateTeamApiSchema = createTeamApiSchema.partial();
@@ -38,6 +41,9 @@ export const createCompetitionApiSchema = z.object({
     max_teams: z.number().int().min(2).max(128).optional(),
     rules: z.record(z.string(), z.unknown()).optional(),
     status: z.enum(['draft', 'active', 'completed', 'archived']).optional(),
+    is_recruiting_referees: z.boolean().optional(),
+    recruitment_message: z.string().max(500).optional().nullable(),
+    registration_fee: z.number().min(0).optional(),
 });
 
 export const updateCompetitionApiSchema = createCompetitionApiSchema.partial();

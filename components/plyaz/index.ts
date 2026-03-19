@@ -4,6 +4,7 @@
 // Core UI
 export { Button } from './Button';
 export type { ButtonProps } from './Button';
+export { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 
 // Cards
 export { Card, CardHeader, CardTitle, CardContent, CardFooter } from './Card';

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     PageLayout,
     Card,
@@ -14,8 +15,10 @@ import {
     Input
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
-import { matchService } from '@/services/match';
 import { playerService } from '@/services/player';
+import { createClient } from '@/lib/supabase/client';
+
+const supabase = createClient();
 
 /**
  * Referee Live Match Protocol (High Fidelity)
@@ -25,12 +28,10 @@ import { playerService } from '@/services/player';
 export default function RefereeLiveConsole({ params }: { params: Promise<{ id: string }> }) {
     const { id: matchId } = use(params);
     const router = useRouter();
+    const queryClient = useQueryClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [match, setMatch] = useState<any>(null);
     const [clock, setClock] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
 
     const [eventModal, setEventModal] = useState<{ open: boolean, type: string, team: 'home' | 'away' }>({
         open: false,
@@ -42,41 +43,86 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
     const [selectedPlayer, setSelectedPlayer] = useState<string>('');
     const [notes, setNotes] = useState('');
 
-    // Initial Load
-    useEffect(() => {
-        const loadMatch = async () => {
-            try {
-                const data = await matchService.getMatch(matchId);
-                if (data) {
-                    setMatch(data);
-                    setClock(data.match_time || 0);
-                    setIsRunning(data.status === 'live');
-                }
-            } catch (err) {
-                console.error('Failed to load match:', err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        loadMatch();
-    }, [matchId]);
+    // --- Data Fetching with React Query polling ---
+    const { data: match, isLoading } = useQuery({
+        queryKey: ['match', matchId],
+        queryFn: async () => {
+            const res = await fetch(`/api/league/matches/${matchId}`);
+            if (!res.ok) throw new Error('Failed to fetch match');
+            return res.json();
+        },
+    });
 
-    // Clock Logic
+    const { data: events = [] } = useQuery({
+        queryKey: ['matchEvents', matchId],
+        queryFn: async () => {
+            const res = await fetch(`/api/league/matches/${matchId}/events`);
+            if (!res.ok) throw new Error('Failed to fetch events');
+            return res.json();
+        },
+    });
+
+    // --- Real-time Subscriptions ---
+    useEffect(() => {
+        if (!matchId) return;
+
+        const channel = supabase
+            .channel(`referee-live-${matchId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'matches',
+                    filter: `id=eq.${matchId}`,
+                },
+                () => {
+                    queryClient.invalidateQueries({ queryKey: ['match', matchId] });
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'match_events',
+                    filter: `match_id=eq.${matchId}`,
+                },
+                () => {
+                    queryClient.invalidateQueries({ queryKey: ['matchEvents', matchId] });
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [matchId, queryClient]);
+
+    // Handle Clock Sync
+    useEffect(() => {
+        if (match && !isLoading) {
+            // Using match.match_time string, parsing to int. Default to 0.
+            const serverTime = parseInt(match.match_time || '0', 10) || 0;
+            // Only sync local clock if not running or if it's way off
+            if (!isRunning || Math.abs(serverTime - clock) > 10) {
+                setClock(serverTime);
+            }
+            setIsRunning(match.status === 'live');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [match?.status, match?.match_time, isLoading]);
+
+    // Local Timer Logic
     useEffect(() => {
         let interval: NodeJS.Timeout;
         if (isRunning) {
             interval = setInterval(() => {
-                setClock(prev => {
-                    const next = prev + 1;
-                    if (next % 10 === 0) { // Sync every 10 seconds for performance
-                        matchService.updateScore(matchId, match.homeScore, match.awayScore);
-                    }
-                    return next;
-                });
+                setClock(prev => prev + 1);
             }, 1000);
         }
         return () => clearInterval(interval);
-    }, [isRunning, matchId, match]);
+    }, [isRunning]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -84,10 +130,57 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
+    // --- Mutations ---
+    const startMatchMutation = useMutation({
+        mutationFn: async () => {
+            const res = await fetch(`/api/league/matches/${matchId}/start`, { method: 'POST' });
+            if (!res.ok) throw new Error('Failed to start match');
+            return res.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['match', matchId] });
+            setIsRunning(true);
+        }
+    });
+
+    const endMatchMutation = useMutation({
+        mutationFn: async () => {
+            const res = await fetch(`/api/league/matches/${matchId}/end`, { method: 'POST' });
+            if (!res.ok) throw new Error('Failed to end match');
+            return res.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['match', matchId] });
+            router.push('/league/matches');
+        }
+    });
+
+    const addEventMutation = useMutation({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mutationFn: async (eventData: any) => {
+            const res = await fetch(`/api/league/matches/${matchId}/events`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData)
+            });
+            if (!res.ok) throw new Error('Failed to add event');
+            return res.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['matchEvents', matchId] });
+            queryClient.invalidateQueries({ queryKey: ['match', matchId] });
+            setEventModal({ open: false, type: '', team: 'home' });
+        }
+    });
+
     const handleOpenEventModal = async (type: string, team: 'home' | 'away') => {
         const teamId = team === 'home' ? match.home_team_id : match.away_team_id;
-        const players = await playerService.getPlayers(teamId);
-        setTeamPlayers(players);
+        try {
+            const players = await playerService.getPlayers(teamId);
+            setTeamPlayers(players);
+        } catch (e) {
+            console.error('Failed to load players', e);
+        }
         setEventModal({ open: true, type, team });
         setSelectedPlayer('');
         setNotes('');
@@ -96,49 +189,67 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
     const handleRecordEvent = async () => {
         if (!selectedPlayer) return;
 
-        const eventData = {
-            matchId,
-            playerId: selectedPlayer,
-            type: eventModal.type,
-            minute: Math.floor(clock / 60),
-            notes
+        const typeMap: Record<string, string> = {
+            '⚽ Goal': 'goal',
+            '🟡 Yellow Card': 'yellow_card',
+            '🔴 Red Card': 'red_card',
+            '🔄 Substitution': 'substitution'
         };
 
-        await matchService.addMatchEvent(eventData);
+        const mappedType = typeMap[eventModal.type] || 'goal';
+        const teamId = eventModal.team === 'home' ? match.home_team_id : match.away_team_id;
+        const player = teamPlayers.find(p => p.id === selectedPlayer);
 
-        if (eventModal.type === '⚽ Goal') {
-            const newHomeScore = eventModal.team === 'home' ? match.homeScore + 1 : match.homeScore;
-            const newAwayScore = eventModal.team === 'away' ? match.awayScore + 1 : match.awayScore;
-            await matchService.updateScore(matchId, newHomeScore, newAwayScore);
-            setMatch({ ...match, homeScore: newHomeScore, awayScore: newAwayScore });
+        const eventData = {
+            type: mappedType,
+            team_id: teamId,
+            player_id: selectedPlayer,
+            player_name: player?.full_name || player?.name || 'Unknown',
+            minute: Math.floor(clock / 60),
+            details: notes ? { notes } : {}
+        };
+
+        addEventMutation.mutate(eventData);
+
+        // Update score optimistically for goals
+        if (mappedType === 'goal') {
+            const newHomeScore = eventModal.team === 'home' ? (match.home_score || 0) + 1 : (match.home_score || 0);
+            const newAwayScore = eventModal.team === 'away' ? (match.away_score || 0) + 1 : (match.away_score || 0);
+
+            // Only optimistic update locally; server updates score in match triggers, 
+            // but we might need to manually call score API if needed according to previous code
+            // Actually, the new prompt asks events to just call /events.
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            queryClient.setQueryData(['match', matchId], (old: any) => ({
+                ...old,
+                home_score: newHomeScore,
+                away_score: newAwayScore
+            }));
         }
-
-        // Refresh match to get updated event list (mocking local update)
-        const updatedMatch = await matchService.getMatch(matchId);
-        setMatch(updatedMatch);
-
-        setEventModal({ open: false, type: '', team: 'home' });
     };
 
-    const toggleMatchStatus = async () => {
+    const toggleMatchStatus = () => {
         if (!isRunning) {
-            await matchService.startMatch(matchId);
-            setIsRunning(true);
-            setMatch({ ...match, status: 'live' });
+            startMatchMutation.mutate();
         } else {
+            // Note: the prompt requested counting up from 0 and "Start Match", but no "Pause Match" API requirement.
+            // We just stop the local timer. Ideally a "pause" endpoint would be called.
             setIsRunning(false);
         }
     };
 
-    const handleEndMatch = async () => {
+    const handleEndMatch = () => {
         if (confirm('Are you sure you want to end the match?')) {
-            await matchService.endMatch(matchId);
-            router.push('/league/matches');
+            endMatchMutation.mutate();
         }
     };
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading Console...</div>;
     if (!match) return <div className="min-h-screen flex items-center justify-center">Match Not Found</div>;
+
+    const homeScore = match.home_score ?? 0;
+    const awayScore = match.away_score ?? 0;
 
     return (
         <PageLayout navItems={adminNavItems} title="MATCH CONTROL">
@@ -146,19 +257,19 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
             <div className="sticky top-0 z-30 -mx-4 px-4 py-6 bg-black text-white shadow-2xl border-b border-orange-500/20">
                 <div className="flex items-center justify-between max-w-lg mx-auto">
                     <div className="text-center w-24">
-                        <div className="text-2xl font-black mb-1 truncate">{match.homeTeam?.shortName || match.homeTeam?.name.substring(0, 3)}</div>
+                        <div className="text-2xl font-black mb-1 truncate">{match.home_team?.short_name || match.home_team?.name?.substring(0, 3)}</div>
                         <div className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Home</div>
                     </div>
 
                     <div className="text-center">
                         <div className="flex items-center gap-6 mb-2">
-                            <span className="text-6xl font-black tabular-nums">{match.homeScore}</span>
+                            <span className="text-6xl font-black tabular-nums">{homeScore}</span>
                             <span className="text-2xl text-orange-500 font-bold">:</span>
-                            <span className="text-6xl font-black tabular-nums">{match.awayScore}</span>
+                            <span className="text-6xl font-black tabular-nums">{awayScore}</span>
                         </div>
                         <div className="flex items-center justify-center gap-2">
                             <Badge variant={isRunning ? 'success' : 'secondary'} size="sm" className="font-mono px-3">
-                                {isRunning ? '● LIVE' : 'PAUSED'}
+                                {isRunning ? '● LIVE' : (match.status === 'scheduled' ? 'SCHEDULED' : (match.status === 'finished' ? 'FINISHED' : 'PAUSED'))}
                             </Badge>
                             <span className="font-mono text-xl text-orange-500 font-black tracking-tighter">
                                 {formatTime(clock)}
@@ -167,7 +278,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
                     </div>
 
                     <div className="text-center w-24">
-                        <div className="text-2xl font-black mb-1 truncate">{match.awayTeam?.shortName || match.awayTeam?.name.substring(0, 3)}</div>
+                        <div className="text-2xl font-black mb-1 truncate">{match.away_team?.short_name || match.away_team?.name?.substring(0, 3)}</div>
                         <div className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Away</div>
                     </div>
                 </div>
@@ -178,7 +289,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
                 <div className="grid grid-cols-2 gap-4">
                     {/* Home Actions */}
                     <div className="space-y-3">
-                        <h4 className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase text-center">{match.homeTeam?.name}</h4>
+                        <h4 className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase text-center">{match.home_team?.name}</h4>
                         <Button
                             fullWidth
                             className="h-20 bg-green-600 hover:bg-green-700 text-white border-0 rounded-2xl flex flex-col gap-1 items-center justify-center"
@@ -217,7 +328,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
 
                     {/* Away Actions */}
                     <div className="space-y-3">
-                        <h4 className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase text-center">{match.awayTeam?.name}</h4>
+                        <h4 className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase text-center">{match.away_team?.name}</h4>
                         <Button
                             fullWidth
                             className="h-20 bg-green-600 hover:bg-green-700 text-white border-0 rounded-2xl flex flex-col gap-1 items-center justify-center"
@@ -262,6 +373,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
                             <Button
                                 className={`flex-1 h-14 rounded-2xl font-black tracking-widest ${isRunning ? 'bg-orange-600 hover:bg-orange-700' : 'bg-black'} text-white`}
                                 onClick={toggleMatchStatus}
+                                disabled={startMatchMutation.isPending}
                             >
                                 {isRunning ? '⏸ PAUSE CLOCK' : '▶ START PERIOD'}
                             </Button>
@@ -269,8 +381,9 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
                                 variant="secondary"
                                 className="h-14 px-6 rounded-2xl border-gray-200 text-gray-400"
                                 onClick={handleEndMatch}
+                                disabled={endMatchMutation.isPending}
                             >
-                                <NavIcons.Settings className="w-5 h-5" />
+                                <NavIcons.Settings className="w-5 h-5" /> END
                             </Button>
                         </div>
                     </CardContent>
@@ -281,7 +394,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
                     <h3 className="text-[10px] font-black tracking-[0.3em] text-gray-400 uppercase">Precision Match Feed</h3>
                     <AnimatePresence>
                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        {match.events?.slice(0, 5).map((event: any, i: number) => (
+                        {events.slice(0, 10).map((event: any, i: number) => (
                             <motion.div
                                 key={event.id || i}
                                 initial={{ opacity: 0, x: -20 }}
@@ -293,16 +406,16 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm font-black">{event.type}</span>
+                                        <span className="text-sm font-black capitalize">{event.type.replace('_', ' ')}</span>
                                         <Badge variant="secondary" size="sm" className="text-[8px]">{event.team_id === match.home_team_id ? 'HOME' : 'AWAY'}</Badge>
                                     </div>
-                                    <p className="text-xs text-gray-500 font-bold">{event.player?.full_name}</p>
+                                    <p className="text-xs text-gray-500 font-bold">{event.player_name || event.player?.full_name}</p>
                                 </div>
-                                {event.notes && <div className="text-[10px] text-gray-300">📄</div>}
+                                {event.details?.notes && <div className="text-[10px] text-gray-300">📄</div>}
                             </motion.div>
                         ))}
                     </AnimatePresence>
-                    {(!match.events || match.events.length === 0) && (
+                    {events.length === 0 && (
                         <div className="text-center py-12 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100">
                             <p className="text-[10px] font-black tracking-widest text-gray-300 uppercase">Waiting for first blood...</p>
                         </div>
@@ -319,7 +432,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
                 <div className="space-y-6 pt-4">
                     <div className="grid grid-cols-1 gap-4">
                         <label className="text-[10px] font-black tracking-widest text-gray-400 uppercase">Select Player</label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
                             {teamPlayers.map(p => (
                                 <button
                                     key={p.id}
@@ -330,9 +443,12 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
                                         }`}
                                 >
                                     <div className="text-[8px] font-black text-orange-500 mb-1">#{p.jersey_number || '??'}</div>
-                                    <div className="text-xs font-bold truncate">{p.full_name}</div>
+                                    <div className="text-xs font-bold truncate">{p.full_name || p.name}</div>
                                 </button>
                             ))}
+                            {teamPlayers.length === 0 && (
+                                <div className="col-span-2 text-xs text-gray-400 italic text-center py-4">No players found</div>
+                            )}
                         </div>
                     </div>
 
@@ -353,11 +469,11 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
                         </Button>
                         <Button
                             fullWidth
-                            disabled={!selectedPlayer}
+                            disabled={!selectedPlayer || addEventMutation.isPending}
                             className="bg-black text-white"
                             onClick={handleRecordEvent}
                         >
-                            Confirm Event
+                            {addEventMutation.isPending ? 'Saving...' : 'Confirm Event'}
                         </Button>
                     </div>
                 </div>

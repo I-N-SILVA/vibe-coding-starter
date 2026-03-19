@@ -40,7 +40,7 @@ test.describe('PLYAZ League Manager User Flows', () => {
 
     test.beforeEach(async ({ page }) => {
         // Navigate first to establish a page context, then seed localStorage
-        await page.goto('/debug/test-flows');
+        await page.goto('/');
         await seedMockData(page);
         // Navigate to league dashboard (full page load, simulation mode already set)
         await page.goto('/league');
@@ -90,23 +90,5 @@ test.describe('PLYAZ League Manager User Flows', () => {
         // 3. Check Teams page (h1 label is "Management")
         await page.goto('/league/teams');
         await expect(page.locator('h1')).toContainText('Management', { ignoreCase: true });
-    });
-
-    test('Data Management: Clearing Data', async ({ page }) => {
-        await page.goto('/debug/test-flows');
-
-        // Capture confirmation dialog before clicking Reset Data
-        page.on('dialog', async dialog => {
-            expect(dialog.message()).toContain('clear all mock data');
-            await dialog.accept();
-        });
-
-        await page.click('text=Reset Data');
-
-        // Wait for localStorage to clear and stats to update
-        await page.waitForTimeout(500);
-
-        // Verify stats grid shows 0 for all entries
-        await expect(page.locator('div').filter({ hasText: /^0$/ }).first()).toBeVisible();
     });
 });

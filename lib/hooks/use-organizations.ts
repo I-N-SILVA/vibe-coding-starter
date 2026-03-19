@@ -12,6 +12,18 @@ export function useOrganization() {
     return useQuery({
         queryKey: queryKeys.organization,
         queryFn: () => orgService.getOrganization('current'),
+        staleTime: 60_000,
+    });
+}
+
+export function useOrganizations() {
+    return useQuery({
+        queryKey: ['organizations'],
+        queryFn: async () => {
+            const data = await apiClient.get('/api/league/organizations');
+            return Array.isArray(data) ? data : data ? [data] : [];
+        },
+        staleTime: 60_000,
     });
 }
 
@@ -19,6 +31,7 @@ export function useActivity() {
     return useQuery({
         queryKey: queryKeys.activity,
         queryFn: () => orgService.getActivity(),
+        staleTime: 30_000,
     });
 }
 

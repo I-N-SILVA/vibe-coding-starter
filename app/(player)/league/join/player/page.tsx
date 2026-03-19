@@ -11,6 +11,7 @@ import {
     Select,
     Badge,
 } from '@/components/plyaz';
+import { useToast } from '@/components/providers/ToastProvider';
 
 const POSITIONS = [
     { value: 'GK', label: 'Goalkeeper' },
@@ -30,6 +31,7 @@ const POSITIONS = [
 
 export default function PlayerOnboardingPage() {
     const router = useRouter();
+    const toast = useToast();
     const searchParams = useSearchParams();
     const teamCode = searchParams?.get('code') || '';
 
@@ -46,6 +48,11 @@ export default function PlayerOnboardingPage() {
     });
 
     const handleSubmit = async () => {
+        if (!player.name) {
+            toast.error('Please enter your full name');
+            return;
+        }
+
         setIsLoading(true);
         try {
             const res = await fetch('/api/league/players', {
@@ -56,12 +63,15 @@ export default function PlayerOnboardingPage() {
                     jersey_number: parseInt(player.jersey_number) || null,
                 }),
             });
-            if (res.ok || res.status === 500) {
-                // Try even if Supabase fails — demo friendly
+            if (res.ok) {
+                toast.success('Player profile created! ⚽');
                 setStep('success');
+            } else {
+                const error = await res.json();
+                toast.error(error.message || 'Failed to create profile');
             }
-        } catch {
-            setStep('success'); // Demo fallback
+        } catch (err: any) {
+            toast.error(err.message || 'An unexpected error occurred');
         } finally {
             setIsLoading(false);
         }

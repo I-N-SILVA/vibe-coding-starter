@@ -25,7 +25,7 @@ export type Profile = {
     email: string | null;
     full_name: string | null;
     avatar_url: string | null;
-    role: 'admin' | 'organizer' | 'referee' | 'manager' | 'player' | 'fan';
+    role: 'admin' | 'organizer' | 'referee' | 'manager' | 'player' | 'fan' | 'coach';
     organization_id: string | null;
     approval_status: 'approved' | 'pending' | 'rejected';
     phone: string | null;
@@ -53,6 +53,8 @@ export type Competition = {
     rules: Record<string, unknown>;
     settings: Record<string, unknown>;
     invite_code: string | null;
+    is_recruiting_referees: boolean;
+    recruitment_message: string | null;
     created_at: string;
     updated_at: string;
 };
@@ -68,6 +70,9 @@ export type Team = {
     secondary_color: string;
     manager_id: string | null;
     invite_code: string | null;
+    is_recruiting_players: boolean;
+    needed_positions: string[];
+    recruitment_message: string | null;
     created_at: string;
     updated_at: string;
 };
@@ -225,6 +230,23 @@ export type AuditLog = {
     action: string;
     details: Record<string, unknown>;
     created_at: string;
+};
+
+export type Application = {
+    id: string;
+    applicant_id: string;
+    applicant_role: 'player' | 'referee';
+    target_id: string;
+    target_type: 'team' | 'competition';
+    status: 'pending' | 'accepted' | 'rejected';
+    message: string | null;
+    created_at: string;
+    updated_at: string;
+
+    // Joined
+    applicant?: Profile;
+    team?: Team;
+    competition?: Competition;
 };
 
 // ============================================
@@ -544,6 +566,8 @@ export type Database = {
                     rules?: Record<string, unknown>;
                     settings?: Record<string, unknown>;
                     invite_code?: string | null;
+                    is_recruiting_referees?: boolean;
+                    recruitment_message?: string | null;
                     created_at?: string;
                     updated_at?: string;
                 };
@@ -571,6 +595,9 @@ export type Database = {
                     secondary_color?: string;
                     manager_id?: string | null;
                     invite_code?: string | null;
+                    is_recruiting_players?: boolean;
+                    needed_positions?: string[];
+                    recruitment_message?: string | null;
                     created_at?: string;
                     updated_at?: string;
                 };
@@ -847,6 +874,30 @@ export type Database = {
                 };
                 Update: Partial<PlayerCompetitionStats>;
                 Relationships: [];
+            };
+            applications: {
+                Row: Application;
+                Insert: {
+                    id?: string;
+                    applicant_id: string;
+                    applicant_role: 'player' | 'referee';
+                    target_id: string;
+                    target_type: 'team' | 'competition';
+                    status?: 'pending' | 'accepted' | 'rejected';
+                    message?: string | null;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: Partial<Application>;
+                Relationships: [
+                    {
+                        foreignKeyName: "applications_applicant_id_fkey";
+                        columns: ["applicant_id"];
+                        isOneToOne: false;
+                        referencedRelation: "profiles";
+                        referencedColumns: ["id"];
+                    }
+                ];
             };
             audit_logs: {
                 Row: AuditLog;

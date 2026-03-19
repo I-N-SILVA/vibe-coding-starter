@@ -12,6 +12,7 @@ import {
     Select,
     Badge,
 } from '@/components/plyaz';
+import { useToast } from '@/components/providers/ToastProvider';
 import { playerNavItems } from '@/lib/constants/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -33,8 +34,8 @@ const POSITIONS = [
 
 export default function PlayerProfilePage() {
     const { profile, updateProfile } = useAuth();
+    const toast = useToast();
     const [isLoading, setIsLoading] = useState(false);
-    const [saved, setSaved] = useState(false);
 
     const [formData, setFormData] = useState({
         full_name: profile?.full_name || '',
@@ -46,7 +47,6 @@ export default function PlayerProfilePage() {
 
     const handleSave = async () => {
         setIsLoading(true);
-        setSaved(false);
         try {
             const { error } = await updateProfile({
                 full_name: formData.full_name,
@@ -57,9 +57,13 @@ export default function PlayerProfilePage() {
             });
 
             if (!error) {
-                setSaved(true);
-                setTimeout(() => setSaved(false), 3000);
+                toast.success('Profile updated successfully! ✨');
+            } else {
+                const message = typeof error === 'string' ? error : (error as any).message;
+                toast.error(message || 'Failed to update profile');
             }
+        } catch (err: any) {
+            toast.error(err.message || 'An unexpected error occurred');
         } finally {
             setIsLoading(false);
         }
@@ -144,15 +148,6 @@ export default function PlayerProfilePage() {
                                 >
                                     Save Changes
                                 </Button>
-                                {saved && (
-                                    <motion.span
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        className="text-green-600 text-sm font-bold flex items-center gap-2"
-                                    >
-                                        ✓ Profile Updated Successfully
-                                    </motion.span>
-                                )}
                             </div>
                         </div>
                     </CardContent>

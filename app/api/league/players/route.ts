@@ -71,6 +71,7 @@ export async function PUT(request: Request) {
         .from('players')
         .update(parsed.data)
         .eq('id', id)
+        .eq('organization_id', auth.orgId)
         .select()
         .single();
 
@@ -91,7 +92,7 @@ export async function DELETE(request: Request) {
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
 
-    const { error } = await supabase.from('players').delete().eq('id', id);
+    const { error } = await supabase.from('players').delete().eq('id', id).eq('organization_id', auth.orgId);
 
     if (error) {
         return apiError(error.message, 500);

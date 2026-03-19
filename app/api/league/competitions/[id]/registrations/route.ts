@@ -12,12 +12,29 @@ export async function GET(_request: Request, { params }: RouteParams) {
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
 
-    const { data, error } = await supabase
+    let query = supabase
         .from('competition_registrations')
-        .select('*')
+        .select('*, team:teams(name)')
         .eq('competition_id', id)
         .eq('organization_id', auth.orgId)
-        .order('created_at', { ascending: false });
+        .order('registered_at', { ascending: false });
+
+    if (auth.user.role === 'player') {
+        const { data: players } = await supabase
+            .from('players')
+            .select('id')
+            .eq('profile_id', auth.userId);
+
+        const playerIds = players?.map(p => p.id) || [];
+
+        if (playerIds.length === 0) {
+            return NextResponse.json([]);
+        }
+
+        query = query.in('player_id', playerIds);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
         return apiError(error.message, 500);

@@ -47,7 +47,8 @@ export function rateLimit(
 
     // Extract identifier: prefer X-Forwarded-For (Vercel), fallback to generic key
     const forwarded = request.headers.get('x-forwarded-for');
-    const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
+    // Harden IP parsing: take only the first valid-looking IP, strip whitespace
+    const ip = forwarded?.split(',')[0]?.trim().replace(/[^\d.a-fA-F:]/g, '') || 'unknown';
     const key = `${ip}:${new URL(request.url).pathname}`;
 
     const now = Date.now();

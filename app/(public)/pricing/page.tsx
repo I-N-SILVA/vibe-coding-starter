@@ -5,12 +5,14 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/plyaz';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useOrganization } from '@/lib/hooks';
 
 import { fadeUpLarge } from '@/lib/animations';
 
 const TIERS = [
   {
     name: 'Academy Free',
+    id: 'free',
     price: '£0',
     desc: 'Perfect for small tournaments or individual team tracking.',
     features: [
@@ -20,11 +22,12 @@ const TIERS = [
       'Basic League Standings',
       'Public Player Profiles',
     ],
-    cta: 'Start for Free',
+    cta: 'Current Plan',
     featured: false,
   },
   {
     name: 'Pro League',
+    id: 'pro',
     price: '£29',
     priceSuffix: '/mo',
     desc: 'The complete toolkit for professional league organizers.',
@@ -38,10 +41,13 @@ const TIERS = [
     ],
     cta: 'Go Pro Now',
     featured: true,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY,
   },
   {
-    name: 'Enterprise / Assocation',
-    price: 'Custom',
+    name: 'Elite Association',
+    id: 'elite',
+    price: '£99',
+    priceSuffix: '/mo',
     desc: 'White-labeled solutions for large associations and governing bodies.',
     features: [
       'Multiple Multi-tenant Orgs',
@@ -50,12 +56,40 @@ const TIERS = [
       'Dedicated Account Manager',
       'API Access',
     ],
-    cta: 'Contact Sales',
+    cta: 'Upgrade to Elite',
     featured: false,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE_YEARLY,
   },
 ];
 
 export default function PricingPage() {
+  const { data: org, isLoading: orgLoading } = useOrganization();
+  const [loadingPrice, setLoadingPrice] = React.useState<string | null>(null);
+
+  const handleCheckout = async (priceId: string) => {
+    if (!org) {
+      window.location.href = '/login?redirect=/pricing';
+      return;
+    }
+
+    try {
+      setLoadingPrice(priceId);
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId }),
+      });
+      const { url, error } = await res.json();
+      if (url) window.location.href = url;
+      else throw new Error(error || 'Failed to create checkout session');
+    } catch (err) {
+      console.error(err);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setLoadingPrice(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <nav className="px-6 py-6 flex justify-between items-center border-b border-gray-50 bg-white sticky top-0 z-50">
@@ -90,50 +124,59 @@ export default function PricingPage() {
 
       <section className="px-6 py-24 md:py-32 bg-gray-50">
         <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-          {TIERS.map((tier, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              viewport={{ once: true }}
-              className={`p-8 md:p-10 rounded-3xl flex flex-col h-full ${tier.featured
+          {TIERS.map((tier, i) => {
+            const isCurrent = org?.plan === tier.id;
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true }}
+                className={`p-8 md:p-10 rounded-3xl flex flex-col h-full ${tier.featured
                   ? 'bg-gray-900 text-white shadow-2xl shadow-orange-500/10 ring-4 ring-orange-500/20'
                   : 'bg-white border border-gray-100'
-                }`}
-            >
-              <div className="mb-10">
-                <h3 className={`text-xs font-bold tracking-widest uppercase mb-6 ${tier.featured ? 'text-orange-500' : 'text-gray-400'}`}>
-                  {tier.name}
-                </h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black">{tier.price}</span>
-                  {tier.priceSuffix && <span className={`text-sm ${tier.featured ? 'text-gray-400' : 'text-gray-400'}`}>{tier.priceSuffix}</span>}
-                </div>
-                <p className={`mt-4 text-sm leading-relaxed ${tier.featured ? 'text-gray-400' : 'text-gray-500'}`}>
-                  {tier.desc}
-                </p>
-              </div>
-
-              <ul className="space-y-4 mb-10 flex-1">
-                {tier.features.map((f) => (
-                  <li key={f} className="flex gap-3 text-sm font-medium">
-                    <span className="text-orange-500 font-bold">✓</span>
-                    <span className={tier.featured ? 'text-gray-300' : 'text-gray-600'}>{f}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                variant={tier.featured ? 'primary' : 'secondary'}
-                fullWidth
-                onClick={() => window.location.href = tier.price === 'Custom' ? '/contact' : '/login'}
-                className="h-14 font-black uppercase tracking-widest text-xs"
+                  }`}
               >
-                {tier.cta}
-              </Button>
-            </motion.div>
-          ))}
+                <div className="mb-10">
+                  <h3 className={`text-xs font-bold tracking-widest uppercase mb-6 ${tier.featured ? 'text-orange-500' : 'text-gray-400'}`}>
+                    {tier.name}
+                  </h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-black">{tier.price}</span>
+                    {tier.priceSuffix && <span className={`text-sm ${tier.featured ? 'text-gray-400' : 'text-gray-400'}`}>{tier.priceSuffix}</span>}
+                  </div>
+                  <p className={`mt-4 text-sm leading-relaxed ${tier.featured ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {tier.desc}
+                  </p>
+                </div>
+
+                <ul className="space-y-4 mb-10 flex-1">
+                  {tier.features.map((f) => (
+                    <li key={f} className="flex gap-3 text-sm font-medium">
+                      <span className="text-orange-500 font-bold">✓</span>
+                      <span className={tier.featured ? 'text-gray-300' : 'text-gray-600'}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button
+                  variant={tier.featured ? 'primary' : 'secondary'}
+                  fullWidth
+                  onClick={() => {
+                    if (tier.id === 'free') return;
+                    if (tier.price === 'Custom') window.location.href = '/contact';
+                    else if (tier.priceId) handleCheckout(tier.priceId);
+                  }}
+                  disabled={isCurrent || (tier.id === 'free' && !!org) || !!loadingPrice}
+                  isLoading={loadingPrice === tier.priceId}
+                  className="h-14 font-black uppercase tracking-widest text-xs"
+                >
+                  {isCurrent ? 'Current Plan' : tier.cta}
+                </Button>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 

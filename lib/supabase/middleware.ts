@@ -60,6 +60,42 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
+    // Redirect authenticated users away from login to their dashboard based on role
+    if (user && (pathname === '/' || pathname.startsWith('/login'))) {
+        try {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+            const role = profile?.role;
+            const url = request.nextUrl.clone();
+
+            switch (role) {
+                case 'organizer':
+                case 'admin':
+                    url.pathname = '/league';
+                    break;
+                case 'manager':
+                case 'coach': // handle alias just in case
+                    url.pathname = '/league/coach/dashboard';
+                    break;
+                case 'player':
+                    url.pathname = '/league/player/dashboard';
+                    break;
+                case 'referee':
+                    url.pathname = '/league/referee';
+                    break;
+                default:
+                    url.pathname = '/league';
+            }
+            return NextResponse.redirect(url);
+        } catch (e) {
+            log.warn('Middleware auth redirect failed', { error: String(e) });
+        }
+    }
+
     // If user is authenticated and accessing admin routes, check for organization
     // Skip this check for onboarding page to avoid redirect loop
     if (user && pathname.startsWith('/league') && !pathname.startsWith('/league/public') && !pathname.startsWith('/league/create')) {

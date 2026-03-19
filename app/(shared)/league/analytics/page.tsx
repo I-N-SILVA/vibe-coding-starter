@@ -22,6 +22,18 @@ import {
     BarChart,
     Bar,
 } from 'recharts';
+import dynamic from 'next/dynamic';
+
+// Dynamic imports for charts to improve bundle size and LCP
+const DynamicLineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false });
+const DynamicBarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { ssr: false });
+const DynamicResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
+const DynamicXAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false });
+const DynamicYAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false });
+const DynamicTooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
+const DynamicLine = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false });
+const DynamicBar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false });
+const DynamicCartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false });
 
 const DEMO_COMPETITIONS = [
     { id: '1', name: 'Premier Division' },
@@ -103,28 +115,28 @@ export default function AnalyticsDashboard() {
                         <p className="text-[10px] text-gray-400 uppercase mt-1">Total goals per match day</p>
                     </div>
                     <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={goalsPerRound}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
-                                <XAxis
+                        <DynamicResponsiveContainer width="100%" height="100%">
+                            <DynamicLineChart data={goalsPerRound}>
+                                <DynamicCartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
+                                <DynamicXAxis
                                     dataKey="round"
                                     tick={{ fontSize: 10, fill: '#9CA3AF' }}
                                     axisLine={false}
                                     tickLine={false}
                                 />
-                                <YAxis
+                                <DynamicYAxis
                                     tick={{ fontSize: 10, fill: '#9CA3AF' }}
                                     axisLine={false}
                                     tickLine={false}
                                 />
-                                <Tooltip
+                                <DynamicTooltip
                                     contentStyle={{
                                         borderRadius: '8px',
                                         border: 'none',
                                         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
                                     }}
                                 />
-                                <Line
+                                <DynamicLine
                                     type="monotone"
                                     dataKey="goals"
                                     stroke="#F97316"
@@ -132,8 +144,8 @@ export default function AnalyticsDashboard() {
                                     dot={{ r: 4, fill: '#F97316', strokeWidth: 2, stroke: '#fff' }}
                                     activeDot={{ r: 6, strokeWidth: 0 }}
                                 />
-                            </LineChart>
-                        </ResponsiveContainer>
+                            </DynamicLineChart>
+                        </DynamicResponsiveContainer>
                     </div>
                 </Card>
 
@@ -146,16 +158,16 @@ export default function AnalyticsDashboard() {
                         <p className="text-[10px] text-gray-400 uppercase mt-1">Goals Scored vs Conceded</p>
                     </div>
                     <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={teamData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
-                                <XAxis
+                        <DynamicResponsiveContainer width="100%" height="100%">
+                            <DynamicBarChart data={teamData}>
+                                <DynamicCartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
+                                <DynamicXAxis
                                     dataKey="name"
                                     tick={{ fontSize: 10, fill: '#9CA3AF' }}
                                     axisLine={false}
                                     tickLine={false}
                                 />
-                                <Tooltip
+                                <DynamicTooltip
                                     cursor={{ fill: '#F9FAFB' }}
                                     contentStyle={{
                                         borderRadius: '8px',
@@ -163,10 +175,10 @@ export default function AnalyticsDashboard() {
                                         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
                                     }}
                                 />
-                                <Bar dataKey="goals" fill="#000000" radius={[4, 4, 0, 0]} barSize={20} />
-                                <Bar dataKey="conceded" fill="#F97316" radius={[4, 4, 0, 0]} barSize={20} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                                <DynamicBar dataKey="goals" fill="#000000" radius={[4, 4, 0, 0]} barSize={20} />
+                                <DynamicBar dataKey="conceded" fill="#F97316" radius={[4, 4, 0, 0]} barSize={20} />
+                            </DynamicBarChart>
+                        </DynamicResponsiveContainer>
                     </div>
                     <div className="mt-4 flex gap-4 justify-center">
                         <div className="flex items-center gap-2">

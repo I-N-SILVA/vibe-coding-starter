@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation';
  * Future-proofs for real Supabase Auth roles
  */
 
-export type UserRole = 'admin' | 'referee' | 'fan' | 'player' | 'guest';
+export type UserRole = 'admin' | 'referee' | 'fan' | 'player' | 'guest' | 'coach';
 
 interface UseRoleResult {
     role: UserRole;

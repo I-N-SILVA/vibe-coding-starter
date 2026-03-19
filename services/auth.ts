@@ -1,18 +1,23 @@
 import { LocalStore } from '@/lib/mock/store';
 import { repositories } from '@/lib/repositories';
 import type { Profile } from '@/lib/supabase/types';
+import { createClient } from '@/lib/supabase/client';
+
+const isSupabaseConfigured = () => {
+    return !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+};
 
 /**
  * Authentication Service
- * Simulates authentication logic using localStorage.
- * Integrates with the repository layer for profile management.
+ * Uses Supabase Auth if configured, otherwise falls back to mock localStorage.
  */
 export const authService = {
-    /**
-     * Get current session
-     */
     async getSession() {
-        // Auth store remains separate for now as it simulates Supabase Auth
+        if (isSupabaseConfigured()) {
+            const supabase = createClient();
+            return supabase.auth.getSession();
+        }
+
         const user = LocalStore.findOne<any>('auth', u => u.isActive);
         if (!user) return { data: { session: null }, error: null };
         return {
@@ -23,10 +28,21 @@ export const authService = {
         };
     },
 
-    /**
-     * Get current user and their profile
-     */
     async getCurrentUser() {
+        if (isSupabaseConfigured()) {
+            const supabase = createClient();
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error || !user) return { user: null, profile: null };
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            return { user, profile };
+        }
+
         const user = LocalStore.findOne<any>('auth', u => u.isActive);
         if (!user) return { user: null, profile: null };
 
@@ -34,10 +50,12 @@ export const authService = {
         return { user, profile };
     },
 
-    /**
-     * Sign in with email and password
-     */
     async signIn(email: string, password: string) {
+        if (isSupabaseConfigured()) {
+            const supabase = createClient();
+            return supabase.auth.signInWithPassword({ email, password });
+        }
+
         const user = LocalStore.findOne<any>('auth', u => u.email === email);
         if (!user) return { data: { user: null }, error: { message: 'Invalid credentials' } as any };
 
@@ -45,20 +63,30 @@ export const authService = {
         return { data: { user, session: { user } as any }, error: null };
     },
 
-    /**
-     * Sign up with custom metadata
-     */
     async signUp(email: string, password: string, fullName: string, role: string = 'organizer') {
+        if (isSupabaseConfigured()) {
+            const supabase = createClient();
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: fullName,
+                        role: role
+                    }
+                }
+            });
+            return { data, error };
+        }
+
         const existing = LocalStore.findOne<any>('auth', u => u.email === email);
         if (existing) return { data: { user: null }, error: { message: 'User already exists' } as any };
 
-        // 1. Create Auth User
         const newUser = LocalStore.addItem<any>('auth', {
             email,
             isActive: true,
         });
 
-        // 2. Create Profile via Repository
         await repositories.profile.create({
             id: newUser.id,
             full_name: fullName,
@@ -68,10 +96,12 @@ export const authService = {
         return { data: { user: newUser, session: { user: newUser } as any }, error: null };
     },
 
-    /**
-     * Sign out
-     */
     async signOut() {
+        if (isSupabaseConfigured()) {
+            const supabase = createClient();
+            return supabase.auth.signOut();
+        }
+
         const user = LocalStore.findOne<any>('auth', u => u.isActive);
         if (user) {
             LocalStore.updateItem<any>('auth', user.id, { isActive: false });

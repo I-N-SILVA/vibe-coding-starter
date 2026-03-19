@@ -13,6 +13,7 @@ export function usePlayers(teamId: string) {
         queryKey: queryKeys.players(teamId),
         queryFn: () => playerService.getPlayers(teamId),
         enabled: !!teamId,
+        staleTime: 30_000,
     });
 }
 
@@ -20,6 +21,20 @@ export function useAllPlayers() {
     return useQuery({
         queryKey: queryKeys.players('all'),
         queryFn: () => playerService.getPlayers(),
+        staleTime: 30_000,
+    });
+}
+
+export function useCurrentPlayer(profileId?: string) {
+    return useQuery({
+        queryKey: ['player', 'current', profileId],
+        queryFn: async () => {
+            if (!profileId) return null;
+            const players = await playerService.getPlayers();
+            return players.find((p: any) => p.profile_id === profileId) || null;
+        },
+        enabled: !!profileId,
+        staleTime: 30_000,
     });
 }
 
@@ -28,6 +43,7 @@ export function usePlayer(teamId: string, playerId: string) {
         queryKey: queryKeys.player(teamId, playerId),
         queryFn: () => playerService.getPlayer(playerId),
         enabled: !!playerId,
+        staleTime: 30_000,
     });
 }
 

@@ -17,10 +17,27 @@ import {
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
 import { useToast } from '@/components/providers';
+import { useOrganization } from '@/lib/hooks';
 import { stagger, fadeUp } from '@/lib/animations';
 
 export default function AdminSettings() {
-    const { success } = useToast();
+    const { success, error: toastError } = useToast();
+    const { data: org } = useOrganization();
+    const [isPortalLoading, setIsPortalLoading] = useState(false);
+    
+    const handlePortal = async () => {
+        try {
+            setIsPortalLoading(true);
+            const res = await fetch('/api/stripe/portal', { method: 'POST' });
+            const { url, error } = await res.json();
+            if (url) window.location.href = url;
+            else throw new Error(error || 'Failed to open billing portal');
+        } catch (err: any) {
+            toastError(err.message || 'Something went wrong');
+        } finally {
+            setIsPortalLoading(false);
+        }
+    };
     const [notifications, setNotifications] = useState({
         matchAlerts: true,
         goals: true,
@@ -48,6 +65,34 @@ export default function AdminSettings() {
                     animate="show"
                     className="space-y-6"
                 >
+                    {/* Subscription & Billing */}
+                    <motion.div variants={fadeUp}>
+                        <Card elevated className="border-orange-100 bg-orange-50/30">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle className="text-sm font-bold tracking-widest uppercase">Subscription & Billing</CardTitle>
+                                <span className="px-3 py-1 rounded-full bg-orange-500 text-[10px] font-black uppercase text-white tracking-widest">
+                                    {org?.plan || 'Free'} Plan
+                                </span>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex items-center justify-between py-2">
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-900">Manage Subscription</p>
+                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider">Update payment method or change plans</p>
+                                    </div>
+                                    <Button 
+                                        variant="secondary" 
+                                        size="sm" 
+                                        onClick={handlePortal}
+                                        isLoading={isPortalLoading}
+                                    >
+                                        Manage
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+
                     {/* General Configuration */}
                     <motion.div variants={fadeUp}>
                         <Card elevated>

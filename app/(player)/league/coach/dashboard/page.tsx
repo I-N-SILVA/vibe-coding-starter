@@ -10,6 +10,10 @@ import {
 } from '@/components/plyaz';
 import { coachNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUp } from '@/lib/animations';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { useTeams } from '@/lib/hooks';
+import { RecruitmentSettings } from '@/components/plyaz/RecruitmentSettings';
+import { ApplicationsInbox } from '@/components/plyaz/ApplicationsInbox';
 import { MOCK_TEAM, MOCK_NEXT_MATCH, MOCK_SQUAD, MOCK_MATCHES } from '@/lib/mock/fixtures';
 
 // Derive top performers and recent results from centralized fixtures
@@ -24,11 +28,17 @@ const topPerformers = MOCK_SQUAD.slice(0, 3).map(p => ({
 const recentResults = MOCK_MATCHES.slice(0, 3);
 
 export default function CoachDashboard() {
+    const { profile } = useAuth();
+    const { data: teams = [], isLoading: teamsLoading } = useTeams();
+
+    // Find the team managed by this user
+    const managedTeam = teams.find(t => t.manager_id === profile?.id) || teams[0]; // Fallback to first team for demo
+
     return (
         <PageLayout navItems={coachNavItems} title="COACH HUB">
             <PageHeader
                 label="Coaching Dashboard"
-                title={`${MOCK_TEAM.name}`}
+                title={`${managedTeam?.name || MOCK_TEAM.name}`}
             />
 
             <motion.div
@@ -147,6 +157,35 @@ export default function CoachDashboard() {
                                 </div>
                             ))}
                         </div>
+                    </motion.section>
+                </div>
+
+                {/* Recruitment Marketplace Controls */}
+                <div className="grid md:grid-cols-2 gap-8">
+                    <motion.section variants={fadeUp}>
+                        <h2 className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 mb-4 flex items-center gap-3">
+                            Recruitment
+                            <div className="h-px flex-1 bg-gray-100" />
+                        </h2>
+                        {managedTeam && (
+                            <RecruitmentSettings
+                                type="team"
+                                id={managedTeam.id}
+                                initialData={{
+                                    is_recruiting: managedTeam.is_recruiting_players || false,
+                                    recruitment_message: managedTeam.recruitment_message || '',
+                                    needed_positions: managedTeam.needed_positions || []
+                                }}
+                            />
+                        )}
+                    </motion.section>
+
+                    <motion.section variants={fadeUp}>
+                        <h2 className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 mb-4 flex items-center gap-3">
+                            Incoming Applications
+                            <div className="h-px flex-1 bg-gray-100" />
+                        </h2>
+                        <ApplicationsInbox targetType="team" />
                     </motion.section>
                 </div>
 

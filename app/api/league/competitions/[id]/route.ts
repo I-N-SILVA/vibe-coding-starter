@@ -31,6 +31,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const parsed = await parseBody(request, updateCompetitionApiSchema);
     if (parsed.error) return parsed.error;
 
+    // Plan Enforcement: Registration Fees
+    if (parsed.data.registration_fee !== undefined && (parsed.data.registration_fee ?? 0) > 0) {
+        const { data: org } = await supabase.from('organizations').select('plan').eq('id', auth.orgId).single();
+        const { canFeature } = await import('@/lib/billing/check-limits');
+        if (!canFeature(org?.plan || 'free', 'canChargeRegistrationFees')) {
+            return apiError('Registration fees require a Pro or Elite plan', 403);
+        }
+    }
+
     // ------------------------------------------------------------------
     // 3.5  Competition lifecycle: require >= 2 teams to activate
     // ------------------------------------------------------------------

@@ -69,9 +69,4 @@ export const matchService = {
 *   **Row Level Security (RLS)**: Enabled on all tables. Policies ensure users can only access data within their own organization or public competitions.
 *   **Triggers**: Database triggers maintain secondary tables (e.g., `profiles`, `standings`) to ensure data consistency without manual intervention.
 
-## Debugging
 
-A dedicated debug dashboard is available at `/debug/supabase` (development only) to verify:
-*   Supabase environment variables.
-*   Session status.
-*   Database connectivity & query execution.

@@ -12,6 +12,7 @@ import {
     Badge,
 } from '@/components/plyaz';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useToast } from '@/components/providers/ToastProvider';
 
 const STEPS = [
     { id: 1, label: 'Basics', icon: '📋' },
@@ -29,6 +30,7 @@ const FORMATS = [
 export default function CreateLeaguePage() {
     const router = useRouter();
     const { profile } = useAuth();
+    const toast = useToast();
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [form, setForm] = useState({
@@ -64,11 +66,8 @@ export default function CreateLeaguePage() {
 
         setIsSubmitting(true);
         try {
-            // Destructure to remove fields that don't belong in the top-level schema
-            const { ...formData } = form;
-
             const payload = {
-                ...formData,
+                ...form,
                 organization_id: profile?.organization_id || 'demo-org-001',
                 status: 'active',
                 settings: {
@@ -82,10 +81,16 @@ export default function CreateLeaguePage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
+
             if (res.ok) {
+                toast.success('League created successfully! ⚡');
                 router.push('/league');
+            } else {
+                const error = await res.json();
+                toast.error(error.message || 'Failed to create league');
             }
-        } catch (err) {
+        } catch (err: any) {
+            toast.error(err.message || 'An unexpected error occurred');
             console.error(err);
         } finally {
             setIsSubmitting(false);

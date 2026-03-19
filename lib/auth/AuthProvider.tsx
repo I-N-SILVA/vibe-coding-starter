@@ -52,23 +52,85 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const router = useRouter();
 
     useEffect(() => {
-        // Load mock auth state from localStorage
-        const storedUser = LocalStore.findOne<MockAuthUser>('auth', (u) => u.isActive);
+        let subscription: { unsubscribe: () => void } | null = null;
 
-        if (storedUser) {
-            setUser(storedUser as unknown as AuthUser);
-            setSession({ user: storedUser } as unknown as Session);
+        const initAuth = async () => {
+            const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-            // Get profile
-            const userProfile = LocalStore.findOne<Profile>('profiles', (p) => p.id === storedUser.id);
-            setProfile(userProfile);
-        }
+            if (isSupabaseConfigured) {
+                const { createClient } = await import('@/lib/supabase/client');
+                const supabase = createClient();
 
-        setIsLoading(false);
-        setIsAuthInitialized(true);
+                // Get initial session
+                const { data: { session } } = await supabase.auth.getSession();
+
+                if (session?.user) {
+                    setUser(session.user as AuthUser);
+                    setSession(session);
+
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    setProfile(profile as Profile);
+                }
+
+                // Listen for changes
+                const { data } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+                    setSession(currentSession);
+                    setUser((currentSession?.user as AuthUser) || null);
+
+                    if (currentSession?.user) {
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', currentSession.user.id)
+                            .single();
+                        setProfile(profile as Profile);
+                    } else {
+                        setProfile(null);
+                    }
+                });
+
+                subscription = data.subscription;
+            } else {
+                // Mock logic
+                const storedUser = LocalStore.findOne<MockAuthUser>('auth', (u) => u.isActive);
+
+                if (storedUser) {
+                    setUser(storedUser as unknown as AuthUser);
+                    setSession({ user: storedUser } as unknown as Session);
+
+                    const userProfile = LocalStore.findOne<Profile>('profiles', (p) => p.id === storedUser.id);
+                    setProfile(userProfile);
+                }
+            }
+
+            setIsLoading(false);
+            setIsAuthInitialized(true);
+        };
+
+        initAuth();
+
+        return () => {
+            if (subscription) {
+                subscription.unsubscribe();
+            }
+        };
     }, []);
 
-    const signIn = async (email: string, _password: string) => {
+    const signIn = async (email: string, password: string) => {
+        const { createClient } = await import('@/lib/supabase/client');
+        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (isSupabaseConfigured) {
+            const supabase = createClient();
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            return { error: error?.message || null };
+        }
+
         const mockUser = LocalStore.findOne<MockAuthUser>('auth', (u) => u.email === email);
         if (!mockUser) return { error: 'User not found' };
 
@@ -81,7 +143,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error: null };
     };
 
-    const signUp = async (email: string, _password: string, fullName: string, role: Profile['role'] = 'organizer') => {
+    const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'organizer') => {
+        const { createClient } = await import('@/lib/supabase/client');
+        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (isSupabaseConfigured) {
+            const supabase = createClient();
+            const { error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: fullName,
+                        role: role
+                    }
+                }
+            });
+            return { error: error?.message || null };
+        }
+
         // Check if exists
         const existing = LocalStore.findOne<MockAuthUser>('auth', (u) => u.email === email);
         if (existing) return { error: 'Email already exists' };
@@ -107,21 +187,55 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const signOut = async () => {
-        if (user) {
-            LocalStore.updateItem<MockAuthUser>('auth', user.id, { isActive: false });
+        const { createClient } = await import('@/lib/supabase/client');
+        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (isSupabaseConfigured) {
+            const supabase = createClient();
+            await supabase.auth.signOut();
+        } else {
+            if (user) {
+                LocalStore.updateItem<MockAuthUser>('auth', user.id, { isActive: false });
+            }
+            setUser(null);
+            setProfile(null);
+            setSession(null);
         }
-        setUser(null);
-        setProfile(null);
-        setSession(null);
         router.push('/login');
     };
 
-    const forgotPassword = async (_email: string) => {
+    const forgotPassword = async (email: string) => {
+        const { createClient } = await import('@/lib/supabase/client');
+        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (isSupabaseConfigured) {
+            const supabase = createClient();
+            const { error } = await supabase.auth.resetPasswordForEmail(email);
+            return { error: error?.message || null };
+        }
         return { error: null };
     };
 
     const updateProfile = async (updates: Partial<Profile>) => {
         if (!user) return { error: 'Not authenticated' };
+
+        const { createClient } = await import('@/lib/supabase/client');
+        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (isSupabaseConfigured) {
+            const supabase = createClient();
+            const { data, error } = await supabase
+                .from('profiles')
+                .update(updates)
+                .eq('id', user.id)
+                .select()
+                .single();
+
+            if (error) return { error: error.message };
+            if (data) setProfile(data as Profile);
+            return { error: null };
+        }
+
         const updated = LocalStore.updateItem<Profile>('profiles', user.id, updates);
         if (updated) setProfile(updated);
         return { error: null };

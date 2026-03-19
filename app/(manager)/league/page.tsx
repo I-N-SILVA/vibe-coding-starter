@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCompetitions, useLiveMatches, useMatches, useTeams } from '@/lib/hooks';
+import { useCompetitions, useLiveMatches, useMatches, useTeams, useOrganization } from '@/lib/hooks';
 import { motion } from 'framer-motion';
 import {
     PageLayout,
@@ -23,6 +23,8 @@ import {
 import { adminNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUp } from '@/lib/animations';
 import { useToast } from '@/components/providers';
+import { RecruitmentSettings } from '@/components/plyaz/RecruitmentSettings';
+import { ApplicationsInbox } from '@/components/plyaz/ApplicationsInbox';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -36,6 +38,10 @@ export default function AdminDashboard() {
     const { data: upcomingMatches = [], isLoading: upcomingLoading, error: upcomingError } = useMatches({ status: 'upcoming' });
     const { data: teams = [], isLoading: teamsLoading } = useTeams();
     const [isCreating, setIsCreating] = useState(false);
+    const [selectedCompId, setSelectedCompId] = useState<string | null>(null);
+
+    const { data: org } = useOrganization();
+    const selectedComp = competitions.find(c => c.id === (selectedCompId || competitions[0]?.id));
 
     const isLoading = compsLoading || liveLoading || upcomingLoading;
 
@@ -125,6 +131,28 @@ export default function AdminDashboard() {
     return (
         <PageLayout navItems={adminNavItems} title="PLYAZ">
             <PageHeader label="Dashboard" title="Welcome back" />
+
+            {/* Upgrade Banner */}
+            {!isLoading && org?.plan === 'free' && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mb-8 p-6 rounded-3xl bg-gray-900 border border-orange-500/30 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-orange-500/5"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center flex-shrink-0">
+                            <NavIcons.Trophy className="text-white w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold tracking-tight mb-1">Unlock Pro Capabilities</h3>
+                            <p className="text-xs text-gray-400">Unlimited teams, fixture auto-scheduler, and advanced referee tools.</p>
+                        </div>
+                    </div>
+                    <Button variant="primary" size="sm" onClick={() => router.push('/pricing')}>
+                        Upgrade Now
+                    </Button>
+                </motion.div>
+            )}
 
             {/* Stats Grid */}
             <motion.section
@@ -248,6 +276,53 @@ export default function AdminDashboard() {
                     </Button>
                 </div>
             </motion.section>
+
+            {/* Recruitment Management */}
+            <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, duration: 0.4 }}
+                className="grid md:grid-cols-2 gap-8 mb-10"
+            >
+                <section>
+                    <h2 className="text-[10px] font-medium tracking-[0.25em] uppercase text-secondary-main/30 mb-4">
+                        Referee Recruitment
+                    </h2>
+                    {competitions.length > 0 ? (
+                        <div className="space-y-4">
+                            <Select
+                                label="Select tournament to manage"
+                                options={competitions.map(c => ({ value: c.id, label: c.name }))}
+                                value={selectedCompId || competitions[0]?.id}
+                                onChange={(e) => setSelectedCompId(e.target.value)}
+                            />
+                            {selectedComp && (
+                                <RecruitmentSettings
+                                    type="competition"
+                                    id={selectedComp.id}
+                                    initialData={{
+                                        is_recruiting: selectedComp.is_recruiting_referees || false,
+                                        recruitment_message: selectedComp.recruitment_message || ''
+                                    }}
+                                />
+                            )}
+                        </div>
+                    ) : (
+                        <Card className="bg-secondary-main/5 border-dashed">
+                            <CardContent className="p-8 text-center text-secondary-main/40 text-xs">
+                                Create a tournament to enable referee recruitment.
+                            </CardContent>
+                        </Card>
+                    )}
+                </section>
+
+                <section>
+                    <h2 className="text-[10px] font-medium tracking-[0.25em] uppercase text-secondary-main/30 mb-4">
+                        Incoming Referee Applications
+                    </h2>
+                    <ApplicationsInbox targetType="competition" />
+                </section>
+            </motion.div>
 
             {/* Upcoming Matches & Recent Activity */}
             <motion.div

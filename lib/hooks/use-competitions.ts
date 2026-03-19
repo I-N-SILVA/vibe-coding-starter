@@ -20,6 +20,7 @@ export function useCompetitions() {
     return useQuery({
         queryKey: queryKeys.competitions,
         queryFn: () => orgService.getCompetitions(),
+        staleTime: 30_000,
     });
 }
 
@@ -28,6 +29,7 @@ export function useCompetition(id: string) {
         queryKey: queryKeys.competition(id),
         queryFn: () => orgService.getCompetition(id),
         enabled: !!id,
+        staleTime: 30_000,
     });
 }
 
@@ -74,6 +76,7 @@ export function useVenues() {
     return useQuery({
         queryKey: queryKeys.venues,
         queryFn: () => apiClient.get('/api/league/venues'),
+        staleTime: 60_000, // Venues change rarely
     });
 }
 
@@ -107,6 +110,7 @@ export function useCategories() {
     return useQuery({
         queryKey: queryKeys.categories,
         queryFn: () => apiClient.get('/api/league/categories'),
+        staleTime: 60_000, // Categories change rarely
     });
 }
 

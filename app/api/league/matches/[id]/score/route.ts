@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
+import { getUserOrgId, apiError, parseBody, validateResourceOwner } from '@/lib/api/helpers';
 import { updateScoreApiSchema } from '@/lib/api/validation';
 import { rateLimit } from '@/lib/api/rate-limit';
 
@@ -14,6 +14,9 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
+
+    const validationError = await validateResourceOwner(supabase, 'matches', id, auth.orgId);
+    if (validationError) return validationError;
 
     const parsed = await parseBody(request, updateScoreApiSchema);
     if (parsed.error) return parsed.error;
