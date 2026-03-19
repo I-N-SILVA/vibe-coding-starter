@@ -90,13 +90,9 @@ export default function RootLayout({
           href="https://api.fontshare.com/v2/css?f[]=general-sans@200,300,400,500,600,700&display=swap"
           rel="stylesheet"
         />
-        <style>
-          {`
-          :root, :before, :after {
-            ${style.join(';')}
-          }
-        `}
-        </style>
+        <style dangerouslySetInnerHTML={{ 
+          __html: `:root, :before, :after { ${style.join('; ')} }` 
+        }} />
         <link rel="icon" type="image/png" sizes="112x112" href="/favicon.png" />
         <link rel="icon" type="image/png" href="/static/branding/logo-circle.png" />
         <link rel="apple-touch-icon" href="/static/branding/logo-circle.png" />

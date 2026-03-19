@@ -10,10 +10,11 @@ const ContentSecurityPolicy = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.vercel-analytics.com https://*.vercel-scripts.com https://*.cloudflareinsights.com https://vercel.live;
   style-src 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com;
+  style-src-elem 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com;
   img-src 'self' https://*.supabase.co blob: data:;
   media-src 'self' https://*.s3.amazonaws.com https://*.shipixen.com;
   connect-src 'self' https://*.supabase.co https://*.vercel-analytics.com https://*.vercel-scripts.com https://vercel.live https://api.fontshare.com https://fonts.googleapis.com https://cdn.fontshare.com;
-  font-src 'self' data: https://fonts.gstatic.com https://r2cdn.perplexity.ai https://cdn.fontshare.com https://api.fontshare.com;
+  font-src 'self' data: https://fonts.gstatic.com https://cdn.fontshare.com https://api.fontshare.com;
 `
   .replace(/\s{2,}/g, ' ')
   .trim();
@@ -62,6 +63,9 @@ const securityHeaders = [
 module.exports = () => {
   const plugins = [withBundleAnalyzer];
   return plugins.reduce((acc, next) => next(acc), {
+    experimental: {
+      outputFileTracingRoot: __dirname,
+    },
     reactStrictMode: true,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {

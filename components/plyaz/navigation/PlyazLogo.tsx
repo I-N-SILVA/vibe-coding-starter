@@ -16,7 +16,7 @@ export const PlyazLogo: React.FC<PlyazLogoProps> = ({ className }) => (
                 className="object-contain"
             />
         </div>
-        <span className="text-sm font-bold tracking-[0.2em] text-gray-900 group-hover:text-accent-main transition-colors duration-300 uppercase">
+        <span className="text-sm font-bold tracking-[0.2em] text-gray-900 dark:text-white group-hover:text-accent-main transition-colors duration-300 uppercase">
             PLYAZ
         </span>
     </div>
