@@ -67,11 +67,11 @@ export default function PlayerOnboardingPage() {
                 toast.success('Player profile created! ⚽');
                 setStep('success');
             } else {
-                const error = await res.json();
-                toast.error(error.message || 'Failed to create profile');
+                const errorData = await res.json() as { message?: string };
+                toast.error(errorData.message || 'Failed to create profile');
             }
-        } catch (err: any) {
-            toast.error(err.message || 'An unexpected error occurred');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'An unexpected error occurred');
         } finally {
             setIsLoading(false);
         }

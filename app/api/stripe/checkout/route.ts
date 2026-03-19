@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getAuthUser, getUserOrgId, apiError } from '@/lib/api/helpers';
+import { getUserOrgId, apiError } from '@/lib/api/helpers';
 import { getStripe } from '@/lib/billing/stripe';
 
 export async function POST(request: Request) {
@@ -58,8 +58,8 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json({ url: session.url });
-    } catch (err: any) {
+    } catch (err) {
         console.error('Stripe Checkout Error:', err);
-        return apiError(err.message || 'Internal Server Error', 500);
+        return apiError(err instanceof Error ? err.message : 'Internal Server Error', 500);
     }
 }

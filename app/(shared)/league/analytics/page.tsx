@@ -22,18 +22,17 @@ import {
     BarChart,
     Bar,
 } from 'recharts';
-import dynamic from 'next/dynamic';
 
-// Dynamic imports for charts to improve bundle size and LCP
-const DynamicLineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false });
-const DynamicBarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { ssr: false });
-const DynamicResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
-const DynamicXAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false });
-const DynamicYAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false });
-const DynamicTooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
-const DynamicLine = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false });
-const DynamicBar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false });
-const DynamicCartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false });
+// Use components directly from recharts
+const DynamicLineChart = LineChart;
+const DynamicBarChart = BarChart;
+const DynamicResponsiveContainer = ResponsiveContainer;
+const DynamicXAxis = XAxis;
+const DynamicYAxis = YAxis;
+const DynamicTooltip = Tooltip;
+const DynamicLine = Line;
+const DynamicBar = Bar;
+const DynamicCartesianGrid = CartesianGrid;
 
 const DEMO_COMPETITIONS = [
     { id: '1', name: 'Premier Division' },

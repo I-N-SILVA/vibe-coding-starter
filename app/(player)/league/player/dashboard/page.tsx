@@ -24,7 +24,8 @@ import {
     usePlayers,
     useCurrentPlayer,
 } from '@/lib/hooks';
-import { Match, Player } from '@/types';
+import { Match } from '@/types';
+import { Team } from '@/lib/supabase/types';
 
 export default function PlayerDashboard() {
     const { profile } = useAuth();
@@ -204,10 +205,10 @@ export default function PlayerDashboard() {
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="flex-1 text-center">
                                         <p className="text-lg font-bold text-gray-900">
-                                            {(nextMatch.homeTeam as any)?.name || 'Home Team'}
+                                            {(nextMatch.homeTeam as unknown as Team)?.name || 'Home Team'}
                                         </p>
                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                            {(nextMatch.homeTeam as any)?.short_name || 'HOME'}
+                                            {(nextMatch.homeTeam as unknown as Team)?.short_name || 'HOME'}
                                         </p>
                                     </div>
                                     <div className="px-6 py-2 bg-gray-50 rounded-xl border border-gray-100 min-w-[80px] text-center">
@@ -219,10 +220,10 @@ export default function PlayerDashboard() {
                                     </div>
                                     <div className="flex-1 text-center">
                                         <p className="text-lg font-bold text-gray-900">
-                                            {(nextMatch.awayTeam as any)?.name || 'Away Team'}
+                                            {(nextMatch.awayTeam as unknown as Team)?.name || 'Away Team'}
                                         </p>
                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                            {(nextMatch.awayTeam as any)?.short_name || 'AWAY'}
+                                            {(nextMatch.awayTeam as unknown as Team)?.short_name || 'AWAY'}
                                         </p>
                                     </div>
                                 </div>
@@ -248,7 +249,7 @@ export default function PlayerDashboard() {
                             description="Take some time to rest or practice. Check back later for your next fixture."
                             action={{
                                 label: "View all games",
-                                onClick: () => console.log('View all games clicked')
+                                onClick: () => {}
                             }}
                         />
                     )}

@@ -14,6 +14,7 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { useTeams } from '@/lib/hooks';
 import { RecruitmentSettings } from '@/components/plyaz/RecruitmentSettings';
 import { ApplicationsInbox } from '@/components/plyaz/ApplicationsInbox';
+import { Team } from '@/lib/supabase/types';
 import { MOCK_TEAM, MOCK_NEXT_MATCH, MOCK_SQUAD, MOCK_MATCHES } from '@/lib/mock/fixtures';
 
 // Derive top performers and recent results from centralized fixtures
@@ -29,10 +30,10 @@ const recentResults = MOCK_MATCHES.slice(0, 3);
 
 export default function CoachDashboard() {
     const { profile } = useAuth();
-    const { data: teams = [], isLoading: teamsLoading } = useTeams();
+    const { data: teams = [] } = useTeams();
 
     // Find the team managed by this user
-    const managedTeam = teams.find(t => t.manager_id === profile?.id) || teams[0]; // Fallback to first team for demo
+    const managedTeam = (teams as Team[]).find(t => t.manager_id === profile?.id) || (teams[0] as Team); // Fallback to first team for demo
 
     return (
         <PageLayout navItems={coachNavItems} title="COACH HUB">

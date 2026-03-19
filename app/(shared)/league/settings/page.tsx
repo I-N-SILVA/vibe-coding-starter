@@ -32,8 +32,8 @@ export default function AdminSettings() {
             const { url, error } = await res.json();
             if (url) window.location.href = url;
             else throw new Error(error || 'Failed to open billing portal');
-        } catch (err: any) {
-            toastError(err.message || 'Something went wrong');
+        } catch (err) {
+            toastError(err instanceof Error ? err.message : 'Something went wrong');
         } finally {
             setIsPortalLoading(false);
         }

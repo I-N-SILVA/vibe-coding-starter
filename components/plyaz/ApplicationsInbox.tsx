@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Card, CardContent, Button, Input, Badge } from '@/components/plyaz';
+import React from 'react';
+import { Card, CardContent, Button, Badge } from '@/components/plyaz';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/providers/ToastProvider';
 
@@ -140,7 +140,7 @@ export function ApplicationsInbox({ targetType }: ApplicationsInboxProps) {
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-semibold text-sm truncate">{app.applicant?.full_name || 'Unknown'}</p>
                                             </div>
-                                            <Badge variant={app.status === 'accepted' ? 'success' : 'danger'} size="sm">
+                                            <Badge variant={app.status === 'accepted' ? 'success' : 'error'} size="sm">
                                                 {app.status}
                                             </Badge>
                                         </CardContent>

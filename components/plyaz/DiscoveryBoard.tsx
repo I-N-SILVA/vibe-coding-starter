@@ -26,7 +26,7 @@ export function DiscoveryBoard({ type, userRole }: DiscoveryBoardProps) {
 
     const endpoint = type === 'team' ? '/api/discover/teams' : '/api/discover/competitions';
 
-    const { data: items, isLoading, refetch } = useQuery({
+    const { data: items, isLoading } = useQuery({
         queryKey: ['discovery', type],
         queryFn: async () => {
             const res = await fetch(endpoint);

@@ -23,18 +23,19 @@ export async function POST(request: Request) {
 
     try {
         event = stripe.webhooks.constructEvent(body, sig, STRIPE_WEBHOOK_SECRET);
-    } catch (err: any) {
-        console.error(`Webhook Error: ${err.message}`);
+    } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        console.error(`Webhook Error: ${message}`);
         return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    const session = event.data.object as any;
+    const session = event.data.object as Stripe.Checkout.Session;
     const orgId = session.metadata?.organization_id;
 
     if (!orgId && event.type !== 'customer.subscription.deleted') {
         // Some events might not have orgId in metadata if not initiated by us, 
         // but for our core flow we expect it.
-        console.log(`No organization_id in metadata for event: ${event.type}`);
+        console.warn(`No organization_id in metadata for event: ${event.type}`);
     }
 
     try {
@@ -88,7 +89,13 @@ export async function POST(request: Request) {
 
             case 'invoice.payment_succeeded': {
                 // Ensure plan is correct on successful renewal
-                const subscriptionId = session.subscription as string;
+                // SDK v20 (API 2025-01-27): subscription is under parent.subscription_details
+                const invoiceRaw = event.data.object as unknown as {
+                    subscription?: string | null;
+                    parent?: { subscription_details?: { subscription?: string | null } };
+                };
+                const subscriptionId = invoiceRaw.subscription
+                    ?? invoiceRaw.parent?.subscription_details?.subscription;
                 if (subscriptionId) {
                     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
                     const plan = getPlanFromPriceId(subscription.items.data[0].price.id);
@@ -108,8 +115,8 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json({ received: true });
-    } catch (err: any) {
-        console.error('Webhook processing error:', err);
+    } catch (err) {
+        console.error('Webhook processing error:', err instanceof Error ? err.message : err);
         // Always return 200 to Stripe to avoid retries on logic errors
         return NextResponse.json({ received: true });
     }

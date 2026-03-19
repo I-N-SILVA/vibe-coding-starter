@@ -55,6 +55,7 @@ export type Competition = {
     invite_code: string | null;
     is_recruiting_referees: boolean;
     recruitment_message: string | null;
+    registration_fee: number;
     created_at: string;
     updated_at: string;
 };
@@ -568,6 +569,7 @@ export type Database = {
                     invite_code?: string | null;
                     is_recruiting_referees?: boolean;
                     recruitment_message?: string | null;
+                    registration_fee?: number;
                     created_at?: string;
                     updated_at?: string;
                 };

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     PageLayout,
@@ -11,7 +11,6 @@ import {
     Button,
     Input,
     Select,
-    StatusBadge,
     Modal,
 } from '@/components/plyaz';
 import { playerNavItems } from '@/lib/constants/navigation';
@@ -20,6 +19,15 @@ import { useToast } from '@/components/providers/ToastProvider';
 import { useCompetitions } from '@/lib/hooks/use-competitions';
 import { createClient } from '@/lib/supabase/client';
 import { apiClient } from '@/lib/api';
+import { Competition } from '@/lib/supabase/types';
+
+type RegistrationField = {
+    id: string;
+    field_name: string;
+    field_type: 'text' | 'number' | 'date' | 'select';
+    is_required: boolean;
+    options?: string[];
+};
 
 const POSITIONS = [
     { value: 'GK', label: 'Goalkeeper' },
@@ -51,9 +59,9 @@ export default function PlayerRegistration() {
     const queryClient = useQueryClient();
     const toast = useToast();
 
-    const [selectedComp, setSelectedComp] = useState<any>(null);
+    const [selectedComp, setSelectedComp] = useState<Competition | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [formData, setFormData] = useState<any>({
+    const [formData, setFormData] = useState({
         team_id: '',
         player_id: '',
         id_document_type: 'passport',
@@ -62,7 +70,7 @@ export default function PlayerRegistration() {
         date_of_birth: '',
         jersey_number: '',
         position: '',
-        custom_fields: {}
+        custom_fields: {} as Record<string, string | number>
     });
 
     // 1. Fetch available competitions
@@ -104,14 +112,16 @@ export default function PlayerRegistration() {
         queryKey: ['competition-fields', selectedComp?.id],
         queryFn: async () => {
             const data = await apiClient.get(`/api/league/competitions/${selectedComp?.id}/registration-fields`);
-            return (data || []) as any[];
+            return (data || []) as RegistrationField[];
         },
         enabled: !!selectedComp?.id
     });
 
+    type RegistrationPayload = Omit<typeof formData, 'jersey_number'> & { jersey_number: number | null };
+
     // 5. Submit Registration
     const submitMutation = useMutation({
-        mutationFn: (payload: any) => apiClient.post(`/api/league/competitions/${selectedComp?.id}/registrations`, payload),
+        mutationFn: (payload: RegistrationPayload) => apiClient.post(`/api/league/competitions/${selectedComp?.id}/registrations`, payload),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['my-registrations'] });
             setIsModalOpen(false);
@@ -122,38 +132,40 @@ export default function PlayerRegistration() {
         }
     });
 
-    const activeCompetitions = competitions?.filter((c: any) => c.status === 'active' || c.status === 'draft') || [];
+    const activeCompetitions = (competitions as Competition[])?.filter((c) => c.status === 'active' || c.status === 'draft') || [];
 
-    const handleOpenRegister = (comp: any) => {
+    const handleOpenRegister = (comp: Competition) => {
         setSelectedComp(comp);
         setIsModalOpen(true);
         if (myPlayers && myPlayers.length === 1) {
-            setFormData((prev: any) => ({ ...prev, player_id: myPlayers[0].id, team_id: myPlayers[0].team_id }));
+            setFormData((prev) => ({ ...prev, player_id: myPlayers[0].id, team_id: myPlayers[0].team_id }));
         }
     };
 
-    const handleCustomFieldChange = (field_name: string, value: any) => {
-        setFormData((prev: any) => ({
+    const handleCustomFieldChange = (field_name: string, value: string | number) => {
+        setFormData((prev) => ({
             ...prev,
             custom_fields: { ...prev.custom_fields, [field_name]: value }
         }));
     };
 
-    // Handle payment success from URL
+    // Handle payment success from URL — runs once on mount only
     React.useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         if (params.get('success') === 'true') {
             toast.success('Registration and payment successful!');
-            // Clean up URL
             window.history.replaceState({}, '', window.location.pathname);
         } else if (params.get('canceled') === 'true') {
             toast.error('Payment was canceled.');
             window.history.replaceState({}, '', window.location.pathname);
         }
-    }, []);
+    }, [toast]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const comp = selectedComp;
+        if (!comp) return;
 
         const payload = {
             ...formData,
@@ -161,27 +173,27 @@ export default function PlayerRegistration() {
         };
 
         // If paid competition, redirect to Stripe
-        if (selectedComp?.registration_fee > 0) {
+        if (comp.registration_fee > 0) {
             try {
                 const response = await fetch('/api/stripe/registration-checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        competition_id: selectedComp.id,
+                        competition_id: comp.id,
                         player_id: formData.player_id,
                         team_id: formData.team_id,
                         metadata: formData.custom_fields
                     })
                 });
 
-                const data = await response.json();
+                const data = await response.json() as { url?: string; error?: string };
                 if (data.url) {
                     window.location.href = data.url;
                 } else {
                     toast.error(data.error || 'Failed to start checkout');
                 }
-            } catch (err: any) {
-                toast.error(err.message || 'Payment failed to initialize');
+            } catch (err) {
+                toast.error(err instanceof Error ? err.message : 'Payment failed to initialize');
             }
             return;
         }
@@ -205,8 +217,8 @@ export default function PlayerRegistration() {
                 ) : activeCompetitions.length === 0 ? (
                     <Card><CardContent className="p-12 text-center text-gray-500">No active competitions available.</CardContent></Card>
                 ) : (
-                    activeCompetitions.map((comp: any) => {
-                        const registration = myRegistrations?.find((r: any) => r.competition_id === comp.id);
+                    activeCompetitions.map((comp: Competition) => {
+                        const registration = myRegistrations?.find((r: { competition_id: string }) => r.competition_id === comp.id);
                         return (
                             <motion.div key={comp.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                                 <Card className="overflow-hidden border-gray-200">
@@ -268,15 +280,19 @@ export default function PlayerRegistration() {
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Competition Registration" size="lg">
                 <form onSubmit={handleSubmit} className="space-y-6 mt-4">
                     <div className="bg-orange-50 p-4 rounded-xl border border-orange-100 mb-6 flex justify-between items-center">
-                        <div>
-                            <h4 className="text-sm font-bold text-orange-900 mb-1">Applying for: {selectedComp?.name}</h4>
-                            <p className="text-xs text-orange-700">Please ensure all your details strictly match your official ID document.</p>
-                        </div>
-                        {selectedComp?.registration_fee > 0 && (
-                            <div className="text-right">
-                                <p className="text-[10px] uppercase tracking-widest text-orange-400 font-bold">Registration Fee</p>
-                                <p className="text-xl font-black text-orange-600">£{selectedComp.registration_fee}</p>
-                            </div>
+                        {selectedComp && (
+                            <>
+                                <div>
+                                    <h4 className="text-sm font-bold text-orange-900 mb-1">Applying for: {selectedComp.name}</h4>
+                                    <p className="text-xs text-orange-700">Please ensure all your details strictly match your official ID document.</p>
+                                </div>
+                                {selectedComp.registration_fee > 0 && (
+                                    <div className="text-right">
+                                        <p className="text-[10px] uppercase tracking-widest text-orange-400 font-bold">Registration Fee</p>
+                                        <p className="text-xl font-black text-orange-600">£{selectedComp.registration_fee}</p>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
 
@@ -355,7 +371,7 @@ export default function PlayerRegistration() {
                             {customFields && customFields.length > 0 && (
                                 <div className="pt-4 border-t border-gray-100 space-y-4">
                                     <h4 className="text-sm font-bold text-gray-900 mb-2">Additional Information</h4>
-                                    {customFields.map((field: any) => (
+                                    {customFields.map((field: RegistrationField) => (
                                         <div key={field.id}>
                                             {field.field_type === 'text' && (
                                                 <Input

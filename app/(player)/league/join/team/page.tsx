@@ -58,11 +58,11 @@ export default function JoinTeamPage() {
                 setResult(team);
                 setStep('success');
             } else {
-                const error = await res.json();
-                toast.error(error.message || 'Failed to create team');
+                const errorData = await res.json() as { message?: string };
+                toast.error(errorData.message || 'Failed to create team');
             }
-        } catch (err: any) {
-            toast.error(err.message || 'An unexpected error occurred');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'An unexpected error occurred');
             console.error(err);
         } finally {
             setIsLoading(false);

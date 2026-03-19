@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import {
     PageLayout,
     PageHeader,
@@ -59,11 +58,11 @@ export default function PlayerProfilePage() {
             if (!error) {
                 toast.success('Profile updated successfully! ✨');
             } else {
-                const message = typeof error === 'string' ? error : (error as any).message;
+                const message = typeof error === 'string' ? error : (error as { message?: string }).message;
                 toast.error(message || 'Failed to update profile');
             }
-        } catch (err: any) {
-            toast.error(err.message || 'An unexpected error occurred');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'An unexpected error occurred');
         } finally {
             setIsLoading(false);
         }

@@ -30,9 +30,9 @@ export async function POST(req: Request) {
 
         // 2. Determine platform fee (PLYAZ cut)
         // Free: 0 (shouldn't reach here), Pro: 5%, Elite: 3%
-        const orgPlan = (competition as any).organization?.plan || 'free';
+        const orgPlan = (competition as { organization?: { plan: string } }).organization?.plan || 'free';
         const { PLAN_LIMITS } = await import('@/lib/billing/config');
-        const platformFeePercent = PLAN_LIMITS[orgPlan as keyof typeof PLAN_LIMITS]?.platformFeePercent || 5;
+        const platformFeePercent = PLAN_LIMITS[orgPlan as keyof typeof PLAN_LIMITS]?.platformFeePercent ?? 5;
         
         // Stripe Application fee (if using Connect) is one way, 
         // but for now we just collect the full amount and will settle manually or via platform fee field in DB.
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
             mode: 'payment',
             success_url: `${process.env.NEXT_PUBLIC_APP_URL}/league/player/registration?success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/league/player/registration?canceled=true`,
-            customer_email: user.email,
+            customer_email: user.email!,
             client_reference_id: user.id,
             metadata: {
                 type: 'registration_fee',
@@ -73,8 +73,8 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json({ url: session.url });
-    } catch (err: any) {
+    } catch (err) {
         console.error('Registration Checkout Error:', err);
-        return apiError(err.message || 'Internal Server Error', 500);
+        return apiError(err instanceof Error ? err.message : 'Internal Server Error', 500);
     }
 }

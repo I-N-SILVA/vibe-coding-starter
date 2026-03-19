@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function PATCH(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const supabase = await createClient();
@@ -13,7 +13,7 @@ export async function PATCH(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const applicationId = params.id;
+        const { id: applicationId } = await params;
         const body = await request.json();
         const { status } = body;
 

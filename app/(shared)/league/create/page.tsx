@@ -21,7 +21,14 @@ const STEPS = [
     { id: 4, label: 'Review', icon: '✅' },
 ];
 
-const FORMATS = [
+type Format = {
+    value: 'league' | 'knockout' | 'group_knockout';
+    label: string;
+    desc: string;
+    icon: string;
+};
+
+const FORMATS: Format[] = [
     { value: 'league', label: 'League', desc: 'Round-robin — every team plays each other', icon: '🏆' },
     { value: 'knockout', label: 'Knockout', desc: 'Single elimination bracket', icon: '⚡' },
     { value: 'group_knockout', label: 'Group + Knockout', desc: 'Group stage into knockout rounds', icon: '🌟' },
@@ -89,8 +96,8 @@ export default function CreateLeaguePage() {
                 const error = await res.json();
                 toast.error(error.message || 'Failed to create league');
             }
-        } catch (err: any) {
-            toast.error(err.message || 'An unexpected error occurred');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'An unexpected error occurred');
             console.error(err);
         } finally {
             setIsSubmitting(false);

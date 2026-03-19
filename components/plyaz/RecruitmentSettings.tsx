@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, Button, Input, Select } from '@/components/plyaz';
+import React, { useState } from 'react';
+import { Card, CardContent, Button, Input } from '@/components/plyaz';
 import { useToast } from '@/components/providers/ToastProvider';
 
 interface RecruitmentSettingsProps {
@@ -51,8 +51,8 @@ export function RecruitmentSettings({ type, id, initialData }: RecruitmentSettin
             }
 
             toast.success('Recruitment settings updated!');
-        } catch (err: any) {
-            toast.error(err.message);
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : 'An error occurred');
         } finally {
             setIsSaving(false);
         }

@@ -5,7 +5,6 @@ import {
     PageLayout,
     PageHeader,
     Card,
-    CardContent,
     Button,
     Badge,
     Input,
@@ -17,12 +16,13 @@ import { adminNavItems } from '@/lib/constants/navigation';
 import { motion } from 'framer-motion';
 import { stagger, fadeUp } from '@/lib/animations';
 import { useOrganizations } from '@/lib/hooks';
+import { Organization } from '@/lib/supabase/types';
 
 export default function OrganizationsPage() {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const { data: orgs, isLoading } = useOrganizations();
 
-    const organizationList = orgs || [];
+    const organizationList = (orgs || []) as (Organization & { member_count?: number; status?: string })[];
 
     return (
         <PageLayout navItems={adminNavItems} title="ORGANIZATIONS">
@@ -49,7 +49,7 @@ export default function OrganizationsPage() {
                     animate="show"
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
-                    {organizationList.map((org: any) => (
+                    {organizationList.map((org) => (
                         <motion.div key={org.id} variants={fadeUp}>
                             <Card elevated hoverable className="h-full flex flex-col pt-8">
                                 <div className="px-6 pb-6 flex-1 flex flex-col items-center text-center">

@@ -28,8 +28,8 @@ export async function POST() {
         });
 
         return NextResponse.json({ url: session.url });
-    } catch (err: any) {
+    } catch (err) {
         console.error('Stripe Portal Error:', err);
-        return apiError(err.message || 'Internal Server Error', 500);
+        return apiError(err instanceof Error ? err.message : 'Internal Server Error', 500);
     }
 }

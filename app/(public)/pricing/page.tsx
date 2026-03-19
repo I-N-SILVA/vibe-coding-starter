@@ -63,7 +63,7 @@ const TIERS = [
 ];
 
 export default function PricingPage() {
-  const { data: org, isLoading: orgLoading } = useOrganization();
+  const { data: org } = useOrganization();
   const [loadingPrice, setLoadingPrice] = React.useState<string | null>(null);
 
   const handleCheckout = async (priceId: string) => {
