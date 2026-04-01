@@ -77,13 +77,13 @@ export const TabPills: React.FC<TabPillsProps> = ({
                             'relative px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors uppercase tracking-wider',
                             isActive
                                 ? 'text-white'
-                                : 'bg-white text-gray-400 border border-gray-100 hover:border-gray-200'
+                                : 'bg-white dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500 border border-neutral-100 dark:border-neutral-700 hover:border-neutral-200 dark:hover:border-neutral-600'
                         )}
                     >
                         {isActive && (
                             <motion.span
                                 layoutId="tab-pill"
-                                className="absolute inset-0 bg-gray-900 rounded-full"
+                                className="absolute inset-0 bg-neutral-900 dark:bg-white/20 rounded-full"
                                 transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
                             />
                         )}

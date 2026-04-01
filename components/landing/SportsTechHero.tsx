@@ -5,6 +5,7 @@ import { motion, useInView } from 'framer-motion';
 import { Button } from '@/components/plyaz';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 /* ─── Animated Grid Background ─── */
 const GridBackground = () => (
@@ -156,16 +157,14 @@ export const SportsTechHero = () => {
                     transition={{ duration: 0.6, delay: 0.7 }}
                     className="flex flex-col sm:flex-row items-center justify-center gap-4"
                 >
-                    <Button
-                        variant="primary"
-                        size="lg"
+                    <Link
+                        href="/login?mode=signup"
                         data-testid="hero-create-league-btn"
-                        className="h-14 px-8 text-xs font-bold tracking-[0.15em] rounded-xl border-0 bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-0.5"
-                        onClick={() => router.push('/login?mode=signup')}
+                        className="h-14 px-8 text-xs font-bold tracking-[0.15em] rounded-xl border-0 bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-0.5 inline-flex items-center justify-center"
                     >
                         CREATE YOUR LEAGUE
                         <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
+                    </Link>
                     <Button
                         variant="ghost"
                         size="lg"

@@ -8,7 +8,7 @@ import sys
 from datetime import datetime
 
 class PLYAZAPITester:
-    def __init__(self, base_url="https://repo-review-pro.preview.emergentagent.com"):
+    def __init__(self, base_url="https://b6240a7c-ced1-457f-adc0-72e2f8c94dd1.preview.emergentagent.com"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0

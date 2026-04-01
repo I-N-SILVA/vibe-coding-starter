@@ -12,6 +12,7 @@ import {
     Button,
     Input,
     NavIcons,
+    ThemeToggle,
 } from '@/components/plyaz';
 
 export default function LoginPage() {
@@ -197,6 +198,7 @@ function LoginForm() {
                         />
                         <span className="text-xs font-bold tracking-[0.2em] uppercase text-neutral-900 dark:text-white lg:hidden">PLYAZ</span>
                     </Link>
+                    <ThemeToggle />
                 </header>
 
                 <div className="flex-1 flex items-center justify-center px-6 pb-12">

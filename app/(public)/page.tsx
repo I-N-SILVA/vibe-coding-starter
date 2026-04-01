@@ -205,15 +205,14 @@ export default function LandingPage() {
                                 START YOUR <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">LEGACY NOW.</span>
                             </h3>
-                            <Button
-                                size="lg"
+                            <Link
+                                href="/login?mode=signup"
                                 data-testid="cta-create-league-btn"
-                                className="h-16 px-10 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold tracking-[0.2em] rounded-xl hover:from-orange-600 hover:to-amber-600 shadow-xl shadow-orange-500/25 hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-1"
-                                onClick={() => router.push('/login?mode=signup')}
+                                className="h-16 px-10 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold tracking-[0.2em] rounded-xl hover:from-orange-600 hover:to-amber-600 shadow-xl shadow-orange-500/25 hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-1 inline-flex items-center justify-center"
                             >
                                 CREATE YOUR LEAGUE
                                 <ArrowRight className="ml-2 w-5 h-5" />
-                            </Button>
+                            </Link>
                         </motion.div>
                     </div>
                 </section>

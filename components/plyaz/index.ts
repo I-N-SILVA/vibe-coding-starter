@@ -14,6 +14,7 @@ export { MatchCard } from './MatchCard';
 export type { MatchCardProps, Team } from './MatchCard';
 
 export { StatCard, TeamCard, PlayerCard, UltimatePlayerCard } from './cards';
+export { ShareableMatchCard } from './ShareableMatchCard';
 export type { StatCardProps, TeamCardProps, PlayerCardProps, UltimatePlayerCardProps } from './cards';
 
 // Badges
