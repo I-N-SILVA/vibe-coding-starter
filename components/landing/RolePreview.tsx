@@ -147,7 +147,7 @@ export const RolePreview: React.FC = () => {
     );
 
     return (
-        <section className="py-32 md:py-40 bg-black text-white relative overflow-hidden">
+        <section className="py-28 md:py-36 bg-neutral-900 dark:bg-neutral-950 text-white relative overflow-hidden" data-testid="role-preview-section">
             {/* Dot grid background */}
             <div
                 className="absolute inset-0 opacity-[0.04] pointer-events-none"
