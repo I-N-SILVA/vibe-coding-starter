@@ -1,8 +1,6 @@
 """
 PLYAZ Backend Proxy
 Routes /api/* requests to the Next.js dev server on port 3000.
-The Kubernetes ingress routes /api/* to port 8001 (this server),
-and all other routes to port 3000 (Next.js directly).
 """
 import httpx
 from fastapi import FastAPI, Request, Response
@@ -19,6 +17,16 @@ app.add_middleware(
 )
 
 NEXTJS_URL = "http://localhost:3000"
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok", "service": "plyaz-proxy"}
+
+
+@app.get("/api/health")
+async def api_health():
+    return {"status": "ok", "service": "plyaz-api"}
 
 
 @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"])
@@ -58,13 +66,3 @@ async def proxy_api(request: Request, path: str):
                 status_code=503,
                 media_type="application/json",
             )
-
-
-@app.get("/health")
-async def health():
-    return {"status": "ok", "service": "plyaz-proxy"}
-
-
-@app.get("/api/health")
-async def api_health():
-    return {"status": "ok", "service": "plyaz-api"}
