@@ -33,8 +33,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref
     ) => {
         const baseStyles = `
-      bg-surface-main rounded-lg
-      border border-secondary-main/5
+      bg-surface-main dark:bg-neutral-800/50 rounded-xl
+      border border-secondary-main/5 dark:border-neutral-700/50
       transition-all duration-300 ease-out
     `;
 

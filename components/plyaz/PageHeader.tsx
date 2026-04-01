@@ -31,14 +31,14 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             )}
         >
             <div>
-                <h1 className="text-[10px] font-medium tracking-[0.25em] uppercase text-gray-400 mb-2">
+                <h1 className="text-[10px] font-semibold tracking-[0.25em] uppercase text-neutral-400 dark:text-neutral-500 mb-2">
                     {label}
                 </h1>
-                <p className="text-2xl font-semibold text-gray-900 tracking-tight">
+                <p className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">
                     {title}
                 </p>
                 {description && (
-                    <p className="text-xs text-gray-400 mt-1 max-w-md">
+                    <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1 max-w-md">
                         {description}
                     </p>
                 )}

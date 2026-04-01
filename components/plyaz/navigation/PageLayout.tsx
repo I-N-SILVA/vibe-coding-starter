@@ -39,7 +39,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
     const router = useRouter();
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-white dark:bg-neutral-950">
             <Navbar
                 title={title}
                 showBackButton={showBackButton}

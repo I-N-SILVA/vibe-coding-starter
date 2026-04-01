@@ -63,3 +63,8 @@ async def proxy_api(request: Request, path: str):
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": "plyaz-proxy"}
+
+
+@app.get("/api/health")
+async def api_health():
+    return {"status": "ok", "service": "plyaz-api"}

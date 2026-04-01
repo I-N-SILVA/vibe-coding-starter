@@ -26,7 +26,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
     return (
         <nav
             className={cn(
-                'fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100',
+                'fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-900 border-t border-neutral-100 dark:border-neutral-800',
                 'pb-safe md:hidden', // Only show on mobile
                 className
             )}
@@ -41,8 +41,8 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
                             className={cn(
                                 'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-colors min-w-[64px]',
                                 isActive
-                                    ? 'text-gray-900'
-                                    : 'text-gray-400 hover:text-orange-500'
+                                    ? 'text-neutral-900 dark:text-white'
+                                    : 'text-neutral-400 dark:text-neutral-500 hover:text-orange-500'
                             )}
                         >
                             <span className={cn('w-6 h-6', isActive && 'text-orange-500')}>
@@ -59,7 +59,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, className }) => {
                 {pathname.includes('/league') && !pathname.includes('/public') && (
                     <button
                         onClick={async () => { await signOut(); router.push('/'); }}
-                        className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-colors min-w-[64px] text-gray-400 hover:text-red-500"
+                        className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-colors min-w-[64px] text-neutral-400 dark:text-neutral-500 hover:text-red-500"
                     >
                         <span className="w-6 h-6">
                             <NavIcons.Logout />

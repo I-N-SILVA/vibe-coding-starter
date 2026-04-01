@@ -43,13 +43,13 @@ export default function LandingPage() {
                         <div className="h-4 w-[1px] bg-neutral-200 dark:bg-neutral-700" />
                         <ThemeToggle />
                         <Link href="/login" className="text-[11px] font-semibold tracking-[0.1em] text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white uppercase transition-colors" data-testid="nav-signin">Sign In</Link>
-                        <Button
-                            onClick={() => router.push('/login?mode=signup')}
+                        <Link
+                            href="/login?mode=signup"
                             data-testid="nav-create-league-btn"
-                            className="h-9 px-5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[11px] font-semibold tracking-[0.1em] rounded-lg hover:from-orange-600 hover:to-amber-600 shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/25 transition-all duration-300"
+                            className="h-9 px-5 inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[11px] font-semibold tracking-[0.1em] rounded-lg hover:from-orange-600 hover:to-amber-600 shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/25 transition-all duration-300"
                         >
                             CREATE LEAGUE
-                        </Button>
+                        </Link>
                     </div>
 
                     {/* Mobile controls */}
