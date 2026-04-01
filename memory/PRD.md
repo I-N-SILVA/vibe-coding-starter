@@ -1,7 +1,7 @@
 # PLYAZ League Manager - PRD & Progress Tracker
 
 ## Original Problem Statement
-User requested a thorough review of the PLYAZ repo, ensure everything works end-to-end, fix issues, provide improvement suggestions, and enhance the frontend with beautiful components and animations from 21st.dev / Magic UI. Focus on both landing page + dashboard, light and dark themes, billing skipped for now.
+User requested a thorough review of the PLYAZ repo, ensure everything works end-to-end, fix issues, provide improvement suggestions, and enhance the frontend with beautiful components and animations from 21st.dev / Magic UI. Focus on both landing page + dashboard, light and dark themes, billing skipped for now. Also requested shareable match result card feature.
 
 ## Architecture
 - **Framework**: Next.js 15 (App Router) with TypeScript
@@ -25,10 +25,11 @@ User requested a thorough review of the PLYAZ repo, ensure everything works end-
 - Match scheduling and live scoring
 - Public-facing league pages
 - Responsive design with dark/light mode
+- Shareable match result cards
 
-## What's Been Implemented - Phase 1 (March 31, 2026)
+## What's Been Implemented
 
-### Bug Fixes
+### Phase 1 - Bug Fixes & Infrastructure (March 31, 2026)
 - [x] Fixed conflicting dynamic route slugs (`[id]` vs `[teamId]` in `/api/league/teams/`)
 - [x] Fixed `next.config.js` deprecated `experimental.outputFileTracingRoot`
 - [x] Fixed "SIGN OUT" showing on public pages (now shows "Admin Login")
@@ -36,82 +37,83 @@ User requested a thorough review of the PLYAZ repo, ensure everything works end-
 - [x] Created FastAPI reverse proxy backend for API routing
 - [x] Added `/api/health` endpoint
 
-### Visual Enhancements
-- [x] **Landing Page Hero** - Animated grid background, gradient "ELITE TALENT" text, animated counters (24k+, 1200+, 99.9%), dual CTA buttons
+### Phase 2 - Landing Page Visual Upgrade (April 1, 2026)
+- [x] **Hero Section** - Animated grid background, gradient "ELITE TALENT" text, animated counters (24k+, 1200+, 99.9%), dual CTA buttons with Link components
 - [x] **Navigation** - Frosted glass navbar, mobile hamburger menu with animation
 - [x] **MetricFeatureGrid** - 4 feature cards with gradient accents, animated counters, hover effects
 - [x] **Statistics Section** - Dark background with dot grid, animated stat cards
 - [x] **CTA Section** - Gradient text "START YOUR LEGACY NOW"
 - [x] **Footer** - Organized with Protocol/Social/Legal columns
-- [x] **Login Page** - Split layout with branding panel + form, gradient text
-- [x] **Dark Mode** - Full dark mode support across landing, login, sidebar, navbar, cards, mobile nav, page headers
 
-### Testing Results
+### Phase 3 - Auth Pages Enhancement (April 1, 2026)
+- [x] **Login Page** - Split layout with branding panel + form
+- [x] **Signup Mode** - Full name, confirm password fields
+- [x] **Theme Toggle** - Added to login page
+- [x] Gradient "precision" text on branding panel
+- [x] Feature bullets with orange accents
+
+### Phase 4 - Dashboard & Component Dark Mode (April 1, 2026)
+- [x] **Card** - Dark mode support with neutral-800/50 backgrounds
+- [x] **StatCard** - Animated counters, gradient borders, dark mode
+- [x] **TeamCard** - Avatar fallbacks, stat grid, dark mode
+- [x] **PlayerCard** - Position badges, stat display, dark mode
+- [x] **MatchCard** - Score display, team logos, dark mode
+- [x] **Badge/StatusBadge** - All variants with dark mode
+- [x] **Modal** - Dark mode with neutral-900 background
+- [x] **EmptyState** - Dark mode support
+- [x] **Skeleton** - Dark mode loading states
+- [x] **TabPills** - Dark mode pill styling
+- [x] **PageHeader** - Dark mode text colors
+- [x] **Sidebar** - Dark mode borders, active states
+- [x] **Navbar** - Dark mode with backdrop blur
+- [x] **MobileNav** - Dark mode bottom nav
+- [x] **PageLayout** - Dark mode background
+- [x] **ThemeToggle** - Updated hover colors
+- [x] **PlyazLogo** - Works in both modes
+
+### Phase 5 - Public Pages Enhancement (April 1, 2026)
+- [x] **Matches Page** - Tab filtering (All/Live/Upcoming/Completed), match cards with score display, share hint
+- [x] **Standings Page** - League table with rankings, form indicators (W/D/L badges), Table/Bracket toggle
+- [x] **Teams Page** - Team cards with stats
+- [x] **League Page** - Competition cards with dark mode
+
+### Phase 6 - Shareable Match Card Feature (April 1, 2026)
+- [x] **ShareableMatchCard** component - Branded dark card with team initials, score display, gradient accents
+- [x] **Share Modal** - Click completed match to open share modal
+- [x] **html2canvas** integration for image generation
+- [x] **Web Share API** with fallback download
+- [x] PLYAZ branding in shareable card
+
+### Testing Results (Latest - Iteration 6)
 - Frontend UI: 100%
 - Navigation: 100%
 - Public Pages: 100%
 - Login/Auth UI: 100%
 - Dark Mode: 100%
-- API Health: 100%
+- Backend API: 85% (non-critical root redirect)
+- Shareable Match Cards: 100%
 
 ## Prioritized Backlog
 
 ### P0 - Critical
-- [ ] End-to-end auth flow testing (sign up, verify email, sign in, redirect to dashboard)
-- [ ] Manager dashboard functionality (create competition, add teams, schedule matches)
+- [ ] End-to-end auth flow testing with real Supabase signup/login
+- [ ] Manager dashboard CRUD operations verification
 
 ### P1 - High Priority
-- [ ] Dashboard stat cards with animated counters and gradient borders
-- [ ] Match detail pages with live scoring UI
-- [ ] Team detail pages with player roster
-- [ ] Standings table with sortable columns
-- [ ] Player profile pages
+- [ ] Match detail page with live scoring UI
+- [ ] Team detail page with player roster
+- [ ] Player statistics visualization
+- [ ] Referee match recording interface
 
 ### P2 - Medium Priority
-- [ ] Referee match recording interface polish
-- [ ] Player discovery/scouting features
-- [ ] Statistics visualization (charts, graphs)
+- [ ] Statistics dashboard with charts (Recharts)
+- [ ] Search/filter functionality across entities
 - [ ] Push notifications for match updates
-- [ ] Search functionality across entities
+- [ ] KnockoutBracket dark mode polish
 
 ### P3 - Nice to Have
 - [ ] Stripe billing integration
 - [ ] Export data (PDF reports, CSV)
-- [ ] Social sharing for match results
 - [ ] SEO optimization for public pages
 - [ ] PWA support for mobile
-
-## Detailed Micro-Task Organization (for step-by-step prompting)
-
-### Task Group 1: Auth Flow Verification
-1. T1.1 - Test complete signup flow with Supabase
-2. T1.2 - Test login flow and redirect to dashboard
-3. T1.3 - Test password reset flow
-4. T1.4 - Test middleware auth guards
-
-### Task Group 2: Manager Dashboard Polish
-5. T2.1 - Enhance league overview page with animated stat cards
-6. T2.2 - Polish competition creation modal
-7. T2.3 - Enhance team management page with data tables
-8. T2.4 - Polish match scheduling interface
-9. T2.5 - Add match result recording flow
-
-### Task Group 3: Public Pages Enhancement
-10. T3.1 - Enhance public matches page with filterable cards
-11. T3.2 - Polish standings table with team logos
-12. T3.3 - Enhance team detail pages
-13. T3.4 - Add player profile cards
-
-### Task Group 4: Dark Mode Completion
-14. T4.1 - Audit remaining components for dark mode
-15. T4.2 - Fix any dark mode inconsistencies in modals/dropdowns
-16. T4.3 - Dark mode for data tables and charts
-
-### Task Group 5: Advanced Features
-17. T5.1 - Real-time match updates (if websockets available)
-18. T5.2 - Statistics dashboard with charts
-19. T5.3 - Search/filter functionality
-20. T5.4 - Stripe billing (when ready)
-
-## Next Steps
-- Continue with Task Group 1 (Auth Flow) or Task Group 2 (Dashboard Polish) based on user preference
+- [ ] Social media OG image generation
