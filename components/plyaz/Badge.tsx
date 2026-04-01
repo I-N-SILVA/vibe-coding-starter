@@ -3,14 +3,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-/**
- * Badge Component - PLYAZ Design System (Refined)
- * 
- * Premium styling with:
- * - Black/white primary colors
- * - Minimal, uppercase typography
- */
-
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
     variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error';
     size?: 'sm' | 'md';
@@ -20,18 +12,18 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     ({ className, variant = 'default', size = 'sm', children, ...props }, ref) => {
         const baseStyles = `
       inline-flex items-center justify-center
-      font-medium uppercase tracking-wider
+      font-semibold uppercase tracking-wider
       rounded-full
       transition-colors duration-200
     `;
 
         const variants = {
-            default: 'bg-gray-100 text-gray-600',
-            primary: 'bg-gray-900 text-white',
-            secondary: 'bg-white text-gray-900 border border-gray-200',
-            success: 'bg-gray-900 text-white',
-            warning: 'bg-gray-900 text-white',
-            error: 'bg-gray-900 text-white',
+            default: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300',
+            primary: 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900',
+            secondary: 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700',
+            success: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+            warning: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+            error: 'bg-red-500/10 text-red-600 dark:text-red-400',
         };
 
         const sizes = {
@@ -52,11 +44,6 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
 );
 
 Badge.displayName = 'Badge';
-
-/**
- * StatusBadge Component - For match status indicators
- * Only LIVE status uses color accent
- */
 
 type MatchStatus = 'live' | 'upcoming' | 'completed' | 'cancelled' | 'postponed' | 'scheduled';
 
@@ -79,28 +66,28 @@ const StatusBadge = React.forwardRef<HTMLSpanElement, StatusBadgeProps>(
             },
             upcoming: {
                 label: 'UPCOMING',
-                bg: 'bg-gray-900',
-                text: 'text-white',
+                bg: 'bg-neutral-900 dark:bg-neutral-200',
+                text: 'text-white dark:text-neutral-900',
             },
             completed: {
                 label: 'FINAL',
-                bg: 'bg-gray-100',
-                text: 'text-gray-600',
+                bg: 'bg-neutral-100 dark:bg-neutral-800',
+                text: 'text-neutral-600 dark:text-neutral-300',
             },
             cancelled: {
                 label: 'CANCELLED',
-                bg: 'bg-gray-100',
-                text: 'text-gray-500',
+                bg: 'bg-red-50 dark:bg-red-500/10',
+                text: 'text-red-500 dark:text-red-400',
             },
             postponed: {
                 label: 'POSTPONED',
-                bg: 'bg-gray-100',
-                text: 'text-gray-500',
+                bg: 'bg-amber-50 dark:bg-amber-500/10',
+                text: 'text-amber-600 dark:text-amber-400',
             },
             scheduled: {
                 label: 'SCHEDULED',
-                bg: 'bg-gray-900',
-                text: 'text-white',
+                bg: 'bg-neutral-900 dark:bg-neutral-200',
+                text: 'text-white dark:text-neutral-900',
             },
         };
 

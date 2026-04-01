@@ -116,9 +116,10 @@ const Modal: React.FC<ModalProps> = ({
                     aria-labelledby={title ? 'modal-title' : undefined}
                     aria-describedby={description ? 'modal-description' : undefined}
                     className={cn(
-                        'relative bg-surface-main rounded-lg shadow-2xl w-full',
+                        'relative bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl dark:shadow-black/40 w-full',
                         'transform transition-all duration-300',
                         'animate-in fade-in-0 zoom-in-95',
+                        'border border-neutral-100 dark:border-neutral-800',
                         sizes[size]
                     )}
                     onClick={(e) => e.stopPropagation()}
@@ -127,11 +128,11 @@ const Modal: React.FC<ModalProps> = ({
                     {showCloseButton && (
                         <button
                             onClick={onClose}
-                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-secondary-main/5 transition-colors group"
+                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors group"
                             aria-label="Close modal"
                         >
                             <svg
-                                className="w-4 h-4 text-secondary-main/30 group-hover:text-accent-main transition-colors"
+                                className="w-4 h-4 text-neutral-400 dark:text-neutral-500 group-hover:text-orange-500 transition-colors"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -153,13 +154,13 @@ const Modal: React.FC<ModalProps> = ({
                             {title && (
                                 <h2
                                     id="modal-title"
-                                    className="text-sm font-medium tracking-widest uppercase text-primary-main"
+                                    className="text-sm font-bold tracking-widest uppercase text-neutral-900 dark:text-white"
                                 >
                                     {title}
                                 </h2>
                             )}
                             {description && (
-                                <p id="modal-description" className="text-sm text-secondary-main/30 mt-2">
+                                <p id="modal-description" className="text-sm text-neutral-400 dark:text-neutral-500 mt-2">
                                     {description}
                                 </p>
                             )}
@@ -208,7 +209,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                 <div
                     className={cn(
                         'mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-6',
-                        variant === 'danger' ? 'bg-red-50' : 'bg-primary-main/5'
+                        variant === 'danger' ? 'bg-red-50 dark:bg-red-500/10' : 'bg-neutral-100 dark:bg-neutral-800'
                     )}
                 >
                     {variant === 'danger' ? (
@@ -245,10 +246,10 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                 </div>
 
                 {/* Text */}
-                <h3 className="text-sm font-medium tracking-widest uppercase text-primary-main mb-2">
+                <h3 className="text-sm font-bold tracking-widest uppercase text-neutral-900 dark:text-white mb-2">
                     {title}
                 </h3>
-                <p className="text-sm text-secondary-main/30 mb-8">{message}</p>
+                <p className="text-sm text-neutral-400 dark:text-neutral-500 mb-8">{message}</p>
 
                 {/* Actions */}
                 <div className="flex gap-3">

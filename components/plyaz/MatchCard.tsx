@@ -98,17 +98,17 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                                     className="w-10 h-10 rounded-full object-cover bg-secondary-main/5"
                                 />
                             ) : (
-                                <div className="w-10 h-10 rounded-full bg-secondary-main/5 flex items-center justify-center">
-                                    <span className="text-sm font-semibold text-secondary-main/30">
+                                <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
+                                    <span className="text-sm font-semibold text-neutral-400 dark:text-neutral-500">
                                         {homeTeam.shortName?.[0] || homeTeam.name[0]}
                                     </span>
                                 </div>
                             )}
                             <div>
-                                <p className="font-semibold text-primary-main tracking-tight">
+                                <p className="font-semibold text-neutral-900 dark:text-white tracking-tight">
                                     {homeTeam.shortName || homeTeam.name}
                                 </p>
-                                <p className="text-[10px] text-secondary-main/40 uppercase tracking-wider">Home</p>
+                                <p className="text-[10px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Home</p>
                             </div>
                         </div>
                     </div>
@@ -117,16 +117,16 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                     <div className="text-center px-6">
                         {hasScore ? (
                             <div className="flex items-center gap-3">
-                                <span className="text-4xl font-bold text-primary-main tracking-tighter">
+                                <span className="text-4xl font-bold text-neutral-900 dark:text-white tracking-tighter">
                                     {homeScore}
                                 </span>
-                                <span className="text-xl text-secondary-main/10">—</span>
-                                <span className="text-4xl font-bold text-primary-main tracking-tighter">
+                                <span className="text-xl text-neutral-200 dark:text-neutral-700">--</span>
+                                <span className="text-4xl font-bold text-neutral-900 dark:text-white tracking-tighter">
                                     {awayScore}
                                 </span>
                             </div>
                         ) : (
-                            <div className="text-sm font-medium text-secondary-main/40 uppercase tracking-wider">
+                            <div className="text-sm font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
                                 {matchTime || 'vs'}
                             </div>
                         )}
@@ -141,10 +141,10 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                     <div className="flex-1 text-right">
                         <div className="flex items-center justify-end gap-3">
                             <div>
-                                <p className="font-semibold text-primary-main tracking-tight">
+                                <p className="font-semibold text-neutral-900 dark:text-white tracking-tight">
                                     {awayTeam.shortName || awayTeam.name}
                                 </p>
-                                <p className="text-[10px] text-secondary-main/40 uppercase tracking-wider">Away</p>
+                                <p className="text-[10px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Away</p>
                             </div>
                             {awayTeam.logoUrl ? (
                                 <Image
@@ -155,8 +155,8 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                                     className="w-10 h-10 rounded-full object-cover bg-secondary-main/5"
                                 />
                             ) : (
-                                <div className="w-10 h-10 rounded-full bg-secondary-main/5 flex items-center justify-center">
-                                    <span className="text-sm font-semibold text-secondary-main/30">
+                                <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
+                                    <span className="text-sm font-semibold text-neutral-400 dark:text-neutral-500">
                                         {awayTeam.shortName?.[0] || awayTeam.name[0]}
                                     </span>
                                 </div>
@@ -167,7 +167,7 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
 
                 {/* Footer Info */}
                 {(date || venue) && (
-                    <div className="mt-6 pt-4 border-t border-secondary-main/5 flex items-center justify-between text-[10px] text-secondary-main/40 uppercase tracking-wider">
+                    <div className="mt-6 pt-4 border-t border-neutral-100 dark:border-neutral-700/50 flex items-center justify-between text-[10px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
                         {date && <span>{date}</span>}
                         {venue && <span>{venue}</span>}
                     </div>

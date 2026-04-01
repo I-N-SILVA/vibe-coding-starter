@@ -53,7 +53,7 @@ export default function PublicCompetitions() {
                 {isLoading ? (
                     <div className="grid md:grid-cols-2 gap-6">
                         {[1, 2].map((i) => (
-                            <div key={i} className="bg-white rounded-lg border border-gray-200 p-8 shadow-lg">
+                            <div key={i} className="bg-white dark:bg-neutral-800/50 rounded-xl border border-neutral-200/60 dark:border-neutral-700/50 p-8">
                                 <div className="flex justify-between items-start mb-6">
                                     <div>
                                         <Skeleton className="h-6 w-40 mb-2" />
@@ -61,7 +61,7 @@ export default function PublicCompetitions() {
                                     </div>
                                     <Skeleton className="w-10 h-10 rounded-full" />
                                 </div>
-                                <div className="pt-6 border-t border-gray-50 flex justify-between">
+                                <div className="pt-6 border-t border-neutral-50 dark:border-neutral-700/50 flex justify-between">
                                     <Skeleton className="h-3 w-24" />
                                     <Skeleton className="h-8 w-24 rounded-full" />
                                 </div>
@@ -82,24 +82,25 @@ export default function PublicCompetitions() {
                                     hoverable
                                     className="cursor-pointer group"
                                     onClick={() => router.push(`/league/public/scoreboard?competitionId=${comp.id}`)}
+                                    data-testid={`competition-card-${comp.id}`}
                                 >
                                     <CardContent className="pt-8">
                                         <div className="flex justify-between items-start mb-6">
                                             <div>
-                                                <h2 className="text-xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
+                                                <h2 className="text-xl font-bold text-neutral-900 dark:text-white group-hover:text-orange-500 transition-colors">
                                                     {comp.name}
                                                 </h2>
-                                                <p className="text-[10px] font-bold tracking-widest uppercase text-gray-400 mt-1">
+                                                <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-400 dark:text-neutral-500 mt-1">
                                                     {comp.type}
                                                 </p>
                                             </div>
-                                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-400">
+                                            <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-xs font-bold text-neutral-400 dark:text-neutral-500">
                                                 {comp.teamCount || 0}
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center justify-between mt-auto pt-6 border-t border-gray-50">
-                                            <span className="text-[10px] font-medium tracking-wider text-gray-400 uppercase">
+                                        <div className="flex items-center justify-between mt-auto pt-6 border-t border-neutral-50 dark:border-neutral-700/50">
+                                            <span className="text-[10px] font-medium tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
                                                 Starts {comp.startDate}
                                             </span>
                                             <Button variant="ghost" size="sm" className="group-hover:translate-x-1 transition-transform">

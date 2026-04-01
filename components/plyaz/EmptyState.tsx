@@ -26,20 +26,21 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
+            data-testid="empty-state"
         >
             <Card padding="lg" elevated>
                 <CardContent className="py-16 text-center">
                     {icon && (
-                        <div className="mx-auto w-14 h-14 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 mb-6">
+                        <div className="mx-auto w-14 h-14 rounded-full bg-neutral-50 dark:bg-neutral-800 flex items-center justify-center text-neutral-400 dark:text-neutral-500 mb-6">
                             <div className="w-6 h-6">{icon}</div>
                         </div>
                     )}
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
+                    <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">{title}</h3>
                     {description && (
-                        <p className="text-sm text-gray-400 mb-8 max-w-sm mx-auto">{description}</p>
+                        <p className="text-sm text-neutral-400 dark:text-neutral-500 mb-8 max-w-sm mx-auto">{description}</p>
                     )}
                     {action && (
-                        <Button variant="primary" onClick={action.onClick}>
+                        <Button variant="primary" onClick={action.onClick} data-testid="empty-state-action">
                             {action.label}
                         </Button>
                     )}

@@ -6,18 +6,18 @@ interface SkeletonProps {
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({ className }) => (
-    <div className={cn('animate-pulse bg-gray-100 rounded', className)} />
+    <div className={cn('animate-pulse bg-neutral-100 dark:bg-neutral-800 rounded', className)} />
 );
 
 export const SkeletonStatCard: React.FC = () => (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <div className="bg-white dark:bg-neutral-800/50 rounded-xl border border-neutral-200/60 dark:border-neutral-700/50 p-6">
         <Skeleton className="h-3 w-16 mb-3" />
         <Skeleton className="h-8 w-12" />
     </div>
 );
 
 export const SkeletonMatchCard: React.FC = () => (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <div className="bg-white dark:bg-neutral-800/50 rounded-xl border border-neutral-200/60 dark:border-neutral-700/50 p-6">
         <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 flex-1">
                 <Skeleton className="w-10 h-10 rounded-full" />
@@ -37,7 +37,7 @@ export const SkeletonMatchCard: React.FC = () => (
                 <Skeleton className="w-10 h-10 rounded-full" />
             </div>
         </div>
-        <div className="mt-6 pt-4 border-t border-gray-100 flex justify-between">
+        <div className="mt-6 pt-4 border-t border-neutral-100 dark:border-neutral-700/50 flex justify-between">
             <Skeleton className="h-2 w-16" />
             <Skeleton className="h-2 w-20" />
         </div>
@@ -45,7 +45,7 @@ export const SkeletonMatchCard: React.FC = () => (
 );
 
 export const SkeletonTableRow: React.FC = () => (
-    <tr className="border-b border-gray-50">
+    <tr className="border-b border-neutral-50 dark:border-neutral-800">
         <td className="px-4 py-5"><Skeleton className="h-4 w-6 mx-auto" /></td>
         <td className="px-4 py-5">
             <div className="flex items-center gap-3">
@@ -63,12 +63,12 @@ export const SkeletonTableRow: React.FC = () => (
 );
 
 export const SkeletonCard: React.FC = () => (
-    <div className="bg-white rounded-lg border border-gray-200 p-8">
+    <div className="bg-white dark:bg-neutral-800/50 rounded-xl border border-neutral-200/60 dark:border-neutral-700/50 p-8">
         <div className="flex flex-col items-center">
             <Skeleton className="w-16 h-16 rounded-full mb-4" />
             <Skeleton className="h-5 w-32 mb-2" />
             <Skeleton className="h-4 w-20 mb-6" />
-            <div className="w-full pt-6 border-t border-gray-50 grid grid-cols-2 gap-2">
+            <div className="w-full pt-6 border-t border-neutral-50 dark:border-neutral-700/50 grid grid-cols-2 gap-2">
                 <Skeleton className="h-8 rounded-full" />
                 <Skeleton className="h-8 rounded-full" />
             </div>
@@ -77,7 +77,7 @@ export const SkeletonCard: React.FC = () => (
 );
 
 export const SkeletonChartCard: React.FC = () => (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <div className="bg-white dark:bg-neutral-800/50 rounded-xl border border-neutral-200/60 dark:border-neutral-700/50 p-6">
         <Skeleton className="h-4 w-32 mb-2" />
         <Skeleton className="h-3 w-48 mb-6" />
         <Skeleton className="h-[300px] w-full rounded-lg" />
