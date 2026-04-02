@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { orgService } from '@/services/org';
 import {
     Card,
     CardContent,
@@ -68,10 +67,23 @@ export default function OnboardingPage() {
                     .replace(/-+/g, '-')
                     .replace(/^-|-$/g, '');
 
-                const org = await orgService.createOrganization(leagueName, orgSlug);
+                const orgRes = await fetch('/api/league/organizations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: leagueName, slug: orgSlug })
+                });
 
-                orgService.createCompetition(org.id, leagueName, leagueType)
-                    .catch(err => console.warn('Background league creation failed:', err));
+                if (!orgRes.ok) {
+                    const errorData = await orgRes.json();
+                    throw new Error(errorData.error || 'Failed to create organization');
+                }
+
+                // Create the initial competition
+                fetch('/api/league/competitions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: leagueName, type: leagueType })
+                }).catch(err => console.warn('Background league creation failed:', err));
             }
 
             // 3. Success screen

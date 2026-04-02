@@ -52,7 +52,10 @@ export async function updateSession(request: NextRequest) {
         pathname.startsWith('/login') ||
         pathname.startsWith('/auth') ||
         pathname.startsWith('/league/public') ||
-        pathname.startsWith('/api/');
+        pathname.startsWith('/api/') ||
+        pathname === '/manifest.json' ||
+        pathname === '/manifest.webmanifest' ||
+        pathname === '/search.json';
 
     if (!user && !isPublicRoute) {
         const url = request.nextUrl.clone();
