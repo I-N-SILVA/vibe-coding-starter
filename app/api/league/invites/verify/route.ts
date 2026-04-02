@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     // Fetch and validate the invite
     const { data: invite, error: inviteError } = await supabase
         .from('invites')
-        .select('invited_role, organization_id, email, expires_at')
+        .select('invited_role, organization_id, expires_at')
         .eq('token', token)
         .eq('status', 'pending')
         .maybeSingle();
@@ -36,10 +36,8 @@ export async function POST(request: Request) {
         return apiError('This invitation has expired.', 400);
     }
     
-    // Return the role and organization ID associated with the invite
-    return NextResponse.json({ 
-        invited_role: invite.invited_role, 
+    return NextResponse.json({
+        invited_role: invite.invited_role,
         organization_id: invite.organization_id,
-        email: invite.email // Also return the email to pre-fill the form
     });
 }

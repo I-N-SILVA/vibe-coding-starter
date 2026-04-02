@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
+import { getAuthUser, getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
 import { createMatchEventApiSchema } from '@/lib/api/validation';
 import { rateLimit } from '@/lib/api/rate-limit';
 
@@ -9,6 +9,9 @@ type RouteParams = { params: Promise<{ id: string }> };
 export async function GET(_request: Request, { params }: RouteParams) {
     const { id } = await params;
     const supabase = await createClient();
+
+    const auth = await getAuthUser(supabase);
+    if (auth.error) return auth.error;
 
     const { data, error } = await supabase
         .from('match_events')

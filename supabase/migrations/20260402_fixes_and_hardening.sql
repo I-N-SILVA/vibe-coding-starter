@@ -51,6 +51,38 @@ CREATE POLICY "Audit logs are immutable — deny update"
 CREATE POLICY "Audit logs are immutable — deny delete"
     ON audit_logs FOR DELETE USING (false);
 
+-- Tighten audit log INSERT: user_id must match the authenticated user
+-- (prevents forging logs attributed to other users)
+DROP POLICY IF EXISTS "Organizers insert audit logs" ON audit_logs;
+CREATE POLICY "Organizers insert audit logs"
+    ON audit_logs FOR INSERT
+    WITH CHECK (
+        organization_id = get_user_org_id()
+        AND (user_id IS NULL OR user_id = auth.uid())
+    );
+
+-- ============================================================
+-- 7. group_teams write policies — restrict to org admins
+-- ============================================================
+CREATE POLICY "Organizers can manage group teams"
+    ON group_teams FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM groups
+            JOIN competitions ON competitions.id = groups.competition_id
+            WHERE groups.id = group_teams.group_id
+            AND competitions.organization_id = get_user_org_id()
+        )
+    )
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM groups
+            JOIN competitions ON competitions.id = groups.competition_id
+            WHERE groups.id = group_teams.group_id
+            AND competitions.organization_id = get_user_org_id()
+        )
+    );
+
 -- ============================================================
 -- 6. Replace USING (true) public SELECT policies with scoped
 --    policies that only expose what the scoreboard needs.
