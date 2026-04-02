@@ -38,6 +38,7 @@ interface AuthContextType {
     signUp: (email: string, password: string, fullName: string, role?: Profile['role'], inviteToken?: string) => Promise<{ error: string | null }>;
     signOut: () => Promise<void>;
     forgotPassword: (email: string) => Promise<{ error: string | null }>;
+    updatePassword: (password: string) => Promise<{ error: string | null }>;
     updateProfile: (updates: Partial<Profile>) => Promise<{ error: string | null }>;
 }
 
@@ -210,7 +211,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (isSupabaseConfigured) {
             const supabase = createClient();
-            const { error } = await supabase.auth.resetPasswordForEmail(email);
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
+            });
+            return { error: error?.message || null };
+        }
+        return { error: null };
+    };
+
+    const updatePassword = async (password: string) => {
+        const { createClient } = await import('@/lib/supabase/client');
+        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (isSupabaseConfigured) {
+            const supabase = createClient();
+            const { error } = await supabase.auth.updateUser({ password });
             return { error: error?.message || null };
         }
         return { error: null };
@@ -258,6 +273,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signUp,
         signOut,
         forgotPassword,
+        updatePassword,
         updateProfile,
     };
 
