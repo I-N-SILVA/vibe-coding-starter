@@ -26,6 +26,15 @@ export const ShareableMatchCard: React.FC<ShareableMatchCardProps> = ({
 }) => {
     const cardRef = useRef<HTMLDivElement>(null);
 
+    const downloadImage = useCallback((blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${homeTeam.shortName || homeTeam.name}-vs-${awayTeam.shortName || awayTeam.name}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }, [homeTeam.name, homeTeam.shortName, awayTeam.name, awayTeam.shortName]);
+
     const handleShare = useCallback(async () => {
         if (!cardRef.current) return;
 
@@ -41,14 +50,23 @@ export const ShareableMatchCard: React.FC<ShareableMatchCardProps> = ({
             canvas.toBlob(async (blob) => {
                 if (!blob) return;
 
-                if (navigator.share && navigator.canShare) {
+                const isShareSupported = typeof navigator !== 'undefined' && !!navigator.share;
+                const isCanShareSupported = typeof navigator !== 'undefined' && typeof navigator.canShare === 'function';
+
+                if (isShareSupported && isCanShareSupported) {
                     const file = new File([blob], `${homeTeam.shortName || homeTeam.name}-vs-${awayTeam.shortName || awayTeam.name}.png`, { type: 'image/png' });
                     try {
-                        await navigator.share({
+                        const shareData = {
                             title: `${homeTeam.name} vs ${awayTeam.name}`,
                             text: `${homeTeam.name} ${homeScore} - ${awayScore} ${awayTeam.name} | ${competition}`,
                             files: [file],
-                        });
+                        };
+                        
+                        if (navigator.canShare(shareData)) {
+                            await navigator.share(shareData);
+                        } else {
+                            downloadImage(blob);
+                        }
                     } catch {
                         downloadImage(blob);
                     }
@@ -62,16 +80,7 @@ export const ShareableMatchCard: React.FC<ShareableMatchCardProps> = ({
             await navigator.clipboard.writeText(text);
             alert('Match result copied to clipboard!');
         }
-    }, [homeTeam, awayTeam, homeScore, awayScore, competition, date]);
-
-    const downloadImage = (blob: Blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${homeTeam.shortName || homeTeam.name}-vs-${awayTeam.shortName || awayTeam.name}.png`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
+    }, [homeTeam, awayTeam, homeScore, awayScore, competition, date, downloadImage]);
 
     const winner = homeScore > awayScore ? 'home' : awayScore > homeScore ? 'away' : 'draw';
 
