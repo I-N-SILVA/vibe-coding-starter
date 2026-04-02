@@ -173,7 +173,7 @@ export default function PlayerRegistration() {
         };
 
         // If paid competition, redirect to Stripe
-        if (comp.registration_fee > 0) {
+        if ((comp.registration_fee ?? 0) > 0) {
             try {
                 const response = await fetch('/api/stripe/registration-checkout', {
                     method: 'POST',
@@ -235,7 +235,7 @@ export default function PlayerRegistration() {
                                             <div className="flex gap-4 text-xs font-medium text-gray-400">
                                                 <span>Season: {comp.season || comp.year}</span>
                                                 {comp.start_date && <span>Starts: {new Date(comp.start_date).toLocaleDateString()}</span>}
-                                                {comp.registration_fee > 0 ? (
+                                                {(comp.registration_fee ?? 0) > 0 ? (
                                                     <span className="text-orange-500 font-bold">Fee: £{comp.registration_fee}</span>
                                                 ) : (
                                                     <span className="text-green-600 font-bold">Free Entry</span>
@@ -286,7 +286,7 @@ export default function PlayerRegistration() {
                                     <h4 className="text-sm font-bold text-orange-900 mb-1">Applying for: {selectedComp.name}</h4>
                                     <p className="text-xs text-orange-700">Please ensure all your details strictly match your official ID document.</p>
                                 </div>
-                                {selectedComp.registration_fee > 0 && (
+                                {(selectedComp.registration_fee ?? 0) > 0 && (
                                     <div className="text-right">
                                         <p className="text-[10px] uppercase tracking-widest text-orange-400 font-bold">Registration Fee</p>
                                         <p className="text-xl font-black text-orange-600">£{selectedComp.registration_fee}</p>

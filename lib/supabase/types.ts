@@ -55,7 +55,7 @@ export type Competition = {
     invite_code: string | null;
     is_recruiting_referees: boolean;
     recruitment_message: string | null;
-    registration_fee: number;
+    registration_fee: number | null;
     created_at: string;
     updated_at: string;
 };

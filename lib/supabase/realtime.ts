@@ -89,3 +89,17 @@ export const subscribeToAllLiveMatches = (
 
     return channel;
 };
+
+/**
+ * Unsubscribe and remove a realtime channel.
+ * Call this in useEffect cleanup to prevent memory leaks.
+ *
+ * @example
+ * useEffect(() => {
+ *   const channel = subscribeToMatch(id, handlers);
+ *   return () => unsubscribe(channel);
+ * }, [id]);
+ */
+export const unsubscribe = (channel: RealtimeChannel): void => {
+    supabase.removeChannel(channel);
+};

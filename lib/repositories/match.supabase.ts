@@ -17,7 +17,7 @@ export class MatchSupabaseRepository extends SupabaseBaseRepository<Match> imple
             .from(this.tableName)
             .select('*')
             .eq('competition_id', competitionId)
-            .order('match_date', { ascending: true });
+            .order('scheduled_at', { ascending: true });
 
         if (error) throw error;
         return data as Match[];
@@ -28,7 +28,7 @@ export class MatchSupabaseRepository extends SupabaseBaseRepository<Match> imple
             .from(this.tableName)
             .select('*')
             .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
-            .order('match_date', { ascending: true });
+            .order('scheduled_at', { ascending: true });
 
         if (error) throw error;
         return data as Match[];
