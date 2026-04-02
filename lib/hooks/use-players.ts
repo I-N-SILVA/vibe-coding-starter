@@ -28,11 +28,7 @@ export function useAllPlayers() {
 export function useCurrentPlayer(profileId?: string) {
     return useQuery({
         queryKey: ['player', 'current', profileId],
-        queryFn: async () => {
-            if (!profileId) return null;
-            const players = await playerService.getPlayers();
-            return players.find((p: any) => p.profile_id === profileId) || null;
-        },
+        queryFn: () => playerService.getPlayerByProfileId(profileId!),
         enabled: !!profileId,
         staleTime: 30_000,
     });

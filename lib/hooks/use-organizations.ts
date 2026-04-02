@@ -53,6 +53,7 @@ export function useInvites() {
     return useQuery({
         queryKey: queryKeys.invites,
         queryFn: () => apiClient.get('/api/league/invites'),
+        staleTime: 2 * 60_000, // Invites don't change every second
     });
 }
 

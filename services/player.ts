@@ -51,5 +51,13 @@ export const playerService = {
     async getPlayer(id: string) {
         const player = await repositories.player.findById(id);
         return playerService.mapPlayer(player);
-    }
+    },
+
+    /**
+     * Get the player linked to a specific profile ID (server-side filter, no full-table scan)
+     */
+    async getPlayerByProfileId(profileId: string) {
+        const results = await repositories.player.findAll({ profile_id: profileId });
+        return results.length > 0 ? playerService.mapPlayer(results[0]) : null;
+    },
 };

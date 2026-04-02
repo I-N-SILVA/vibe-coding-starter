@@ -134,6 +134,7 @@ export function useChampionshipConfig(competitionId: string) {
         queryKey: queryKeys.championshipConfig(competitionId),
         queryFn: () => apiClient.get(`/api/league/competitions/${competitionId}/config`),
         enabled: !!competitionId,
+        staleTime: 5 * 60_000, // Config changes rarely
     });
 }
 
@@ -160,5 +161,6 @@ export function useCompetitionStats(competitionId: string) {
         queryKey: queryKeys.competitionStats(competitionId),
         queryFn: () => apiClient.get(`/api/league/competitions/${competitionId}/stats`),
         enabled: !!competitionId,
+        staleTime: 5 * 60_000,
     });
 }

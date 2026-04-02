@@ -11,5 +11,6 @@ export function useStandings(competitionId: string) {
         queryKey: queryKeys.standings(competitionId),
         queryFn: () => apiClient.get(`/api/league/competitions/${competitionId}/standings`),
         enabled: !!competitionId,
+        staleTime: 5 * 60_000, // Standings update infrequently — avoid refetch on every tab focus
     });
 }
