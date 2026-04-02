@@ -3,15 +3,14 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { orgService } from '@/services/org';
 import { apiClient } from '@/lib/api';
 import { queryKeys } from './query-keys';
-import type { CreateOrganizationDto, CreateInviteDto } from '@/types';
+import type { CreateOrganizationDto, CreateInviteDto, Organization, ActivityItem } from '@/types';
 
 export function useOrganization() {
     return useQuery({
         queryKey: queryKeys.organization,
-        queryFn: () => orgService.getOrganization('current'),
+        queryFn: () => apiClient.get<Organization | null>('/api/league/organizations'),
         staleTime: 60_000,
     });
 }
@@ -30,7 +29,7 @@ export function useOrganizations() {
 export function useActivity() {
     return useQuery({
         queryKey: queryKeys.activity,
-        queryFn: () => orgService.getActivity(),
+        queryFn: () => apiClient.get<ActivityItem[]>('/api/league/activity'),
         staleTime: 30_000,
     });
 }
@@ -39,7 +38,7 @@ export function useCreateOrganization() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreateOrganizationDto) => orgService.createOrganization(data.name, data.slug),
+        mutationFn: (data: CreateOrganizationDto) => apiClient.post('/api/league/organizations', { name: data.name, slug: data.slug }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.organization });
         },

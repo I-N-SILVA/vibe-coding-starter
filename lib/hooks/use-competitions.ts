@@ -3,13 +3,13 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { orgService } from '@/services/org';
 import { apiClient } from '@/lib/api';
 import { queryKeys } from './query-keys';
 import type {
     CreateCompetitionDto,
     CreateVenueDto,
-    CreateCategoryDto
+    CreateCategoryDto,
+    Competition
 } from '@/types';
 
 // ============================================
@@ -19,7 +19,7 @@ import type {
 export function useCompetitions() {
     return useQuery({
         queryKey: queryKeys.competitions,
-        queryFn: () => orgService.getCompetitions(),
+        queryFn: () => apiClient.get<Competition[]>('/api/league/competitions'),
         staleTime: 30_000,
     });
 }
@@ -27,7 +27,7 @@ export function useCompetitions() {
 export function useCompetition(id: string) {
     return useQuery({
         queryKey: queryKeys.competition(id),
-        queryFn: () => orgService.getCompetition(id),
+        queryFn: () => apiClient.get<Competition>(`/api/league/competitions/${id}`),
         enabled: !!id,
         staleTime: 30_000,
     });
@@ -37,7 +37,7 @@ export function useCreateCompetition() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreateCompetitionDto) => orgService.createCompetition('current', data.name, data.type),
+        mutationFn: (data: CreateCompetitionDto) => apiClient.post('/api/league/competitions', data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.competitions });
         },
@@ -49,7 +49,7 @@ export function useUpdateCompetition() {
 
     return useMutation({
         mutationFn: ({ id, data }: { id: string; data: Partial<CreateCompetitionDto> }) =>
-            orgService.updateCompetition(id, data),
+            apiClient.patch(`/api/league/competitions/${id}`, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.competition(variables.id) });
             queryClient.invalidateQueries({ queryKey: queryKeys.competitions });
@@ -61,7 +61,7 @@ export function useDeleteCompetition() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (id: string) => orgService.deleteCompetition(id),
+        mutationFn: (id: string) => apiClient.delete(`/api/league/competitions/${id}`),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.competitions });
         },
