@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { User, Session, SupabaseClient } from '@supabase/supabase-js';
 import { Profile } from '@/lib/supabase/types';
 import { LocalStore } from '@/lib/mock/store';
 import { useRouter } from 'next/navigation';
@@ -44,6 +44,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const isSupabaseConfigured = () =>
+    !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
@@ -51,45 +54,55 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthInitialized, setIsAuthInitialized] = useState(false);
     const router = useRouter();
+    // Cache the Supabase client so it's not recreated on every auth call
+    const supabaseRef = useRef<SupabaseClient | null>(null);
+
+    const getSupabase = async (): Promise<SupabaseClient> => {
+        if (!supabaseRef.current) {
+            const { createClient } = await import('@/lib/supabase/client');
+            supabaseRef.current = createClient();
+        }
+        return supabaseRef.current;
+    };
 
     useEffect(() => {
         let subscription: { unsubscribe: () => void } | null = null;
 
         const initAuth = async () => {
-            const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+            if (isSupabaseConfigured()) {
+                const supabase = await getSupabase();
 
-            if (isSupabaseConfigured) {
-                const { createClient } = await import('@/lib/supabase/client');
-                const supabase = createClient();
+                // Use getUser() — validates JWT with the server (secure).
+                // getSession() reads from localStorage without server validation.
+                const { data: { user: authUser } } = await supabase.auth.getUser();
 
-                // Get initial session
-                const { data: { session } } = await supabase.auth.getSession();
+                if (authUser) {
+                    setUser(authUser as AuthUser);
 
-                if (session?.user) {
-                    setUser(session.user as AuthUser);
-                    setSession(session);
+                    const { data: { session: currentSession } } = await supabase.auth.getSession();
+                    setSession(currentSession);
 
-                    const { data: profile } = await supabase
+                    const { data: profileData } = await supabase
                         .from('profiles')
                         .select('*')
-                        .eq('id', session.user.id)
+                        .eq('id', authUser.id)
                         .single();
 
-                    setProfile(profile as Profile);
+                    setProfile(profileData as Profile);
                 }
 
                 // Listen for changes
-                const { data } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+                const { data } = supabase.auth.onAuthStateChange(async (_event, currentSession) => {
                     setSession(currentSession);
                     setUser((currentSession?.user as AuthUser) || null);
 
                     if (currentSession?.user) {
-                        const { data: profile } = await supabase
+                        const { data: profileData } = await supabase
                             .from('profiles')
                             .select('*')
                             .eq('id', currentSession.user.id)
                             .single();
-                        setProfile(profile as Profile);
+                        setProfile(profileData as Profile);
                     } else {
                         setProfile(null);
                     }
@@ -120,14 +133,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 subscription.unsubscribe();
             }
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const signIn = async (email: string, password: string) => {
-        const { createClient } = await import('@/lib/supabase/client');
-        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-        if (isSupabaseConfigured) {
-            const supabase = createClient();
+        if (isSupabaseConfigured()) {
+            const supabase = await getSupabase();
             const { error } = await supabase.auth.signInWithPassword({ email, password });
             return { error: error?.message || null };
         }
@@ -144,21 +155,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error: null };
     };
 
-    const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'organizer') => {
-        const { createClient } = await import('@/lib/supabase/client');
-        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-        if (isSupabaseConfigured) {
-            const supabase = createClient();
+    const signUp = async (email: string, password: string, fullName: string, role: Profile['role'] = 'organizer', inviteToken?: string) => {
+        if (isSupabaseConfigured()) {
+            const supabase = await getSupabase();
             const { error } = await supabase.auth.signUp({
                 email,
                 password,
                 options: {
                     data: {
                         full_name: fullName,
-                        role: role
-                    }
-                }
+                        role,
+                        ...(inviteToken ? { invite_token: inviteToken } : {}),
+                    },
+                },
             });
             return { error: error?.message || null };
         }
@@ -188,11 +197,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const signOut = async () => {
-        const { createClient } = await import('@/lib/supabase/client');
-        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-        if (isSupabaseConfigured) {
-            const supabase = createClient();
+        if (isSupabaseConfigured()) {
+            const supabase = await getSupabase();
             await supabase.auth.signOut();
         } else {
             if (user) {
@@ -206,11 +212,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const forgotPassword = async (email: string) => {
-        const { createClient } = await import('@/lib/supabase/client');
-        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-        if (isSupabaseConfigured) {
-            const supabase = createClient();
+        if (isSupabaseConfigured()) {
+            const supabase = await getSupabase();
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
             });
@@ -220,11 +223,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const updatePassword = async (password: string) => {
-        const { createClient } = await import('@/lib/supabase/client');
-        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-        if (isSupabaseConfigured) {
-            const supabase = createClient();
+        if (isSupabaseConfigured()) {
+            const supabase = await getSupabase();
             const { error } = await supabase.auth.updateUser({ password });
             return { error: error?.message || null };
         }
@@ -234,11 +234,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const updateProfile = async (updates: Partial<Profile>) => {
         if (!user) return { error: 'Not authenticated' };
 
-        const { createClient } = await import('@/lib/supabase/client');
-        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-        if (isSupabaseConfigured) {
-            const supabase = createClient();
+        if (isSupabaseConfigured()) {
+            const supabase = await getSupabase();
             const { data, error } = await supabase
                 .from('profiles')
                 .update(updates)

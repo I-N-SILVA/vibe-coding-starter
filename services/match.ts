@@ -131,7 +131,7 @@ export const matchService = {
             const player = await repositories.player.findById(e.player_id);
             return {
                 ...e,
-                player: player ? { full_name: player.name || player.full_name } : null
+                player: player ? { name: player.name } : null
             };
         }));
 
@@ -145,9 +145,9 @@ export const matchService = {
         const event = await repositories.match.addEvent({
             match_id: data.matchId,
             player_id: data.playerId,
-            event_type: data.type,
+            type: data.type,
             minute: data.minute,
-            notes: data.notes
+            details: data.details ?? {},
         });
         return event;
     }

@@ -89,6 +89,12 @@ module.exports = () => {
           port: '',
           pathname: '**/*',
         },
+        {
+          protocol: 'https',
+          hostname: '*.supabase.co',
+          port: '',
+          pathname: '/storage/v1/object/public/**',
+        },
       ],
     },
     async headers() {
@@ -99,7 +105,7 @@ module.exports = () => {
         },
       ];
     },
-    webpack: (config, options) => {
+    webpack: (config, _options) => {
       config.module.rules.push({
         test: /\.svg$/,
         use: ['@svgr/webpack'],

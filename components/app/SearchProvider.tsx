@@ -11,7 +11,7 @@ export const SearchProvider = ({ children }: { children: React.ReactNode }) => {
     <KBarSearchProvider
       kbarConfig={{
         searchDocumentsPath: '/search.json',
-        onSearchDocumentsLoad(_json) {
+        onSearchDocumentsLoad(_json: unknown) {
           return [
             ...searchLinks.map((link) => {
               return {

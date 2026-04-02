@@ -7,18 +7,16 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { supabase as browserClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import { IRepository } from './types';
 
 export abstract class SupabaseBaseRepository<T extends { id: string }> implements IRepository<T> {
     protected client: SupabaseClient;
 
     constructor(protected tableName: string, client?: SupabaseClient) {
-        this.client = client || browserClient!;
-        if (!this.client) {
-            // This might happen during SSR if createClient haven't been called correctly
-            // but usually SupabaseBaseRepository is used within a context that has the client.
-        }
+        // Use the provided client (server-side), or create a browser client.
+        // createClient() safely falls back to a no-op mock when env vars are missing.
+        this.client = client ?? createClient();
     }
 
     async findAll(filters?: Record<string, unknown>): Promise<T[]> {

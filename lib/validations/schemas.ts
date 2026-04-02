@@ -32,7 +32,7 @@ export const createCompetitionSchema = z.object({
         .min(1, 'Competition name is required')
         .min(3, 'Name must be at least 3 characters')
         .max(50, 'Name must be less than 50 characters'),
-    format: z.enum(['league', 'cup', 'group']).describe('Please select a format'),
+    format: z.enum(['league', 'knockout', 'group_knockout']).describe('Please select a format'),
     startDate: z
         .string()
         .min(1, 'Start date is required'),
@@ -107,7 +107,7 @@ export const addPlayerSchema = z.object({
         .number()
         .min(1, 'Jersey number must be at least 1')
         .max(99, 'Jersey number must be 99 or less'),
-    position: z.enum(['goalkeeper', 'defender', 'midfielder', 'forward']).describe('Please select a position'),
+    position: z.enum(['GK', 'CB', 'LB', 'RB', 'CDM', 'CM', 'CAM', 'LM', 'RM', 'LW', 'RW', 'ST', 'CF']).describe('Please select a position'),
 });
 
 export type AddPlayerFormData = z.infer<typeof addPlayerSchema>;

@@ -1,7 +1,6 @@
 import { LocalStore } from '@/lib/mock/store';
 import { repositories } from '@/lib/repositories';
-import { toCamelCase } from '@/lib/mappers';
-import type { Database, Competition, Organization } from '@/lib/supabase/types';
+import type { Competition } from '@/lib/supabase/types';
 
 /**
  * Organization Service
