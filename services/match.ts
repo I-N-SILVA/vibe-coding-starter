@@ -1,8 +1,6 @@
 import { repositories } from '@/lib/repositories';
 import { toCamelCase } from '@/lib/mappers';
-import type { Database, Match, MatchEvent } from '@/lib/supabase/types';
-
-type MatchRow = Database['public']['Tables']['matches']['Row'];
+import type { Match, MatchEvent } from '@/lib/supabase/types';
 
 /**
  * Match Service

@@ -1,6 +1,6 @@
 import { LocalStore } from '@/lib/mock/store';
 import { repositories } from '@/lib/repositories';
-import type { Database, Player } from '@/lib/supabase/types';
+import type { Player } from '@/lib/supabase/types';
 
 /**
  * Player Service

@@ -12,11 +12,9 @@ import { z } from 'zod';
 export const loginSchema = z.object({
     email: z
         .string()
-        .min(1, 'Email is required')
         .email('Please enter a valid email address'),
     password: z
         .string()
-        .min(1, 'Password is required')
         .min(6, 'Password must be at least 6 characters'),
 });
 
@@ -29,7 +27,6 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 export const createCompetitionSchema = z.object({
     name: z
         .string()
-        .min(1, 'Competition name is required')
         .min(3, 'Name must be at least 3 characters')
         .max(50, 'Name must be less than 50 characters'),
     format: z.enum(['league', 'knockout', 'group_knockout']).describe('Please select a format'),
@@ -48,7 +45,6 @@ export type CreateCompetitionFormData = z.infer<typeof createCompetitionSchema>;
 export const createTeamSchema = z.object({
     name: z
         .string()
-        .min(1, 'Team name is required')
         .min(2, 'Name must be at least 2 characters')
         .max(30, 'Name must be less than 30 characters'),
     shortName: z

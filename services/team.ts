@@ -1,6 +1,6 @@
 import { LocalStore } from '@/lib/mock/store';
 import { repositories } from '@/lib/repositories';
-import type { Database, Team } from '@/lib/supabase/types';
+import type { Team } from '@/lib/supabase/types';
 
 /**
  * Team Service
