@@ -7,6 +7,9 @@ import type { Match, MatchEvent } from '@/types';
 /**
  * Supabase Realtime Utilities - PLYAZ League Manager
  * Utilities for subscribing to live updates
+ *
+ * NOTE: Supabase realtime payloads always arrive in snake_case (DB column names).
+ * Callers are responsible for mapping to UI types if needed.
  */
 
 const supabase = createClient();

@@ -24,8 +24,7 @@ import {
     usePlayers,
     useCurrentPlayer,
 } from '@/lib/hooks';
-import { Match } from '@/types';
-import { Team } from '@/lib/supabase/types';
+import type { MatchUI } from '@/lib/mappers';
 
 export default function PlayerDashboard() {
     const { profile } = useAuth();
@@ -98,8 +97,8 @@ export default function PlayerDashboard() {
     // Find Next Match for Team
     const nextMatch = useMemo(() => {
         if (!matches || !teamId) return null;
-        return matches.find((m: Match) =>
-            m.home_team_id === teamId || m.away_team_id === teamId
+        return matches.find((m: MatchUI) =>
+            m.homeTeamId === teamId || m.awayTeamId === teamId
         );
     }, [matches, teamId]);
 
@@ -205,25 +204,25 @@ export default function PlayerDashboard() {
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="flex-1 text-center">
                                         <p className="text-lg font-bold text-gray-900">
-                                            {(nextMatch.homeTeam as unknown as Team)?.name || 'Home Team'}
+                                            {nextMatch.homeTeam?.name ?? 'Home Team'}
                                         </p>
                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                            {(nextMatch.homeTeam as unknown as Team)?.short_name || 'HOME'}
+                                            {nextMatch.homeTeam?.shortName ?? 'HOME'}
                                         </p>
                                     </div>
                                     <div className="px-6 py-2 bg-gray-50 rounded-xl border border-gray-100 min-w-[80px] text-center">
                                         <p className="text-sm font-black text-gray-900">
-                                            {nextMatch.scheduled_at
-                                                ? new Date(nextMatch.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                            {nextMatch.scheduledAt
+                                                ? new Date(nextMatch.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                                                 : 'TBD'}
                                         </p>
                                     </div>
                                     <div className="flex-1 text-center">
                                         <p className="text-lg font-bold text-gray-900">
-                                            {(nextMatch.awayTeam as unknown as Team)?.name || 'Away Team'}
+                                            {nextMatch.awayTeam?.name ?? 'Away Team'}
                                         </p>
                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                            {(nextMatch.awayTeam as unknown as Team)?.short_name || 'AWAY'}
+                                            {nextMatch.awayTeam?.shortName ?? 'AWAY'}
                                         </p>
                                     </div>
                                 </div>
@@ -231,14 +230,14 @@ export default function PlayerDashboard() {
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm">📅</span>
                                         <span className="text-xs font-semibold text-gray-600">
-                                            {nextMatch.scheduled_at
-                                                ? new Date(nextMatch.scheduled_at).toLocaleDateString()
+                                            {nextMatch.scheduledAt
+                                                ? new Date(nextMatch.scheduledAt).toLocaleDateString()
                                                 : 'Schedule pending'}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm">📍</span>
-                                        <span className="text-xs font-semibold text-gray-600">{nextMatch.venue || 'TBD'}</span>
+                                        <span className="text-xs font-semibold text-gray-600">{nextMatch.venue ?? 'TBD'}</span>
                                     </div>
                                 </div>
                             </CardContent>

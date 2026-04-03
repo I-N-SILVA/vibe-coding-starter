@@ -12,26 +12,43 @@ import {
 } from '@/components/plyaz';
 import { useLiveMatch } from '@/lib/hooks';
 import { leagueApi, teamsApi } from '@/lib/api';
-import type { Player, Match, MatchEvent, MatchEventType } from '@/types';
+import type { MatchUI } from '@/lib/mappers';
+import type { Player, MatchEvent, MatchEventType } from '@/types';
 import { refereeNavItems } from '@/lib/constants/navigation';
 
-/** Match data may come in camelCase or snake_case from API */
-type FetchedMatch = Match & Record<string, unknown>;
+const INITIAL_MATCH: MatchUI = {
+    id: '',
+    homeTeam: { id: '', name: 'Home', shortName: 'HOM' },
+    awayTeam: { id: '', name: 'Away', shortName: 'AWY' },
+    homeScore: 0,
+    awayScore: 0,
+    status: 'scheduled',
+    competitionId: '',
+    organizationId: '',
+    homeTeamId: '',
+    awayTeamId: '',
+    matchday: null,
+    round: null,
+    matchTime: null,
+    venue: null,
+    venueId: null,
+    groupId: null,
+    refereeId: null,
+    scheduledAt: null,
+    startedAt: null,
+    endedAt: null,
+    notes: null,
+    createdAt: '',
+    updatedAt: '',
+};
 
 export default function RefereeController() {
     const params = useParams();
     const router = useRouter();
     const matchId = params.id as string;
 
-    const [initialFetchMatch, setInitialFetchMatch] = useState<FetchedMatch | null>(null);
-    const { match } = useLiveMatch(initialFetchMatch || {
-        id: matchId,
-        homeTeam: { id: '', name: 'Home', shortName: 'HOM' },
-        awayTeam: { id: '', name: 'Away', shortName: 'AWY' },
-        homeScore: 0,
-        awayScore: 0,
-        status: 'scheduled',
-    } as unknown as Match);
+    const [initialFetchMatch, setInitialFetchMatch] = useState<MatchUI | null>(null);
+    const { match } = useLiveMatch(initialFetchMatch ?? { ...INITIAL_MATCH, id: matchId });
 
     const [isMatchStarted, setIsMatchStarted] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -54,15 +71,15 @@ export default function RefereeController() {
     useEffect(() => {
         async function fetchInitialData() {
             try {
-                const matchData = await leagueApi.getMatch(matchId) as FetchedMatch;
+                const matchData = await leagueApi.getMatch(matchId);
                 if (matchData) {
                     setInitialFetchMatch(matchData);
-                    setHomeScore(matchData.homeScore ?? matchData.home_score ?? 0);
-                    setAwayScore(matchData.awayScore ?? matchData.away_score ?? 0);
+                    setHomeScore(matchData.homeScore ?? 0);
+                    setAwayScore(matchData.awayScore ?? 0);
                     setIsMatchStarted(matchData.status === 'live');
 
-                    const homeTeamId = matchData.homeTeam?.id ?? matchData.home_team_id;
-                    const awayTeamId = matchData.awayTeam?.id ?? matchData.away_team_id;
+                    const homeTeamId = matchData.homeTeam?.id ?? matchData.homeTeamId;
+                    const awayTeamId = matchData.awayTeam?.id ?? matchData.awayTeamId;
 
                     const [hPlayers, aPlayers, mEvents] = await Promise.all([
                         teamsApi.getPlayers(homeTeamId),
@@ -148,7 +165,7 @@ export default function RefereeController() {
             // Goals update score automatically on backend? 
             // If not, update score here
             if (type === 'goal') {
-                const isHome = teamId === (match?.homeTeam?.id || match?.home_team_id);
+                const isHome = teamId === (match?.homeTeam?.id ?? match?.homeTeamId);
                 const newHome = isHome ? homeScore + 1 : homeScore;
                 const newAway = !isHome ? awayScore + 1 : awayScore;
 
@@ -172,7 +189,7 @@ export default function RefereeController() {
 
     if (isLoading) return <div className="min-h-screen bg-primary-main flex items-center justify-center text-white">LOADING...</div>;
 
-    const currentMatch = match || initialFetchMatch;
+    const currentMatch = match;
 
     return (
         <PageLayout navItems={refereeNavItems} title="REFEREE">
@@ -180,7 +197,7 @@ export default function RefereeController() {
                 {/* Header Info */}
                 <div className="text-center mb-8">
                     <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-secondary-main/40 mb-2">
-                        {currentMatch?.competitionId || currentMatch?.competition_id}
+                        {currentMatch?.competitionId}
                     </p>
                     <div className="flex items-center justify-center gap-4">
                         {isMatchStarted && (
@@ -200,7 +217,7 @@ export default function RefereeController() {
                 {/* Scoreboard */}
                 <section className="flex items-center justify-center gap-8 mb-12">
                     <div className="flex-1 text-right">
-                        <p className="text-xl font-black tracking-tight uppercase">{currentMatch?.homeTeam?.shortName || currentMatch?.home_team?.short_name || 'HOME'}</p>
+                        <p className="text-xl font-black tracking-tight uppercase">{currentMatch?.homeTeam?.shortName ?? 'HOME'}</p>
                         <p className="text-[10px] text-secondary-main/30 uppercase tracking-widest font-bold">Home</p>
                     </div>
                     <div className="flex items-center gap-6">
@@ -209,7 +226,7 @@ export default function RefereeController() {
                         <span className="text-8xl font-black tracking-tighter">{awayScore}</span>
                     </div>
                     <div className="flex-1 text-left">
-                        <p className="text-xl font-black tracking-tight uppercase">{currentMatch?.awayTeam?.shortName || currentMatch?.away_team?.short_name || 'AWAY'}</p>
+                        <p className="text-xl font-black tracking-tight uppercase">{currentMatch?.awayTeam?.shortName ?? 'AWAY'}</p>
                         <p className="text-[10px] text-secondary-main/30 uppercase tracking-widest font-bold">Away</p>
                     </div>
                 </section>
@@ -235,14 +252,14 @@ export default function RefereeController() {
                                     className="h-24 rounded-2xl bg-surface-main text-primary-main font-black text-xs tracking-[0.2em] uppercase active:scale-95 transition-all shadow-lg"
                                 >
                                     <span className="block text-2xl mb-1">⚽</span>
-                                    {(currentMatch?.homeTeam?.shortName || currentMatch?.home_team?.short_name || 'HOME')} GOAL
+                                    {currentMatch?.homeTeam?.shortName ?? 'HOME'} GOAL
                                 </button>
                                 <button
                                     onClick={() => { setSelectedTeam('away'); setIsGoalModalOpen(true); }}
                                     className="h-24 rounded-2xl bg-surface-main text-primary-main font-black text-xs tracking-[0.2em] uppercase active:scale-95 transition-all shadow-lg"
                                 >
                                     <span className="block text-2xl mb-1">⚽</span>
-                                    {(currentMatch?.awayTeam?.shortName || currentMatch?.away_team?.short_name || 'AWAY')} GOAL
+                                    {currentMatch?.awayTeam?.shortName ?? 'AWAY'} GOAL
                                 </button>
                             </div>
 
@@ -328,12 +345,12 @@ export default function RefereeController() {
                                     </span>
                                     <div className="flex-1">
                                         <p className="text-xs font-bold uppercase tracking-wider">{event.type.replace('_', ' ')}</p>
-                                        <p className="text-[10px] text-secondary-main/40 font-medium">{event.playerName || event.player_name}</p>
+                                        <p className="text-[10px] text-secondary-main/40 font-medium">{event.player_name}</p>
                                     </div>
                                     <Badge variant="secondary" className="text-[8px] border-secondary-main/10 text-secondary-main/40">
-                                        {(event.teamId || event.team_id) === (currentMatch?.homeTeam?.id || currentMatch?.home_team_id)
-                                            ? (currentMatch?.homeTeam?.shortName || currentMatch?.home_team?.short_name || 'HOME')
-                                            : (currentMatch?.awayTeam?.shortName || currentMatch?.away_team?.short_name || 'AWAY')}
+                                        {event.team_id === (currentMatch?.homeTeam?.id ?? currentMatch?.homeTeamId)
+                                            ? (currentMatch?.homeTeam?.shortName ?? 'HOME')
+                                            : (currentMatch?.awayTeam?.shortName ?? 'AWAY')}
                                     </Badge>
                                 </div>
                             ))
@@ -348,14 +365,14 @@ export default function RefereeController() {
                     {(selectedTeam === 'home' ? homePlayers : awayPlayers).map((player) => (
                         <button
                             key={player.id}
-                            onClick={() => recordEvent('goal', selectedTeam === 'home' ? (currentMatch?.homeTeam?.id || currentMatch?.home_team_id || '') : (currentMatch?.awayTeam?.id || currentMatch?.away_team_id || ''), player.id)}
+                            onClick={() => recordEvent('goal', selectedTeam === 'home' ? (currentMatch?.homeTeam?.id ?? currentMatch?.homeTeamId ?? '') : (currentMatch?.awayTeam?.id ?? currentMatch?.awayTeamId ?? ''), player.id)}
                             className="w-full py-5 px-5 text-left bg-secondary-main/5 rounded-2xl hover:bg-accent-main/10 hover:border-accent-main border-2 border-transparent transition-all group"
                         >
-                            <span className="inline-block w-8 text-xs font-black text-secondary-main/30 group-hover:text-accent-main">#{player.number || player.jersey_number}</span>
-                            <span className="font-bold text-sm tracking-tight">{player.firstName || player.name} {player.lastName || ''}</span>
+                            <span className="inline-block w-8 text-xs font-black text-secondary-main/30 group-hover:text-accent-main">#{player.jersey_number}</span>
+                            <span className="font-bold text-sm tracking-tight">{player.name}</span>
                         </button>
                     ))}
-                    <Button variant="secondary" fullWidth onClick={() => recordEvent('goal', selectedTeam === 'home' ? (currentMatch?.homeTeam?.id || currentMatch?.home_team_id || '') : (currentMatch?.awayTeam?.id || currentMatch?.away_team_id || ''), '')} className="mt-4">
+                    <Button variant="secondary" fullWidth onClick={() => recordEvent('goal', selectedTeam === 'home' ? (currentMatch?.homeTeam?.id ?? currentMatch?.homeTeamId ?? '') : (currentMatch?.awayTeam?.id ?? currentMatch?.awayTeamId ?? ''), '')} className="mt-4">
                         Unknown Player
                     </Button>
                 </div>
@@ -364,17 +381,17 @@ export default function RefereeController() {
             <Modal isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={`${cardType === 'yellow_card' ? 'Yellow' : 'Red'} Card`}>
                 <div className="grid grid-cols-2 gap-4 mb-6">
                     <button onClick={() => setSelectedTeam('home')} className={cn('py-4 rounded-xl border-2 font-bold text-xs tracking-widest flex items-center justify-center gap-2', selectedTeam === 'home' ? 'bg-primary-main text-white border-primary-main' : 'border-secondary-main/5 text-secondary-main/40')}>
-                        {currentMatch?.homeTeam?.shortName || currentMatch?.home_team?.short_name || 'HOME'}
+                        {currentMatch?.homeTeam?.shortName ?? 'HOME'}
                     </button>
                     <button onClick={() => setSelectedTeam('away')} className={cn('py-4 rounded-xl border-2 font-bold text-xs tracking-widest flex items-center justify-center gap-2', selectedTeam === 'away' ? 'bg-primary-main text-white border-primary-main' : 'border-secondary-main/5 text-secondary-main/40')}>
-                        {currentMatch?.awayTeam?.shortName || currentMatch?.away_team?.short_name || 'AWAY'}
+                        {currentMatch?.awayTeam?.shortName ?? 'AWAY'}
                     </button>
                 </div>
                 <div className="space-y-2">
                     {(selectedTeam === 'home' ? homePlayers : awayPlayers).map((player) => (
-                        <button key={player.id} onClick={() => recordEvent(cardType, selectedTeam === 'home' ? (currentMatch?.homeTeam?.id || currentMatch?.home_team_id || '') : (currentMatch?.awayTeam?.id || currentMatch?.away_team_id || ''), player.id)} className="w-full py-5 px-5 text-left bg-secondary-main/5 rounded-2xl hover:bg-accent-main/10 hover:border-accent-main border-2 border-transparent transition-all">
-                            <span className="inline-block w-8 text-xs font-black text-secondary-main/30 group-hover:text-accent-main">#{player.number || player.jersey_number}</span>
-                            <span className="font-bold text-sm tracking-tight">{player.firstName || player.name} {player.lastName || ''}</span>
+                        <button key={player.id} onClick={() => recordEvent(cardType, selectedTeam === 'home' ? (currentMatch?.homeTeam?.id ?? currentMatch?.homeTeamId ?? '') : (currentMatch?.awayTeam?.id ?? currentMatch?.awayTeamId ?? ''), player.id)} className="w-full py-5 px-5 text-left bg-secondary-main/5 rounded-2xl hover:bg-accent-main/10 hover:border-accent-main border-2 border-transparent transition-all">
+                            <span className="inline-block w-8 text-xs font-black text-secondary-main/30">#{player.jersey_number}</span>
+                            <span className="font-bold text-sm tracking-tight">{player.name}</span>
                         </button>
                     ))}
                 </div>

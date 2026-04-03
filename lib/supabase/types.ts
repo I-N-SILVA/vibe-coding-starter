@@ -99,19 +99,6 @@ export type Player = {
     };
     created_at: string;
     updated_at: string;
-    // camelCase aliases — populated by the mapper layer (toCamelCase / mapPlayerToUI)
-    teamId?: string | null;
-    profileId?: string | null;
-    organizationId?: string;
-    jerseyNumber?: number | null;
-    dateOfBirth?: string | null;
-    photoUrl?: string | null;
-    /** @deprecated Use `name` directly (split on first space if needed) */
-    firstName?: string;
-    /** @deprecated Use `name` directly */
-    lastName?: string;
-    /** @deprecated Use `jersey_number` */
-    number?: number | null;
 };
 
 export type PlayerPosition = 'GK' | 'CB' | 'LB' | 'RB' | 'CDM' | 'CM' | 'CAM' | 'LM' | 'RM' | 'LW' | 'RW' | 'ST' | 'CF';
@@ -151,22 +138,6 @@ export type Match = {
     away_team?: Team;
     referee?: Profile;
     events?: MatchEvent[];
-    // camelCase aliases — populated by the mapper layer (mapMatchToUI)
-    competitionId?: string;
-    organizationId?: string;
-    homeTeamId?: string;
-    awayTeamId?: string;
-    homeScore?: number;
-    awayScore?: number;
-    matchTime?: string | null;
-    venueId?: string | null;
-    groupId?: string | null;
-    refereeId?: string | null;
-    scheduledAt?: string | null;
-    startedAt?: string | null;
-    endedAt?: string | null;
-    homeTeam?: { id: string; name: string; shortName?: string; short_name?: string | null };
-    awayTeam?: { id: string; name: string; shortName?: string; short_name?: string | null };
 };
 
 export type MatchEvent = {
@@ -180,11 +151,6 @@ export type MatchEvent = {
     half: '1st' | '2nd' | 'ET1' | 'ET2' | 'penalties' | null;
     details: Record<string, unknown>;
     created_at: string;
-    // camelCase aliases — populated by the mapper layer
-    matchId?: string;
-    teamId?: string | null;
-    playerId?: string | null;
-    playerName?: string | null;
 };
 
 export type StandingsEntry = {

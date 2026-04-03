@@ -232,12 +232,12 @@ export default function AdminDashboard() {
                         {liveMatches.map((match) => (
                             <MatchCard
                                 key={match.id}
-                                homeTeam={match.homeTeam}
-                                awayTeam={match.awayTeam}
+                                homeTeam={match.homeTeam ?? { id: match.homeTeamId ?? '', name: 'Home' }}
+                                awayTeam={match.awayTeam ?? { id: match.awayTeamId ?? '', name: 'Away' }}
                                 homeScore={match.homeScore}
                                 awayScore={match.awayScore}
                                 status={match.status}
-                                matchTime={match.matchTime}
+                                matchTime={match.matchTime ?? undefined}
                                 onPress={() => router.push(`/league/referee/${match.id}`)}
                             />
                         ))}
@@ -340,12 +340,12 @@ export default function AdminDashboard() {
                             {upcomingMatches.map((match) => (
                                 <MatchCard
                                     key={match.id}
-                                    homeTeam={match.homeTeam}
-                                    awayTeam={match.awayTeam}
+                                    homeTeam={match.homeTeam ?? { id: match.homeTeamId ?? '', name: 'Home' }}
+                                    awayTeam={match.awayTeam ?? { id: match.awayTeamId ?? '', name: 'Away' }}
                                     status={match.status}
-                                    matchTime={match.matchTime}
-                                    date={match.scheduledDate ? new Date(match.scheduledDate).toLocaleDateString() : 'TBD'}
-                                    venue={match.venue}
+                                    matchTime={match.matchTime ?? undefined}
+                                    date={match.scheduledAt ? new Date(match.scheduledAt).toLocaleDateString() : 'TBD'}
+                                    venue={match.venue ?? undefined}
                                 />
                             ))}
                         </div>

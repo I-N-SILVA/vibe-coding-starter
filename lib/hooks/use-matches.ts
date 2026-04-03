@@ -5,11 +5,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { matchService } from '@/services/match';
 import { queryKeys } from './query-keys';
-import type {
-    CreateMatchDto,
-    UpdateScoreDto,
-    AddMatchEventDto
-} from '@/types';
+import type { MatchEvent, UpdateScoreDto, AddMatchEventDto } from '@/types';
 
 // ============================================
 // MATCH HOOKS
@@ -45,7 +41,8 @@ export function useCreateMatch() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreateMatchDto) => matchService.createMatch(data),
+        mutationFn: (data: { competitionId: string; homeTeamId: string; awayTeamId: string; scheduledDate?: string; venueId?: string }) =>
+            matchService.createMatch(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.matches() });
         },
@@ -104,13 +101,11 @@ export function useAddMatchEvent() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: AddMatchEventDto) => matchService.addMatchEvent(data),
+        mutationFn: (data: { matchId: string; playerId?: string; type: MatchEvent['type']; minute?: number; details?: Record<string, unknown> }) =>
+            matchService.addMatchEvent(data),
         onSuccess: (_, variables) => {
-            const matchId = variables.matchId || variables.match_id || '';
-            if (matchId) {
-                queryClient.invalidateQueries({ queryKey: queryKeys.matchEvents(matchId) });
-                queryClient.invalidateQueries({ queryKey: queryKeys.match(matchId) });
-            }
+            queryClient.invalidateQueries({ queryKey: queryKeys.matchEvents(variables.matchId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.match(variables.matchId) });
         },
     });
 }

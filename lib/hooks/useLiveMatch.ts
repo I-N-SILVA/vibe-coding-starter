@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { toCamelCase } from '@/lib/mappers';
+import type { MatchUI } from '@/lib/mappers';
 import { subscribeToMatch } from '@/lib/supabase/realtime';
 import type { Match, MatchEvent } from '@/types';
 import { useToast } from '@/components/providers';
@@ -12,8 +14,8 @@ import { useToast } from '@/components/providers';
  * @param initialMatch The match data from initial SSR or static fetch
  * @returns Current match data and live status
  */
-export const useLiveMatch = (initialMatch: Match) => {
-    const [match, setMatch] = useState<Match>(initialMatch);
+export const useLiveMatch = (initialMatch: MatchUI) => {
+    const [match, setMatch] = useState<MatchUI>(initialMatch);
     const [isLive, setIsLive] = useState(match.status === 'live');
     const [lastEvent, setLastEvent] = useState<MatchEvent | null>(null);
     const { info } = useToast();
@@ -26,12 +28,15 @@ export const useLiveMatch = (initialMatch: Match) => {
         if (!initialMatch.id) return;
 
         const channel = subscribeToMatch(initialMatch.id, {
+            // Supabase sends snake_case — convert to camelCase and merge into MatchUI state
             onMatchUpdate: (updatedMatch) => {
+                const mapped = toCamelCase(updatedMatch as Match);
                 setMatch((prev) => ({
                     ...prev,
-                    ...updatedMatch,
-                    homeTeam: updatedMatch.homeTeam ?? prev.homeTeam,
-                    awayTeam: updatedMatch.awayTeam ?? prev.awayTeam,
+                    ...mapped,
+                    // Preserve enriched team summaries; realtime doesn't include them
+                    homeTeam: prev.homeTeam,
+                    awayTeam: prev.awayTeam,
                 }));
 
                 if (updatedMatch.status) {
@@ -43,18 +48,18 @@ export const useLiveMatch = (initialMatch: Match) => {
 
                 setMatch((prev) => ({
                     ...prev,
-                    events: prev.events ? [event, ...prev.events] : [event]
+                    events: prev.events ? [event, ...prev.events] : [event],
                 }));
 
                 if (event.type === 'goal') {
                     const current = matchRef.current;
                     const homeTeam = current.homeTeam;
                     const awayTeam = current.awayTeam;
-                    const isHome = event.teamId === (homeTeam?.id ?? current.home_team_id);
+                    const isHome = event.team_id === (homeTeam?.id ?? current.homeTeamId);
                     const scoringTeam = isHome
-                        ? (homeTeam?.shortName ?? current.home_team?.short_name ?? 'HOME')
-                        : (awayTeam?.shortName ?? current.away_team?.short_name ?? 'AWAY');
-                    info(`GOAL! ${event.playerName ?? event.player_name ?? 'Someone'} scores for ${scoringTeam}`);
+                        ? (homeTeam?.shortName ?? 'HOME')
+                        : (awayTeam?.shortName ?? 'AWAY');
+                    info(`GOAL! ${event.player_name ?? 'Someone'} scores for ${scoringTeam}`);
                 }
             },
         });

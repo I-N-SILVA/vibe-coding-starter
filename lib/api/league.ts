@@ -4,9 +4,9 @@
  */
 
 import { apiClient } from './client';
+import type { MatchUI } from '@/lib/mappers';
 import type {
     Competition,
-    Match,
     StandingsEntry,
     CreateCompetitionDto,
     CreateMatchDto,
@@ -49,26 +49,26 @@ export const leagueApi = {
         if (params?.status) searchParams.set('status', params.status);
         if (params?.competitionId) searchParams.set('competitionId', params.competitionId);
         const query = searchParams.toString();
-        return apiClient.get<Match[]>(`/api/league/matches${query ? `?${query}` : ''}`);
+        return apiClient.get<MatchUI[]>(`/api/league/matches${query ? `?${query}` : ''}`);
     },
 
     getMatch: (id: string) =>
-        apiClient.get<Match>(`/api/league/matches/${id}`),
+        apiClient.get<MatchUI>(`/api/league/matches/${id}`),
 
     createMatch: (data: CreateMatchDto) =>
-        apiClient.post<Match>('/api/league/matches', data),
+        apiClient.post<MatchUI>('/api/league/matches', data),
 
     updateScore: (data: UpdateScoreDto) =>
-        apiClient.patch<Match>(`/api/league/matches/${data.matchId}/score`, {
+        apiClient.patch<MatchUI>(`/api/league/matches/${data.matchId}/score`, {
             homeScore: data.homeScore,
             awayScore: data.awayScore,
         }),
 
     startMatch: (matchId: string) =>
-        apiClient.post<Match>(`/api/league/matches/${matchId}/start`),
+        apiClient.post<MatchUI>(`/api/league/matches/${matchId}/start`),
 
     endMatch: (matchId: string) =>
-        apiClient.post<Match>(`/api/league/matches/${matchId}/end`),
+        apiClient.post<MatchUI>(`/api/league/matches/${matchId}/end`),
 
     // ============================================
     // MATCH EVENTS

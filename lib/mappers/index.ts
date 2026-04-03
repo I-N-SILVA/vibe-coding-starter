@@ -71,9 +71,37 @@ export function mapArrayToUI<T extends Record<string, unknown>>(arr: T[]): Camel
 
 import type {
     Match as DBMatch,
+    Player as DBPlayer,
+    MatchEvent as DBMatchEvent,
     Team as DBTeam,
     StandingsEntry as DBStandingsEntry,
 } from '@/lib/supabase/types';
+
+// ============================================
+// UI TYPES — camelCase representations for components
+// ============================================
+
+/** Team summary shape used by UI components (matches MatchCard's Team interface) */
+export type TeamSummary = {
+    id: string;
+    name: string;
+    shortName?: string;
+    logoUrl?: string;
+} | null;
+
+/** camelCase Match for UI components */
+export type MatchUI = CamelCaseKeys<Omit<DBMatch, 'home_team' | 'away_team' | 'referee' | 'events'>> & {
+    homeTeam?: TeamSummary;
+    awayTeam?: TeamSummary;
+    /** Events are always snake_case as received from Supabase realtime or DB */
+    events?: DBMatchEvent[];
+};
+
+/** camelCase Player for UI components */
+export type PlayerUI = CamelCaseKeys<DBPlayer>;
+
+/** camelCase MatchEvent for UI components */
+export type MatchEventUI = CamelCaseKeys<DBMatchEvent>;
 
 /**
  * Map a DB match (with optional joined teams) to UI representation.
