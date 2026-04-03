@@ -51,9 +51,9 @@ export default function UpdatePasswordPage() {
             setIsConfirmed(true);
             setIsLoading(false);
             
-            // Redirect to login after 3 seconds
+            // Redirect to dashboard after 3 seconds
             setTimeout(() => {
-                router.push('/login');
+                window.location.href = '/';
             }, 3000);
         }
     };
@@ -139,10 +139,10 @@ export default function UpdatePasswordPage() {
                                     <Button
                                         variant="secondary"
                                         fullWidth
-                                        onClick={() => router.push('/login')}
+                                        onClick={() => window.location.href = '/'}
                                         className="h-12 font-semibold tracking-wider text-[11px] uppercase"
                                     >
-                                        Go to Login Now
+                                        Go to Dashboard
                                     </Button>
                                 </motion.div>
                             ) : (

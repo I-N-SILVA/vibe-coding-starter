@@ -85,6 +85,11 @@ export async function updateSession(request: NextRequest) {
             // Redirect from login/root to role-based dashboard
             if (pathname === '/' || pathname.startsWith('/login')) {
                 const url = request.nextUrl.clone();
+                if (error || !profile) {
+                    url.pathname = '/onboarding';
+                    return NextResponse.redirect(url);
+                }
+                
                 switch (profile?.role) {
                     case 'manager':
                     case 'coach':
