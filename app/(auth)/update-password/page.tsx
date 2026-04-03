@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -16,7 +15,6 @@ import {
 } from '@/components/plyaz';
 
 export default function UpdatePasswordPage() {
-    const router = useRouter();
     const { updatePassword } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [isConfirmed, setIsConfirmed] = useState(false);

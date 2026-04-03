@@ -1,5 +1,6 @@
 'use client';
 
+// @ts-ignore
 import { KBarSearchProvider } from '@shipixen/pliny/search/KBar';
 import { useRouter } from 'next/navigation';
 import { searchLinks } from '@/data/config/searchLinks';

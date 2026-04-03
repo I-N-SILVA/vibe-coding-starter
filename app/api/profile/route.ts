@@ -15,15 +15,15 @@ export async function PATCH(request: Request) {
 
         // SECURITY: role changes must go through the admin-only update-role endpoint.
         // Accepting role from user input here would allow self-promotion to admin.
-        const { role: _role, id: _id, organization_id: _org, ...safeUpdates } = body;
+        // We use an explicit allowlist below to ensure restricted fields are excluded.
 
-        const allowedFields: (keyof typeof safeUpdates)[] = [
+        const allowedFields = [
             'full_name', 'avatar_url', 'phone', 'bio',
             'position', 'jersey_number', 'nationality',
         ];
 
         const filtered = Object.fromEntries(
-            Object.entries(safeUpdates).filter(([key]) => allowedFields.includes(key as never))
+            Object.entries(body).filter(([key]) => allowedFields.includes(key))
         );
 
         if (Object.keys(filtered).length === 0) {
