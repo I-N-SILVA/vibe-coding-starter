@@ -33,7 +33,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-    const limited = rateLimit(request, 5, 60_000); // 5 orgs/min
+    const limited = await rateLimit(request, 5, 60_000); // 5 orgs/min
     if (limited) return limited;
 
     const supabase = await createClient();

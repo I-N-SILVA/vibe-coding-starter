@@ -14,57 +14,39 @@ function toTeamSummary(team: Team | null | undefined): TeamSummary {
  */
 export const matchService = {
     /**
-     * Map a DB match + enriched teams to a UI (camelCase) MatchUI.
+     * Map a DB match (with pre-joined home_team/away_team) to MatchUI.
+     * The repository always joins teams — no extra arguments needed.
      */
-    mapMatch(match: Match, homeTeam?: Team | null, awayTeam?: Team | null): MatchUI {
+    mapMatch(match: Match): MatchUI {
         return {
             ...toCamelCase(match),
-            homeTeam: toTeamSummary(homeTeam ?? match.home_team),
-            awayTeam: toTeamSummary(awayTeam ?? match.away_team),
+            homeTeam: toTeamSummary(match.home_team),
+            awayTeam: toTeamSummary(match.away_team),
         };
     },
 
     /**
-     * Get matches with optional status/competition filters
+     * Get matches with optional status/competition filters.
+     * Teams are pre-joined in the repository (no N+1).
      */
     async getMatches(params?: { status?: string; competitionId?: string }) {
-        let matches: Match[] = [];
-
-        if (params?.competitionId) {
-            matches = await repositories.match.findByCompetition(params.competitionId);
-        } else {
-            matches = await repositories.match.findAll();
-        }
+        let matches: Match[] = params?.competitionId
+            ? await repositories.match.findByCompetition(params.competitionId)
+            : await repositories.match.findAll();
 
         if (params?.status) {
             matches = matches.filter(m => m.status === params.status);
         }
 
-        const result = await Promise.all(matches.map(async (m) => {
-            const [homeTeam, awayTeam] = await Promise.all([
-                repositories.team.findById(m.home_team_id),
-                repositories.team.findById(m.away_team_id),
-            ]);
-            return matchService.mapMatch(m, homeTeam, awayTeam);
-        }));
-
-        return result.sort((a, b) =>
-            new Date(a.scheduledAt || 0).getTime() - new Date(b.scheduledAt || 0).getTime()
-        );
+        return matches.map(m => matchService.mapMatch(m));
     },
 
     /**
-     * Get a single match with details
+     * Get a single match with joined team data.
      */
     async getMatch(id: string): Promise<MatchUI | null> {
         const match = await repositories.match.findById(id);
-        if (!match) return null;
-
-        const [homeTeam, awayTeam] = await Promise.all([
-            repositories.team.findById(match.home_team_id),
-            repositories.team.findById(match.away_team_id),
-        ]);
-        return matchService.mapMatch(match, homeTeam, awayTeam);
+        return match ? matchService.mapMatch(match) : null;
     },
 
     /**

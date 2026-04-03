@@ -5,7 +5,7 @@ import { acceptInviteApiSchema as verifyInviteApiSchema } from '@/lib/api/valida
 import { rateLimit } from '@/lib/api/rate-limit';
 
 export async function POST(request: Request) {
-    const limited = rateLimit(request, 20, 60_000); // More lenient rate limit for this check
+    const limited = await rateLimit(request, 20, 60_000); // More lenient rate limit for this check
     if (limited) return limited;
 
     const supabase = await createClient();

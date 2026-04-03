@@ -27,7 +27,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 }
 
 export async function POST(request: Request, { params }: RouteParams) {
-    const limited = rateLimit(request, 30, 60_000);
+    const limited = await rateLimit(request, 30, 60_000);
     if (limited) return limited;
 
     const { id } = await params;

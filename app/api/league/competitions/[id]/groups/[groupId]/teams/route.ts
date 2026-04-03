@@ -24,7 +24,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
 export async function POST(request: Request, { params }: RouteParams) {
     const { groupId } = await params;
-    const limited = rateLimit(request, 5, 60_000);
+    const limited = await rateLimit(request, 5, 60_000);
     if (limited) return limited;
 
     const supabase = await createClient();

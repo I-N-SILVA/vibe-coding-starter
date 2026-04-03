@@ -53,6 +53,7 @@ export async function updateSession(request: NextRequest) {
         pathname.startsWith('/auth') ||
         pathname.startsWith('/league/public') ||
         pathname.startsWith('/api/') ||
+        pathname === '/update-password' ||
         pathname === '/manifest.json' ||
         pathname === '/manifest.webmanifest' ||
         pathname === '/search.json';

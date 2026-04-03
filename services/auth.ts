@@ -121,7 +121,7 @@ export const authService = {
             const { createClient } = await import('@/lib/supabase/client');
             const supabase = createClient();
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
+                redirectTo: `${window.location.origin}/update-password`,
             });
             return { error: error?.message ?? null };
         }

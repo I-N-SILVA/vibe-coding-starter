@@ -7,7 +7,7 @@ import { rateLimit } from '@/lib/api/rate-limit';
 type RouteParams = { params: Promise<{ id: string }> };
 
 export async function POST(request: Request, { params }: RouteParams) {
-    const limited = rateLimit(request, 3, 60_000);
+    const limited = await rateLimit(request, 3, 60_000);
     if (limited) return limited;
 
     const { id } = await params;

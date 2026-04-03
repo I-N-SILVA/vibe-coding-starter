@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Analytics, AnalyticsConfig } from '@shipixen/pliny/analytics';
 import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
 

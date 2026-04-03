@@ -8,7 +8,7 @@ export async function POST(
     request: Request,
     { params }: { params: Promise<{ organizationId: string, userId: string }> }
 ) {
-    const limited = rateLimit(request, 10, 60_000);
+    const limited = await rateLimit(request, 10, 60_000);
     if (limited) return limited;
 
     const supabase = await createClient();

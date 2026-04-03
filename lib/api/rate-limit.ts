@@ -1,81 +1,87 @@
 import { NextResponse } from 'next/server';
 
 /**
- * Simple in-memory rate limiter for API mutation endpoints.
- * Uses a sliding window approach per IP address.
+ * Rate Limiter — PLYAZ League Manager
  *
- * For production at scale, consider using Vercel Edge Rate Limiting
- * or Redis-based rate limiting (e.g., @upstash/ratelimit).
+ * Uses Upstash Redis when UPSTASH_REDIS_REST_URL is configured (production/staging).
+ * Falls back to in-memory sliding window for local dev without Redis.
+ *
+ * Upstash setup:
+ *   1. Create a free Redis DB at console.upstash.com
+ *   2. Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to .env.local
  */
 
-interface RateLimitEntry {
-    count: number;
-    resetAt: number;
-}
+// ─── In-memory fallback ────────────────────────────────────────────────────
 
-const store = new Map<string, RateLimitEntry>();
-
-// Clean up expired entries every 60 seconds
-const CLEANUP_INTERVAL = 60_000;
+interface MemEntry { count: number; resetAt: number }
+const store = new Map<string, MemEntry>();
 let lastCleanup = Date.now();
 
-function cleanup() {
+function memoryCheck(key: string, limit: number, windowMs: number): boolean {
     const now = Date.now();
-    if (now - lastCleanup < CLEANUP_INTERVAL) return;
-    lastCleanup = now;
-    for (const [key, entry] of store) {
-        if (now > entry.resetAt) {
-            store.delete(key);
-        }
+    if (now - lastCleanup > 60_000) {
+        lastCleanup = now;
+        for (const [k, v] of store) if (now > v.resetAt) store.delete(k);
     }
+    const entry = store.get(key);
+    if (!entry || now > entry.resetAt) {
+        store.set(key, { count: 1, resetAt: now + windowMs });
+        return false;
+    }
+    return ++entry.count > limit;
 }
+
+// ─── Upstash Redis ─────────────────────────────────────────────────────────
+
+async function redisCheck(key: string, limit: number, windowMs: number): Promise<boolean> {
+    const { Ratelimit } = await import('@upstash/ratelimit');
+    const { Redis } = await import('@upstash/redis');
+    const ratelimit = new Ratelimit({
+        redis: Redis.fromEnv(),
+        limiter: Ratelimit.slidingWindow(limit, `${windowMs}ms`),
+        analytics: true,
+        prefix: 'rl:plyaz',
+    });
+    const { success } = await ratelimit.limit(key);
+    return !success;
+}
+
+// ─── Public API ────────────────────────────────────────────────────────────
 
 /**
  * Check rate limit for a request.
  * Returns null if allowed, or a 429 NextResponse if rate limited.
  *
- * @param request - The incoming request
- * @param limit - Maximum requests per window (default: 30)
- * @param windowMs - Time window in milliseconds (default: 60000 = 1 minute)
+ * NOTE: now async — all call sites must await this.
  */
-export function rateLimit(
+export async function rateLimit(
     request: Request,
     limit: number = 30,
     windowMs: number = 60_000
-): NextResponse | null {
-    cleanup();
-
-    // Extract identifier: prefer X-Forwarded-For (Vercel), fallback to generic key
+): Promise<NextResponse | null> {
     const forwarded = request.headers.get('x-forwarded-for');
-    // Harden IP parsing: take only the first valid-looking IP, strip whitespace
     const ip = forwarded?.split(',')[0]?.trim().replace(/[^\d.a-fA-F:]/g, '') || 'unknown';
     const key = `${ip}:${new URL(request.url).pathname}`;
+    const useRedis = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
 
-    const now = Date.now();
-    const entry = store.get(key);
-
-    if (!entry || now > entry.resetAt) {
-        store.set(key, { count: 1, resetAt: now + windowMs });
-        return null;
+    let limited: boolean;
+    try {
+        limited = useRedis ? await redisCheck(key, limit, windowMs) : memoryCheck(key, limit, windowMs);
+    } catch {
+        limited = false; // fail open — availability over strict limiting
     }
 
-    entry.count++;
+    if (!limited) return null;
 
-    if (entry.count > limit) {
-        const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
-        return NextResponse.json(
-            { error: 'Too many requests. Please try again later.' },
-            {
-                status: 429,
-                headers: {
-                    'Retry-After': String(retryAfter),
-                    'X-RateLimit-Limit': String(limit),
-                    'X-RateLimit-Remaining': '0',
-                    'X-RateLimit-Reset': String(entry.resetAt),
-                },
-            }
-        );
-    }
-
-    return null;
+    return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+            status: 429,
+            headers: {
+                'Retry-After': String(Math.ceil(windowMs / 1000)),
+                'X-RateLimit-Limit': String(limit),
+                'X-RateLimit-Remaining': '0',
+            },
+        }
+    );
 }

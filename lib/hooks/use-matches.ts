@@ -5,7 +5,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { matchService } from '@/services/match';
 import { queryKeys } from './query-keys';
-import type { MatchEvent, UpdateScoreDto, AddMatchEventDto } from '@/types';
+import type { MatchEvent, UpdateScoreDto } from '@/types';
+import type { MatchUI } from '@/lib/mappers';
 
 // ============================================
 // MATCH HOOKS
@@ -54,8 +55,21 @@ export function useUpdateScore() {
 
     return useMutation({
         mutationFn: (data: UpdateScoreDto) => matchService.updateScore(data.matchId, data.homeScore, data.awayScore),
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.match(variables.matchId) });
+        onMutate: async (data) => {
+            await queryClient.cancelQueries({ queryKey: queryKeys.match(data.matchId) });
+            const previous = queryClient.getQueryData<MatchUI>(queryKeys.match(data.matchId));
+            queryClient.setQueryData<MatchUI>(queryKeys.match(data.matchId), (old) =>
+                old ? { ...old, homeScore: data.homeScore, awayScore: data.awayScore } : old
+            );
+            return { previous };
+        },
+        onError: (_, vars, ctx) => {
+            if (ctx?.previous) {
+                queryClient.setQueryData(queryKeys.match(vars.matchId), ctx.previous);
+            }
+        },
+        onSettled: (_, __, vars) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.match(vars.matchId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.matches() });
         },
     });
