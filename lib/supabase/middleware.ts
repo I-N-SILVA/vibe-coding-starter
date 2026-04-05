@@ -3,17 +3,18 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { log } from '@/lib/logger';
 
 export async function updateSession(request: NextRequest) {
-    let supabaseResponse = NextResponse.next({
-        request,
-    });
-
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
-        // Cannot authenticate without Supabase — redirect to a static error or let the error boundary handle it
-        return supabaseResponse;
+        return NextResponse.next({
+            request,
+        });
     }
+
+    let supabaseResponse = NextResponse.next({
+        request,
+    });
 
     const supabase = createServerClient(
         supabaseUrl,
@@ -24,10 +25,6 @@ export async function updateSession(request: NextRequest) {
                     return request.cookies.getAll();
                 },
                 setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-                    supabaseResponse = NextResponse.next({
-                        request,
-                    });
                     cookiesToSet.forEach(({ name, value, options }) =>
                         supabaseResponse.cookies.set(name, value, options)
                     );
