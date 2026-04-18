@@ -1,6 +1,10 @@
+// @ts-ignore
 import { AnalyticsConfig } from '@shipixen/pliny/analytics';
+// @ts-ignore
 import { CommentsConfig } from '@shipixen/pliny/comments';
+// @ts-ignore
 import { NewsletterConfig } from '@shipixen/pliny/newsletter';
+// @ts-ignore
 import { SearchConfig } from '@shipixen/pliny/search';
 
 export interface SiteMetadata {

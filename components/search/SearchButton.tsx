@@ -1,3 +1,4 @@
+// @ts-ignore
 import { KBarButton } from '@shipixen/pliny/search/KBarButton';
 import { siteConfig } from '@/data/config/site.settings';
 import { SearchIcon } from 'lucide-react';

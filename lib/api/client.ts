@@ -117,7 +117,13 @@ async function apiFetch<T>(
     if (!response.ok) {
         let errorData: ApiError;
         try {
-            errorData = await response.json();
+            const raw = await response.json();
+            // API routes return { error: string } — normalise to { message, code }
+            errorData = {
+                code: raw.code || `HTTP_${response.status}`,
+                message: raw.message || raw.error || `HTTP ${response.status}: ${response.statusText}`,
+                details: raw.details,
+            };
         } catch {
             errorData = {
                 code: 'UNKNOWN_ERROR',

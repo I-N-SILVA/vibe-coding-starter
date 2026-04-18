@@ -7,11 +7,24 @@ import { playerService } from '@/services/player';
 import { apiClient } from '@/lib/api';
 import { queryKeys } from './query-keys';
 import type { CreatePlayerDto } from '@/types';
+import type { Player } from '@/lib/supabase/types';
+
+function toApiPlayerDto(data: CreatePlayerDto) {
+    return {
+        name: data.name,
+        team_id: data.team_id ?? data.teamId,
+        position: data.position,
+        jersey_number: data.jersey_number ?? data.jerseyNumber,
+        date_of_birth: data.date_of_birth ?? data.dateOfBirth,
+        nationality: data.nationality,
+        bio: data.bio,
+    };
+}
 
 export function usePlayers(teamId: string) {
     return useQuery({
         queryKey: queryKeys.players(teamId),
-        queryFn: () => playerService.getPlayers(teamId),
+        queryFn: () => apiClient.get<Player[]>(`/api/league/teams/${teamId}/players`),
         enabled: !!teamId,
         staleTime: 30_000,
     });
@@ -20,7 +33,7 @@ export function usePlayers(teamId: string) {
 export function useAllPlayers() {
     return useQuery({
         queryKey: queryKeys.players('all'),
-        queryFn: () => playerService.getPlayers(),
+        queryFn: () => apiClient.get<Player[]>('/api/league/players'),
         staleTime: 30_000,
     });
 }
@@ -37,7 +50,7 @@ export function useCurrentPlayer(profileId?: string) {
 export function usePlayer(teamId: string, playerId: string) {
     return useQuery({
         queryKey: queryKeys.player(teamId, playerId),
-        queryFn: () => playerService.getPlayer(playerId),
+        queryFn: () => apiClient.get<Player>(`/api/league/players/${playerId}`),
         enabled: !!playerId,
         staleTime: 30_000,
     });
@@ -47,10 +60,12 @@ export function useCreatePlayer() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreatePlayerDto) => apiClient.post('/api/league/players', data),
+        mutationFn: (data: CreatePlayerDto) =>
+            apiClient.post('/api/league/players', toApiPlayerDto(data)),
         onSuccess: (_, variables) => {
-            if (variables.teamId) {
-                queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });
+            const teamId = variables.team_id ?? variables.teamId;
+            if (teamId) {
+                queryClient.invalidateQueries({ queryKey: queryKeys.players(teamId) });
             }
             queryClient.invalidateQueries({ queryKey: queryKeys.players('all') });
         },
@@ -62,7 +77,7 @@ export function useUpdatePlayer() {
 
     return useMutation({
         mutationFn: ({ playerId, data }: { teamId: string; playerId: string; data: Partial<CreatePlayerDto> }) =>
-            apiClient.patch(`/api/league/players/${playerId}`, data),
+            apiClient.patch(`/api/league/players/${playerId}`, toApiPlayerDto(data as CreatePlayerDto)),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.player(variables.teamId, variables.playerId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });

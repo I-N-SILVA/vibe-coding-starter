@@ -120,8 +120,9 @@ export const authService = {
         if (isSupabaseConfigured()) {
             const { createClient } = await import('@/lib/supabase/client');
             const supabase = createClient();
+            const origin = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || '';
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/update-password`,
+                redirectTo: `${origin}/update-password`,
             });
             return { error: error?.message ?? null };
         }

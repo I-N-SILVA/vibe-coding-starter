@@ -299,7 +299,7 @@ export default function PlayerDashboard() {
                                     <CardContent className="p-4 flex items-center justify-between">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-400 group-hover:bg-gray-900 group-hover:text-white transition-colors">
-                                                {teammate.jersey_number || teammate.number || '-'}
+                                                {teammate.jersey_number || '-'}
                                             </div>
                                             <div>
                                                 <p className="font-bold text-gray-900">{teammate.name}</p>

@@ -87,11 +87,11 @@ export default function AdminTeams() {
                                 <CardContent className="pt-4">
                                     <div className="flex flex-col items-center text-center">
                                         <div className="w-16 h-16 rounded-full bg-primary-main flex items-center justify-center text-xl font-bold text-white mb-4 group-hover:scale-110 transition-transform">
-                                            {team.shortName || team.name.substring(0, 2).toUpperCase()}
+                                            {team.short_name || team.name.substring(0, 2).toUpperCase()}
                                         </div>
                                         <h3 className="text-lg font-bold text-primary-main mb-1">{team.name}</h3>
                                         <Badge variant="secondary" size="sm" className="mb-6 border-secondary-main/10 text-secondary-main/40">
-                                            {competitions.find(c => c.id === team.competitionId)?.name || 'Unassigned'}
+                                            {competitions.find(c => c.id === team.competition_id)?.name || 'Unassigned'}
                                         </Badge>
 
                                         <div className="grid grid-cols-2 gap-2 w-full pt-6 border-t border-secondary-main/5 mt-auto">

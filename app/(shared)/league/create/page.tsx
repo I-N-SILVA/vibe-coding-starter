@@ -94,7 +94,7 @@ export default function CreateLeaguePage() {
                 router.push('/league');
             } else {
                 const error = await res.json();
-                toast.error(error.message || 'Failed to create league');
+                toast.error(error.error || error.message || 'Failed to create league');
             }
         } catch (err) {
             toast.error(err instanceof Error ? err.message : 'An unexpected error occurred');
