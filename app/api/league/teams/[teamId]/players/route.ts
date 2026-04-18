@@ -8,6 +8,17 @@ type RouteParams = { params: Promise<{ teamId: string }> };
 export async function GET(_request: Request, { params }: RouteParams) {
     const { teamId } = await params;
     const supabase = await createClient();
+    const auth = await getUserOrgId(supabase);
+    if (auth.error) return auth.error;
+
+    const { data: team, error: teamErr } = await supabase
+        .from('teams')
+        .select('id')
+        .eq('id', teamId)
+        .eq('organization_id', auth.orgId)
+        .single();
+
+    if (teamErr || !team) return apiError('Team not found or access denied', 404);
 
     const { data, error } = await supabase
         .from('players')
@@ -27,6 +38,15 @@ export async function POST(request: Request, { params }: RouteParams) {
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
+
+    const { data: team, error: teamErr } = await supabase
+        .from('teams')
+        .select('id')
+        .eq('id', teamId)
+        .eq('organization_id', auth.orgId)
+        .single();
+
+    if (teamErr || !team) return apiError('Team not found or access denied', 404);
 
     const parsed = await parseBody(request, createPlayerApiSchema);
     if (parsed.error) return parsed.error;

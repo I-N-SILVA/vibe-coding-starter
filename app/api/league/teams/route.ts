@@ -55,6 +55,17 @@ export async function POST(request: Request) {
     const parsed = await parseBody(request, createTeamApiSchema);
     if (parsed.error) return parsed.error;
 
+    // Validate competition belongs to this org (if provided)
+    if (parsed.data.competition_id) {
+        const { data: comp, error: compErr } = await supabase
+            .from('competitions')
+            .select('id')
+            .eq('id', parsed.data.competition_id)
+            .eq('organization_id', auth.orgId)
+            .single();
+        if (compErr || !comp) return apiError('Competition not found or access denied', 404);
+    }
+
     const { data, error } = await supabase
         .from('teams')
         .insert([{ ...parsed.data, organization_id: auth.orgId }])
