@@ -56,11 +56,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setIsAuthInitialized(true);
 
             // Subscribe to auth state changes (Supabase only; no-op in mock)
-            const subscription = await authService.onAuthStateChange(async (userId) => {
+            const subscription = await authService.onAuthStateChange(async (userId, newSession) => {
                 if (userId) {
                     const p = await authService.getProfileById(userId);
                     setUser({ id: userId });
                     setProfile(p);
+                    setSession(newSession);
                 } else {
                     setUser(null);
                     setProfile(null);

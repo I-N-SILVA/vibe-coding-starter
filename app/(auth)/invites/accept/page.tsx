@@ -2,11 +2,13 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 function AcceptInvite() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const queryClient = useQueryClient();
     const { isAuthenticated, isLoading: authLoading } = useAuth();
     const [status, setStatus] = useState('Accepting invitation...');
 
@@ -36,6 +38,9 @@ function AcceptInvite() {
 
             if (response.ok) {
                 setStatus('Invitation accepted! Redirecting...');
+                // Invalidate org context so OrgProvider picks up the new organization immediately
+                queryClient.invalidateQueries({ queryKey: ['organization'] });
+                router.refresh(); // Clear middleware/layout cache
                 router.push('/league');
             } else {
                 const { error } = await response.json();
@@ -44,7 +49,7 @@ function AcceptInvite() {
         };
 
         accept();
-    }, [searchParams, router, isAuthenticated, authLoading]);
+    }, [searchParams, router, isAuthenticated, authLoading, queryClient]);
 
     return (
         <div className="min-h-screen flex items-center justify-center">

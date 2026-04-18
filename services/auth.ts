@@ -45,13 +45,13 @@ export const authService = {
      * Only meaningful in Supabase mode; returns a no-op in mock mode.
      */
     async onAuthStateChange(
-        callback: (userId: string | null) => Promise<void>
+        callback: (userId: string | null, session: import('@supabase/supabase-js').Session | null) => Promise<void>
     ): Promise<{ unsubscribe: () => void }> {
         if (isSupabaseConfigured()) {
             const { createClient } = await import('@/lib/supabase/client');
             const supabase = createClient();
             const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
-                await callback(session?.user?.id ?? null);
+                await callback(session?.user?.id ?? null, session);
             });
             return data.subscription;
         }

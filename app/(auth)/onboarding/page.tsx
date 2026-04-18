@@ -48,20 +48,8 @@ export default function OnboardingPage() {
         setError(null);
 
         try {
-            // 1. Update Profile Role via API
-            const roleRes = await fetch('/api/profile', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ role })
-            });
-
-            if (!roleRes.ok) {
-                const errorData = await roleRes.json();
-                throw new Error(errorData.error || 'Failed to update profile role');
-            }
-
-            // 2. If organizer, create Organization and Competition
             if (role === 'organizer') {
+                // 1. Create Organization (this also sets role='admin' server-side)
                 const orgSlug = leagueName.toLowerCase()
                     .replace(/[^a-z0-9]/g, '-')
                     .replace(/-+/g, '-')
@@ -78,24 +66,33 @@ export default function OnboardingPage() {
                     throw new Error(errorData.error || 'Failed to create organization');
                 }
 
-                // Create the initial competition
-                fetch('/api/league/competitions', {
+                // 2. Create the initial competition (awaited so user lands on populated dashboard)
+                const compRes = await fetch('/api/league/competitions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: leagueName, type: leagueType })
-                }).catch(err => console.warn('Background league creation failed:', err));
+                });
+
+                if (!compRes.ok) {
+                    // Non-fatal: org was created, just no initial competition
+                    console.warn('[Onboarding] Initial competition creation failed');
+                }
+            } else {
+                // Non-organizer roles need to be invited via invite link.
+                // We still show success and redirect to the appropriate page.
+                // The middleware will redirect to onboarding if they have no org,
+                // but they can get their org assigned via invite acceptance.
             }
 
-            // 3. Success screen
+            // Show success screen
             setIsSuccess(true);
 
-            // 4. Redirect after delay
+            // Redirect after delay
             setTimeout(() => {
                 let destination = '/league';
                 if (role === 'manager') destination = '/league/coach/dashboard';
                 else if (role === 'player') destination = '/league/player/dashboard';
                 else if (role === 'referee') destination = '/league/referee';
-                else if (role === 'admin') destination = '/league';
 
                 router.push(destination);
                 router.refresh();
