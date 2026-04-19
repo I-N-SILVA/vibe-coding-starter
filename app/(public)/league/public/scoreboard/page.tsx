@@ -13,72 +13,43 @@ import {
 } from '@/components/plyaz';
 import { publicNavItems } from '@/lib/constants/navigation';
 import { subscribeToAllLiveMatches } from '@/lib/supabase/realtime';
-import type { MatchStatus } from '@/types';
-
-interface DemoMatch {
-    id: string;
-    homeTeam: { id: string; name: string; shortName: string };
-    awayTeam: { id: string; name: string; shortName: string };
-    homeScore?: number;
-    awayScore?: number;
-    status: MatchStatus;
-    matchTime?: string;
-    date?: string;
-    venue?: string;
-    [key: string]: unknown;
-}
-
-const DEMO_MATCHES: DemoMatch[] = [
-    {
-        id: '1',
-        homeTeam: { id: '1', name: 'FC United', shortName: 'FCU' },
-        awayTeam: { id: '2', name: 'City Rangers', shortName: 'CRG' },
-        homeScore: 2,
-        awayScore: 1,
-        status: 'live' as const,
-        matchTime: "72'",
-    },
-    {
-        id: '2',
-        homeTeam: { id: '3', name: 'Phoenix FC', shortName: 'PHX' },
-        awayTeam: { id: '4', name: 'Eagles', shortName: 'EGL' },
-        homeScore: 0,
-        awayScore: 0,
-        status: 'live' as const,
-        matchTime: "28'",
-    },
-    {
-        id: '3',
-        homeTeam: { id: '5', name: 'Rovers', shortName: 'ROV' },
-        awayTeam: { id: '6', name: 'Athletic', shortName: 'ATH' },
-        status: 'scheduled' as const,
-        matchTime: '3:00 PM',
-        date: 'Today',
-        venue: 'Main Stadium',
-    },
-];
+import type { Match } from '@/lib/supabase/types';
 
 export default function PublicScoreboard() {
     const router = useRouter();
-    const [matches, setMatches] = useState<DemoMatch[]>(DEMO_MATCHES);
+    const [matches, setMatches] = useState<Match[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(new Date());
 
     useEffect(() => {
-        // Simulate initial load
-        const timer = setTimeout(() => setIsLoading(false), 600);
+        async function fetchMatches() {
+            try {
+                const [liveRes, upcomingRes] = await Promise.all([
+                    fetch('/api/league/public/matches?status=live'),
+                    fetch('/api/league/public/matches?status=scheduled'),
+                ]);
+                const live: Match[] = liveRes.ok ? await liveRes.json() : [];
+                const upcoming: Match[] = upcomingRes.ok ? await upcomingRes.json() : [];
+                setMatches([...live, ...upcoming]);
+            } catch {
+                // silently fail — user may not be authenticated
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        fetchMatches();
 
         const channel = subscribeToAllLiveMatches((updatedMatch) => {
             setMatches((prev) =>
                 prev.map((m) =>
-                    m.id === updatedMatch.id ? ({ ...m, ...updatedMatch } as DemoMatch) : m
+                    m.id === updatedMatch.id ? { ...m, ...updatedMatch } : m
                 )
             );
             setLastUpdated(new Date());
         });
 
         return () => {
-            clearTimeout(timer);
             channel.unsubscribe();
         };
     }, []);
@@ -114,12 +85,7 @@ export default function PublicScoreboard() {
                     <div className="grid gap-4">
                         {isLoading ? (
                             [1, 2].map((i) => (
-                                <motion.div
-                                    key={i}
-                                    initial={{ opacity: 0, y: 8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.1 }}
-                                >
+                                <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
                                     <SkeletonMatchCard />
                                 </motion.div>
                             ))
@@ -127,13 +93,13 @@ export default function PublicScoreboard() {
                             liveMatches.map(match => (
                                 <MatchCard
                                     key={match.id}
-                                    homeTeam={match.homeTeam}
-                                    awayTeam={match.awayTeam}
-                                    homeScore={match.homeScore}
-                                    awayScore={match.awayScore}
+                                    homeTeam={match.home_team ?? { id: match.home_team_id, name: 'Home' }}
+                                    awayTeam={match.away_team ?? { id: match.away_team_id, name: 'Away' }}
+                                    homeScore={match.home_score}
+                                    awayScore={match.away_score}
                                     status={match.status}
-                                    matchTime={match.matchTime}
-                                    onPress={() => router.push(`/league/public/teams/${match.homeTeam.id}`)}
+                                    matchTime={match.match_time ?? undefined}
+                                    onPress={() => router.push(`/league/public/teams/${match.home_team_id}`)}
                                 />
                             ))
                         ) : (
@@ -162,13 +128,13 @@ export default function PublicScoreboard() {
                             upcomingMatches.map(match => (
                                 <MatchCard
                                     key={match.id}
-                                    homeTeam={match.homeTeam}
-                                    awayTeam={match.awayTeam}
+                                    homeTeam={match.home_team ?? { id: match.home_team_id, name: 'Home' }}
+                                    awayTeam={match.away_team ?? { id: match.away_team_id, name: 'Away' }}
                                     status={match.status}
-                                    matchTime={match.matchTime}
-                                    date={match.date}
-                                    venue={match.venue}
-                                    onPress={() => router.push(`/league/public/teams/${match.homeTeam.id}`)}
+                                    matchTime={match.match_time ?? undefined}
+                                    date={match.scheduled_at ? new Date(match.scheduled_at).toLocaleDateString() : undefined}
+                                    venue={match.venue ?? undefined}
+                                    onPress={() => router.push(`/league/public/teams/${match.home_team_id}`)}
                                 />
                             ))
                         ) : (

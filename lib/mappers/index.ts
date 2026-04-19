@@ -106,13 +106,22 @@ export type MatchEventUI = CamelCaseKeys<DBMatchEvent>;
 /**
  * Map a DB match (with optional joined teams) to UI representation.
  */
-export function mapMatchToUI(match: DBMatch) {
+function toTeamSummary(team: DBTeam | null | undefined): TeamSummary {
+    if (!team) return null;
+    return {
+        id: team.id,
+        name: team.name,
+        shortName: team.short_name ?? undefined,
+        logoUrl: team.logo_url ?? undefined,
+    };
+}
+
+export function mapMatchToUI(match: DBMatch): MatchUI {
     return {
         ...toCamelCase(match),
-        // Preserve joined entities as camelCase too
-        homeTeam: match.home_team ? toCamelCase(match.home_team) : undefined,
-        awayTeam: match.away_team ? toCamelCase(match.away_team) : undefined,
-        referee: match.referee ? toCamelCase(match.referee) : undefined,
+        homeTeam: toTeamSummary(match.home_team),
+        awayTeam: toTeamSummary(match.away_team),
+        events: match.events,
     };
 }
 

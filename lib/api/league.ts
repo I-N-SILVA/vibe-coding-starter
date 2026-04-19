@@ -4,7 +4,9 @@
  */
 
 import { apiClient } from './client';
+import { mapMatchToUI } from '@/lib/mappers';
 import type { MatchUI } from '@/lib/mappers';
+import type { Match } from '@/lib/supabase/types';
 import type {
     Competition,
     StandingsEntry,
@@ -44,31 +46,42 @@ export const leagueApi = {
     // MATCHES
     // ============================================
 
-    getMatches: (params?: { status?: string; competitionId?: string }) => {
+    getMatches: async (params?: { status?: string; competitionId?: string }) => {
         const searchParams = new URLSearchParams();
         if (params?.status) searchParams.set('status', params.status);
         if (params?.competitionId) searchParams.set('competitionId', params.competitionId);
         const query = searchParams.toString();
-        return apiClient.get<MatchUI[]>(`/api/league/matches${query ? `?${query}` : ''}`);
+        const matches = await apiClient.get<Match[]>(`/api/league/matches${query ? `?${query}` : ''}`);
+        return matches.map(mapMatchToUI);
     },
 
-    getMatch: (id: string) =>
-        apiClient.get<MatchUI>(`/api/league/matches/${id}`),
+    getMatch: async (id: string) => {
+        const match = await apiClient.get<Match>(`/api/league/matches/${id}`);
+        return mapMatchToUI(match);
+    },
 
-    createMatch: (data: CreateMatchDto) =>
-        apiClient.post<MatchUI>('/api/league/matches', data),
+    createMatch: async (data: CreateMatchDto) => {
+        const match = await apiClient.post<Match>('/api/league/matches', data);
+        return mapMatchToUI(match);
+    },
 
-    updateScore: (data: UpdateScoreDto) =>
-        apiClient.patch<MatchUI>(`/api/league/matches/${data.matchId}/score`, {
+    updateScore: async (data: UpdateScoreDto) => {
+        const match = await apiClient.patch<Match>(`/api/league/matches/${data.matchId}/score`, {
             homeScore: data.homeScore,
             awayScore: data.awayScore,
-        }),
+        });
+        return mapMatchToUI(match);
+    },
 
-    startMatch: (matchId: string) =>
-        apiClient.post<MatchUI>(`/api/league/matches/${matchId}/start`),
+    startMatch: async (matchId: string) => {
+        const match = await apiClient.post<Match>(`/api/league/matches/${matchId}/start`);
+        return mapMatchToUI(match);
+    },
 
-    endMatch: (matchId: string) =>
-        apiClient.post<MatchUI>(`/api/league/matches/${matchId}/end`),
+    endMatch: async (matchId: string) => {
+        const match = await apiClient.post<Match>(`/api/league/matches/${matchId}/end`);
+        return mapMatchToUI(match);
+    },
 
     // ============================================
     // MATCH EVENTS

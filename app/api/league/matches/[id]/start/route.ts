@@ -22,8 +22,8 @@ export async function POST(_request: Request, { params }: RouteParams) {
         return apiError('Forbidden: Match belongs to another organization', 403);
     }
 
-    if (match.status !== 'upcoming') {
-        return apiError(`Cannot start match with status "${match.status}". Match must be upcoming.`, 409);
+    if (!['upcoming', 'scheduled'].includes(match.status)) {
+        return apiError(`Cannot start match with status "${match.status}". Match must be scheduled or upcoming.`, 409);
     }
 
     const { data, error } = await supabase
