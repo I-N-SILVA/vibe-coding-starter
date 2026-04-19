@@ -2,9 +2,13 @@
 
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { PageLayout, PageHeader, Button, Badge } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
 import { GripVertical, Check, RotateCcw, ChevronDown } from 'lucide-react';
+import { usePlayers } from '@/lib/hooks';
+import type { Player } from '@/types';
 
 /**
  * Pitch Lineup Builder
@@ -109,29 +113,25 @@ const FORMATIONS: Record<GameFormat, Record<string, FormationPosition[]>> = {
     },
 };
 
-// Mock squad roster
-const MOCK_SQUAD: PlayerSlot[] = [
-    { id: 'p1', name: 'D. Silva', position: 'GK', number: 1 },
-    { id: 'p2', name: 'T. Walker', position: 'RB', number: 2 },
-    { id: 'p3', name: 'A. Cole', position: 'LB', number: 3 },
-    { id: 'p4', name: 'R. Keane', position: 'CB', number: 4 },
-    { id: 'p5', name: 'J. Stones', position: 'CB', number: 5 },
-    { id: 'p6', name: 'M. Salah', position: 'RW', number: 6 },
-    { id: 'p7', name: 'N. Kanté', position: 'CM', number: 7 },
-    { id: 'p8', name: 'L. Modric', position: 'CM', number: 8 },
-    { id: 'p9', name: 'M. Rivera', position: 'ST', number: 9 },
-    { id: 'p10', name: 'K. De Bruyne', position: 'CAM', number: 10 },
-    { id: 'p11', name: 'S. Mané', position: 'LW', number: 11 },
-    { id: 'p12', name: 'C. Peres', position: 'GK', number: 12 },
-    { id: 'p13', name: 'V. Lindelöf', position: 'CB', number: 13 },
-    { id: 'p14', name: 'F. Henderson', position: 'CM', number: 14 },
-    { id: 'p15', name: 'H. Maguire', position: 'CB', number: 15 },
-    { id: 'p16', name: 'B. Fernandes', position: 'CAM', number: 16 },
-    { id: 'p17', name: 'J. Lingard', position: 'RW', number: 17 },
-    { id: 'p18', name: 'A. Martial', position: 'ST', number: 18 },
-];
-
 export default function LineupBuilderPage() {
+    const params = useParams();
+    const id = params?.id as string;
+
+    const { data: match } = useQuery({
+        queryKey: ['match', id],
+        queryFn: () => fetch(`/api/league/matches/${id}`).then((r) => r.json()),
+        enabled: !!id,
+    });
+
+    const { data: players = [], isLoading: playersLoading } = usePlayers(match?.home_team_id ?? '');
+
+    const squad: PlayerSlot[] = (players as Player[]).map((player) => ({
+        id: player.id,
+        name: player.name,
+        position: player.position ?? 'PLAYER',
+        number: player.jersey_number ?? 0,
+    }));
+
     const [gameFormat, setGameFormat] = useState<GameFormat>('11-a-side');
     const [formationName, setFormationName] = useState('4-3-3');
     const [formation, setFormation] = useState<FormationPosition[]>(
@@ -139,10 +139,11 @@ export default function LineupBuilderPage() {
     );
     const [selectedPitchIndex, setSelectedPitchIndex] = useState<number | null>(null);
     const [isPublished, setIsPublished] = useState(false);
+    const [isPublishing, setIsPublishing] = useState(false);
     const [showFormationPicker, setShowFormationPicker] = useState(false);
 
     const assignedPlayerIds = formation.map(p => p.player?.id).filter(Boolean);
-    const availablePlayers = MOCK_SQUAD.filter(p => !assignedPlayerIds.includes(p.id));
+    const availablePlayers = squad.filter(p => !assignedPlayerIds.includes(p.id));
     const formatSize = gameFormat === '5-a-side' ? 5 : gameFormat === '7-a-side' ? 7 : 11;
 
     const handleFormatChange = useCallback((format: GameFormat) => {
@@ -188,12 +189,35 @@ export default function LineupBuilderPage() {
         setIsPublished(false);
     };
 
-    const handlePublish = () => {
-        setIsPublished(true);
-        setSelectedPitchIndex(null);
+    const handlePublish = async () => {
+        setIsPublishing(true);
+        try {
+            await fetch(`/api/league/matches/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lineup: formation.map(pos => ({
+                        role: pos.role,
+                        player_id: pos.player?.id ?? null,
+                    })),
+                }),
+            });
+            setIsPublished(true);
+            setSelectedPitchIndex(null);
+        } finally {
+            setIsPublishing(false);
+        }
     };
 
     const filledCount = formation.filter(p => p.player).length;
+
+    if (playersLoading) {
+        return (
+            <PageLayout navItems={adminNavItems} title="LINEUP">
+                <div className="h-20 animate-pulse bg-gray-100 rounded-2xl" />
+            </PageLayout>
+        );
+    }
 
     return (
         <PageLayout navItems={adminNavItems} title="LINEUP">
@@ -354,7 +378,7 @@ export default function LineupBuilderPage() {
                         {/* Bench section */}
                         {filledCount === formatSize && availablePlayers.length > 0 && (
                             <div>
-                                <h4 className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase mb-2">🪑 Bench ({availablePlayers.length})</h4>
+                                <h4 className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase mb-2">Bench ({availablePlayers.length})</h4>
                                 <div className="flex flex-wrap gap-2">
                                     {availablePlayers.slice(0, 7).map(p => (
                                         <div key={p.id} className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500" title={p.name}>
@@ -372,10 +396,12 @@ export default function LineupBuilderPage() {
                                 className={`h-14 rounded-2xl font-black tracking-widest text-sm transition-all ${isPublished ? 'bg-green-600 text-white' : 'bg-black text-white'
                                     }`}
                                 onClick={handlePublish}
-                                disabled={filledCount < formatSize}
+                                disabled={filledCount < formatSize || isPublishing}
                             >
                                 {isPublished ? (
                                     <><Check className="w-5 h-5 mr-2" /> LINEUP PUBLISHED</>
+                                ) : isPublishing ? (
+                                    'PUBLISHING…'
                                 ) : (
                                     `CONFIRM LINEUP (${filledCount}/${formatSize})`
                                 )}

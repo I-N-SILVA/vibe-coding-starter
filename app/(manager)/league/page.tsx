@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCompetitions, useLiveMatches, useMatches, useTeams, useOrganization } from '@/lib/hooks';
+import { queryKeys } from '@/lib/hooks/query-keys';
 import { motion } from 'framer-motion';
 import {
     PageLayout,
@@ -29,6 +31,7 @@ import { ApplicationsInbox } from '@/components/plyaz/ApplicationsInbox';
 export default function AdminDashboard() {
     const router = useRouter();
     const toast = useToast();
+    const queryClient = useQueryClient();
     const [isCreateLeagueOpen, setIsCreateLeagueOpen] = useState(false);
     const [newLeague, setNewLeague] = useState({ name: '', type: 'league', startDate: '' });
     const [recentActivity, setRecentActivity] = useState<Array<{ id: string; action: string; detail: string; time: string }>>([]);
@@ -116,8 +119,7 @@ export default function AdminDashboard() {
             toast.success('League created successfully');
             setIsCreateLeagueOpen(false);
             setNewLeague({ name: '', type: 'league', startDate: '' });
-            // Refresh competitions list
-            window.location.reload();
+            await queryClient.invalidateQueries({ queryKey: queryKeys.competitions });
         } catch (err: unknown) {
             toast.error(err instanceof Error ? err.message : 'Failed to create league');
         } finally {
@@ -202,6 +204,38 @@ export default function AdminDashboard() {
                     )}
                 </div>
             </motion.section>
+
+            {/* Needs Attention */}
+            {!isLoading && competitions.some(c => c.status === 'draft') && (
+                <motion.section
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15, duration: 0.4 }}
+                    className="mb-10"
+                >
+                    <h2 className="text-[10px] font-medium tracking-[0.25em] uppercase text-secondary-main/30 mb-4 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0" />
+                        Needs Attention
+                    </h2>
+                    <div className="space-y-3">
+                        {competitions.filter(c => c.status === 'draft').map(comp => (
+                            <div
+                                key={comp.id}
+                                className="flex items-center justify-between p-4 rounded-2xl bg-orange-50 border border-orange-100 cursor-pointer hover:bg-orange-100 transition-colors"
+                                onClick={() => router.push(`/league/competitions/${comp.id}`)}
+                            >
+                                <div>
+                                    <p className="text-sm font-bold text-gray-900">{comp.name}</p>
+                                    <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest mt-0.5">Draft — not published</p>
+                                </div>
+                                <Button variant="ghost" size="sm" className="text-orange-500 hover:text-orange-600">
+                                    Set Up
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                </motion.section>
+            )}
 
             {/* Live Matches */}
             <motion.section

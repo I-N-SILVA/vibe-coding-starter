@@ -10,40 +10,49 @@ import {
     Skeleton,
     PageLayout,
     PageHeader,
+    EmptyState,
+    NavIcons,
 } from '@/components/plyaz';
 import { publicNavItems } from '@/lib/constants/navigation';
-
 import { stagger, fadeUpLarge } from '@/lib/animations';
 
-const DEFAULT_COMPS = [
-    { id: '1', name: 'Premier Division', type: 'League', teamCount: 12, startDate: 'Feb 1, 2026' },
-    { id: '2', name: 'Sunday Cup', type: 'Knockout', teamCount: 16, startDate: 'Mar 15, 2026' },
-];
+interface PublicCompetition {
+    id: string;
+    name: string;
+    type: string;
+    status: string;
+    start_date: string | null;
+    max_teams: number;
+}
 
 export default function PublicCompetitions() {
     const router = useRouter();
-    const [competitions, setCompetitions] = useState<Array<{ id: string; name: string; type: string; teamCount?: number; startDate: string }>>([]);
+    const [competitions, setCompetitions] = useState<PublicCompetition[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchComps() {
-            try {
-                const res = await fetch('/api/league/competitions');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.length > 0) setCompetitions(data);
-                    else setCompetitions(DEFAULT_COMPS);
-                } else {
-                    setCompetitions(DEFAULT_COMPS);
-                }
-            } catch {
-                setCompetitions(DEFAULT_COMPS);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchComps();
+        fetch('/api/league/public/competitions')
+            .then((res) => (res.ok ? res.json() : []))
+            .then((data: PublicCompetition[]) => setCompetitions(data))
+            .catch(() => setCompetitions([]))
+            .finally(() => setIsLoading(false));
     }, []);
+
+    const formatStartDate = (dateStr: string | null) => {
+        if (!dateStr) return 'TBC';
+        return new Date(dateStr).toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+        });
+    };
+
+    const formatType = (type: string) => {
+        if (type === 'league') return 'League';
+        if (type === 'knockout') return 'Knockout Cup';
+        if (type === 'group_knockout') return 'Group + Knockout';
+        return type;
+    };
 
     return (
         <PageLayout navItems={publicNavItems} title="PLYAZ FAN">
@@ -68,6 +77,12 @@ export default function PublicCompetitions() {
                             </div>
                         ))}
                     </div>
+                ) : competitions.length === 0 ? (
+                    <EmptyState
+                        icon={<NavIcons.Calendar />}
+                        title="No Active Competitions"
+                        description="Check back soon — competitions will appear here once they go live."
+                    />
                 ) : (
                     <motion.div
                         variants={stagger}
@@ -91,17 +106,17 @@ export default function PublicCompetitions() {
                                                     {comp.name}
                                                 </h2>
                                                 <p className="text-[10px] font-bold tracking-widest uppercase text-neutral-400 dark:text-neutral-500 mt-1">
-                                                    {comp.type}
+                                                    {formatType(comp.type)}
                                                 </p>
                                             </div>
                                             <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-xs font-bold text-neutral-400 dark:text-neutral-500">
-                                                {comp.teamCount || 0}
+                                                {comp.max_teams || 0}
                                             </div>
                                         </div>
 
                                         <div className="flex items-center justify-between mt-auto pt-6 border-t border-neutral-50 dark:border-neutral-700/50">
                                             <span className="text-[10px] font-medium tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
-                                                Starts {comp.startDate}
+                                                Starts {formatStartDate(comp.start_date)}
                                             </span>
                                             <Button variant="ghost" size="sm" className="group-hover:translate-x-1 transition-transform">
                                                 View Scores

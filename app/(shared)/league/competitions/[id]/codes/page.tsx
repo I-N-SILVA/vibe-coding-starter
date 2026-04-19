@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageLayout, PageHeader, Card, CardContent, Button, Badge } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
 import { Copy, Check, Plus, Link2, RefreshCw } from 'lucide-react';
+import { useToast } from '@/components/providers';
 
 /**
  * Competition Invite Code Generator
@@ -15,52 +18,65 @@ interface InviteCode {
     id: string;
     code: string;
     type: 'team' | 'player';
-    competition: string;
     assignedTo: string | null;
     status: 'active' | 'used' | 'expired';
     createdAt: string;
 }
 
-const generateCode = (): string => {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = 'PLY-';
-    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-    return code;
-};
+interface InviteRow {
+    id: string;
+    token: string;
+    type: string;
+    status: string;
+    created_at: string;
+    email: string | null;
+}
 
-const MOCK_CODES: InviteCode[] = [
-    { id: '1', code: 'PLY-A8X3K2', type: 'team', competition: 'Premier League 2026', assignedTo: 'Phoenix FC', status: 'used', createdAt: '2026-02-10' },
-    { id: '2', code: 'PLY-B7Y2J9', type: 'team', competition: 'Premier League 2026', assignedTo: 'City Rangers', status: 'used', createdAt: '2026-02-10' },
-    { id: '3', code: 'PLY-C4Z8M1', type: 'team', competition: 'Premier League 2026', assignedTo: null, status: 'active', createdAt: '2026-02-12' },
-    { id: '4', code: 'PLY-D9W5N6', type: 'player', competition: 'Champions Cup', assignedTo: 'Marcus Rivera', status: 'used', createdAt: '2026-02-14' },
-    { id: '5', code: 'PLY-E3V7P4', type: 'player', competition: 'Champions Cup', assignedTo: null, status: 'active', createdAt: '2026-02-15' },
-];
+function mapInviteRow(row: InviteRow): InviteCode {
+    return {
+        id: row.id,
+        code: row.token,
+        type: row.type === 'team_join' ? 'team' : 'player',
+        status: row.status === 'pending' ? 'active' : (row.status as 'used' | 'expired'),
+        createdAt: row.created_at,
+        assignedTo: row.email ?? null,
+    };
+}
 
 export default function InviteCodesPage() {
+    const params = useParams();
+    const id = params.id as string;
+    const queryClient = useQueryClient();
+    const toast = useToast();
     const [codeType, setCodeType] = useState<'team' | 'player'>('team');
-    const [codes, setCodes] = useState<InviteCode[]>(MOCK_CODES);
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
-    const filteredCodes = codes.filter(c => c.type === codeType);
-    const activeCount = codes.filter(c => c.status === 'active').length;
-    const usedCount = codes.filter(c => c.status === 'used').length;
+    const { data: rawCodes = [], isLoading } = useQuery({
+        queryKey: ['codes', id],
+        queryFn: () =>
+            fetch(`/api/league/competitions/${id}/codes`)
+                .then((r) => (r.ok ? r.json() : [])) as Promise<InviteRow[]>,
+    });
 
-    const handleGenerate = () => {
-        const newCode: InviteCode = {
-            id: Date.now().toString(),
-            code: generateCode(),
-            type: codeType,
-            competition: 'Premier League 2026',
-            assignedTo: null,
-            status: 'active',
-            createdAt: new Date().toISOString().split('T')[0],
-        };
-        setCodes([newCode, ...codes]);
+    const codes: InviteCode[] = rawCodes.map(mapInviteRow);
+    const filteredCodes = codes.filter((c) => c.type === codeType);
+    const activeCount = codes.filter((c) => c.status === 'active').length;
+    const usedCount = codes.filter((c) => c.status === 'used').length;
+
+    const handleGenerate = async () => {
+        await fetch(`/api/league/competitions/${id}/codes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: codeType }),
+        });
+        await queryClient.invalidateQueries({ queryKey: ['codes', id] });
     };
 
     const handleCopy = (code: InviteCode) => {
-        navigator.clipboard.writeText(code.code);
+        const url = `${window.location.origin}/invites/accept?token=${code.code}`;
+        navigator.clipboard.writeText(url);
         setCopiedId(code.id);
+        toast.success('Link copied to clipboard');
         setTimeout(() => setCopiedId(null), 2000);
     };
 
@@ -117,57 +133,66 @@ export default function InviteCodesPage() {
                 >
                     <Plus className="w-5 h-5 mr-2" /> GENERATE NEW {codeType.toUpperCase()} CODE
                 </Button>
+                <p className="text-[10px] text-gray-400 text-center mt-2">Share the invite link — anyone with it can join directly.</p>
+
+                {/* Loading State */}
+                {isLoading && (
+                    <div className="text-center py-8 text-gray-400 text-sm font-bold tracking-widest uppercase">
+                        Loading codes...
+                    </div>
+                )}
 
                 {/* Code List */}
-                <AnimatePresence>
-                    <div className="space-y-3">
-                        {filteredCodes.map((code, i) => (
-                            <motion.div
-                                key={code.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.05 }}
-                            >
-                                <Card className="border-0 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow">
-                                    <CardContent className="p-5">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <div className="flex items-center gap-3">
-                                                <span className="font-mono text-lg font-black text-gray-900 tracking-wider">{code.code}</span>
-                                                <button
-                                                    onClick={() => handleCopy(code)}
-                                                    className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                {!isLoading && (
+                    <AnimatePresence>
+                        <div className="space-y-3">
+                            {filteredCodes.map((code, i) => (
+                                <motion.div
+                                    key={code.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.05 }}
+                                >
+                                    <Card className="border-0 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow">
+                                        <CardContent className="p-5">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="font-mono text-lg font-black text-gray-900 tracking-wider">{code.code}</span>
+                                                    <button
+                                                        onClick={() => handleCopy(code)}
+                                                        className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                                                    >
+                                                        {copiedId === code.id ? (
+                                                            <Check className="w-4 h-4 text-green-500" />
+                                                        ) : (
+                                                            <Copy className="w-4 h-4 text-gray-400" />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                                <Badge
+                                                    variant={code.status === 'active' ? 'success' : 'secondary'}
+                                                    className="text-[8px] uppercase tracking-widest"
                                                 >
-                                                    {copiedId === code.id ? (
-                                                        <Check className="w-4 h-4 text-green-500" />
-                                                    ) : (
-                                                        <Copy className="w-4 h-4 text-gray-400" />
-                                                    )}
-                                                </button>
+                                                    {code.status}
+                                                </Badge>
                                             </div>
-                                            <Badge
-                                                variant={code.status === 'active' ? 'success' : 'secondary'}
-                                                className="text-[8px] uppercase tracking-widest"
-                                            >
-                                                {code.status}
-                                            </Badge>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="text-xs text-gray-500 font-bold">{code.competition}</p>
-                                                <p className="text-[10px] text-gray-400 mt-1">
-                                                    {code.assignedTo
-                                                        ? `Assigned to: ${code.assignedTo}`
-                                                        : 'Unassigned'}
-                                                </p>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-[10px] text-gray-400 mt-1">
+                                                        {code.assignedTo
+                                                            ? `Assigned to: ${code.assignedTo}`
+                                                            : 'Unassigned'}
+                                                    </p>
+                                                </div>
+                                                <span className="text-[10px] text-gray-300 font-mono">{code.createdAt}</span>
                                             </div>
-                                            <span className="text-[10px] text-gray-300 font-mono">{code.createdAt}</span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        ))}
-                    </div>
-                </AnimatePresence>
+                                        </CardContent>
+                                    </Card>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </AnimatePresence>
+                )}
 
                 {/* Bulk Actions */}
                 <div className="flex gap-3 pt-4">

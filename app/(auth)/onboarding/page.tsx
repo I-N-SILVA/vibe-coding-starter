@@ -12,10 +12,19 @@ import {
     Select,
 } from '@/components/plyaz';
 
+type Role = 'organizer' | 'manager' | 'player' | 'referee';
+
+const ROLE_CARDS: Array<{ value: Role; icon: string; label: string; description: string }> = [
+    { value: 'organizer', icon: '🏆', label: 'Organizer', description: 'Create and manage your league, season, and competitions' },
+    { value: 'manager', icon: '📋', label: 'Manager', description: 'Manage your squad, tactics, and match schedule' },
+    { value: 'player', icon: '⚽', label: 'Player', description: 'Track your stats, confirm availability, and follow your team' },
+    { value: 'referee', icon: '🟡', label: 'Referee', description: 'Log match events live and submit official match reports' },
+];
+
 export default function OnboardingPage() {
     const router = useRouter();
     const { user, profile, isLoading } = useAuth();
-    const [role, setRole] = useState('organizer');
+    const [role, setRole] = useState<Role>('organizer');
     const [leagueName, setLeagueName] = useState('');
     const [leagueType, setLeagueType] = useState('league');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,9 +43,6 @@ export default function OnboardingPage() {
                 router.push('/league');
                 return;
             }
-            // If they are not an organizer and already have a role set, they might have already completed onboarding
-            // But we can let them change it if they want until they join an org?
-            // Actually, if we just let them stay on onboarding until they submit, it's fine.
         }
     }, [user, profile, isLoading, router]);
 
@@ -80,23 +86,22 @@ export default function OnboardingPage() {
             } else {
                 // Non-organizer roles need to be invited via invite link.
                 // We still show success and redirect to the appropriate page.
-                // The middleware will redirect to onboarding if they have no org,
-                // but they can get their org assigned via invite acceptance.
             }
 
             // Show success screen
             setIsSuccess(true);
 
-            // Redirect after delay
+            // Redirect after delay — organizer needs more time for DB work
+            const delay = role === 'organizer' ? 1500 : 500;
             setTimeout(() => {
                 let destination = '/league';
                 if (role === 'manager') destination = '/league/coach/dashboard';
                 else if (role === 'player') destination = '/league/player/dashboard';
                 else if (role === 'referee') destination = '/league/referee';
 
-                router.push(destination);
                 router.refresh();
-            }, 2500);
+                router.push(destination);
+            }, delay);
         } catch (err) {
             console.warn('[Onboarding] Error:', err);
             setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -167,6 +172,8 @@ export default function OnboardingPage() {
         );
     }
 
+    const firstName = user?.email?.split('@')[0] ?? 'there';
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-primary-main/5 px-4">
             <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -199,9 +206,13 @@ export default function OnboardingPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                 </svg>
                             </motion.div>
-                            <h2 className="text-2xl font-black text-primary-main mb-2">Welcome to your dashboard!</h2>
+                            <h2 className="text-2xl font-black text-primary-main mb-2">
+                                You&apos;re all set, {firstName}!
+                            </h2>
                             <p className="text-secondary-main/50 text-sm mb-0">
-                                Your league is being prepared. Propelling talent forward...
+                                {role === 'organizer'
+                                    ? "Your league is ready. Let's build something great."
+                                    : 'Welcome to PLYAZ. Connect with your team.'}
                             </p>
                             <div className="mt-8 flex justify-center">
                                 <div className="w-12 h-1 bg-green-500/10 rounded-full overflow-hidden">
@@ -222,10 +233,14 @@ export default function OnboardingPage() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.4 }}
                                 >
-                                    <div className="flex items-center gap-1 mb-8">
+                                    {/* Progress */}
+                                    <div className="flex items-center gap-2 mb-8">
                                         <div className="flex-1 h-1 rounded-full bg-black" />
                                         <div className="flex-1 h-1 rounded-full bg-secondary-main/10" />
                                         <div className="flex-1 h-1 rounded-full bg-secondary-main/10" />
+                                        <span className="text-[10px] font-bold tracking-widest uppercase text-secondary-main/40 ml-1">
+                                            Step 1 of 2
+                                        </span>
                                     </div>
 
                                     <h1 className="text-2xl font-black text-primary-main mb-2">Welcome to PLYAZ</h1>
@@ -234,19 +249,47 @@ export default function OnboardingPage() {
                                     </p>
 
                                     <form onSubmit={handleSubmit} className="space-y-6">
-                                        <div className="space-y-2">
-                                            <Select
-                                                label="I am joining as..."
-                                                value={role}
-                                                onChange={(e) => setRole(e.target.value)}
-                                                options={[
-                                                    { value: 'organizer', label: 'League Organizer' },
-                                                    { value: 'manager', label: 'Team Manager / Coach' },
-                                                    { value: 'player', label: 'Player' },
-                                                    { value: 'referee', label: 'Referee' },
-                                                ]}
-                                            />
+                                        {/* Role Cards */}
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-bold tracking-widest uppercase text-secondary-main/50">
+                                                What&apos;s your role?
+                                            </label>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {ROLE_CARDS.map((card) => (
+                                                    <button
+                                                        key={card.value}
+                                                        type="button"
+                                                        onClick={() => setRole(card.value)}
+                                                        className={[
+                                                            'rounded-2xl border-2 p-4 cursor-pointer transition-all text-left',
+                                                            role === card.value
+                                                                ? 'border-black bg-black text-white'
+                                                                : 'border-gray-100 bg-white hover:border-gray-300 text-primary-main',
+                                                        ].join(' ')}
+                                                    >
+                                                        <span className="text-xl block mb-2">{card.icon}</span>
+                                                        <span className="block text-sm font-bold leading-tight mb-1">
+                                                            {card.label}
+                                                        </span>
+                                                        <span className={[
+                                                            'block text-[10px] leading-snug',
+                                                            role === card.value ? 'text-white/70' : 'text-secondary-main/40',
+                                                        ].join(' ')}>
+                                                            {card.description}
+                                                        </span>
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
+
+                                        {/* Helper text for non-organizer roles */}
+                                        {role !== 'organizer' && (
+                                            <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-center">
+                                                <p className="text-xs text-blue-700 font-semibold">
+                                                    You&apos;ll need an invite link from your league organizer to join a team.
+                                                </p>
+                                            </div>
+                                        )}
 
                                         {role === 'organizer' && (
                                             <>
@@ -291,7 +334,7 @@ export default function OnboardingPage() {
                                             isLoading={isSubmitting}
                                             className="h-14 text-sm font-bold tracking-widest"
                                         >
-                                            LAUNCH DASHBOARD
+                                            {role === 'organizer' ? 'LAUNCH DASHBOARD' : 'JOIN PLYAZ'}
                                         </Button>
                                     </form>
                                 </motion.div>

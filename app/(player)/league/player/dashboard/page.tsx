@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
     PageLayout,
@@ -28,6 +29,7 @@ import type { Match } from '@/lib/supabase/types';
 
 export default function PlayerDashboard() {
     const { profile } = useAuth();
+    const router = useRouter();
 
     // 1. Fetch competition stats
     const {
@@ -138,55 +140,7 @@ export default function PlayerDashboard() {
                 animate="show"
                 className="space-y-8 pb-20"
             >
-                {/* Profile Snapshot */}
-                <motion.section variants={fadeUp}>
-                    {isStatsLoading ? (
-                        <SkeletonStatCard />
-                    ) : (
-                        <Card elevated className="bg-gray-900 text-white overflow-hidden border-0">
-                            <CardContent className="p-0">
-                                <div className="flex flex-col md:flex-row">
-                                    <div className="p-8 flex-1">
-                                        <div className="flex items-center gap-4 mb-6">
-                                            <div className="w-20 h-20 rounded-2xl bg-orange-600 flex items-center justify-center text-3xl font-black shadow-2xl transform -rotate-3">
-                                                {profile?.jersey_number || '10'}
-                                            </div>
-                                            <div>
-                                                <h2 className="text-2xl font-black">{profile?.full_name || 'Demo Player'}</h2>
-                                                <p className="text-orange-500 font-bold text-sm tracking-widest uppercase">
-                                                    {profile?.position || 'Player'} • Plyaz Athlete
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
-                                            <div>
-                                                <p className="text-2xl font-black">{totalStats.goals}</p>
-                                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Goals</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-2xl font-black">{totalStats.assists}</p>
-                                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Assists</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-2xl font-black">{totalStats.appearances}</p>
-                                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Games</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="bg-orange-600/10 p-8 flex items-center justify-center border-l border-white/5">
-                                        <div className="text-center">
-                                            <p className="text-4xl font-black mb-1">{totalStats.rating}</p>
-                                            <p className="text-[10px] font-bold text-orange-500 uppercase tracking-widest leading-none">Global Rating</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                </motion.section>
-
-                {/* Upcoming Match */}
+                {/* Upcoming Match — top of feed */}
                 <motion.section variants={fadeUp} id="schedule">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-xs font-bold tracking-widest uppercase text-gray-500">Next Game</h3>
@@ -247,10 +201,58 @@ export default function PlayerDashboard() {
                             title="No Games Scheduled"
                             description="Take some time to rest or practice. Check back later for your next fixture."
                             action={{
-                                label: "View all games",
-                                onClick: () => {}
+                                label: "View all matches",
+                                onClick: () => router.push('/league/matches')
                             }}
                         />
+                    )}
+                </motion.section>
+
+                {/* Profile Snapshot */}
+                <motion.section variants={fadeUp}>
+                    {isStatsLoading ? (
+                        <SkeletonStatCard />
+                    ) : (
+                        <Card elevated className="bg-gray-900 text-white overflow-hidden border-0">
+                            <CardContent className="p-0">
+                                <div className="flex flex-col md:flex-row">
+                                    <div className="p-8 flex-1">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="w-20 h-20 rounded-2xl bg-orange-600 flex items-center justify-center text-3xl font-black shadow-2xl transform -rotate-3">
+                                                {profile?.jersey_number || '10'}
+                                            </div>
+                                            <div>
+                                                <h2 className="text-2xl font-black">{profile?.full_name || 'Demo Player'}</h2>
+                                                <p className="text-orange-500 font-bold text-sm tracking-widest uppercase">
+                                                    {profile?.position || 'Player'} • Plyaz Athlete
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
+                                            <div>
+                                                <p className="text-2xl font-black">{totalStats.goals}</p>
+                                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Goals</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-2xl font-black">{totalStats.assists}</p>
+                                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Assists</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-2xl font-black">{totalStats.appearances}</p>
+                                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Games</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-orange-600/10 p-8 flex items-center justify-center border-l border-white/5">
+                                        <div className="text-center">
+                                            <p className="text-4xl font-black mb-1">{totalStats.rating}</p>
+                                            <p className="text-[10px] font-bold text-orange-500 uppercase tracking-widest leading-none">Season Rating</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     )}
                 </motion.section>
 
