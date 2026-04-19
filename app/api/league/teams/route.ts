@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
+import { getUserOrgId, apiError, parseBody, validateResourceOwner } from '@/lib/api/helpers';
 import { createTeamApiSchema } from '@/lib/api/validation';
 import { rateLimit } from '@/lib/api/rate-limit';
 
@@ -57,13 +57,8 @@ export async function POST(request: Request) {
 
     // Validate competition belongs to this org (if provided)
     if (parsed.data.competition_id) {
-        const { data: comp, error: compErr } = await supabase
-            .from('competitions')
-            .select('id')
-            .eq('id', parsed.data.competition_id)
-            .eq('organization_id', auth.orgId)
-            .single();
-        if (compErr || !comp) return apiError('Competition not found or access denied', 404);
+        const ownershipError = await validateResourceOwner(supabase, 'competitions', parsed.data.competition_id, auth.orgId!);
+        if (ownershipError) return ownershipError;
     }
 
     const { data, error } = await supabase

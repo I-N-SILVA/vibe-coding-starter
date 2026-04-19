@@ -1,7 +1,19 @@
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
+import { rateLimit } from '@/lib/api/rate-limit';
 
 export async function middleware(request: NextRequest) {
+    // Rate-limit all mutating API calls at the edge
+    const { method, nextUrl } = request;
+    const isWriteApiCall =
+        ['POST', 'PATCH', 'PUT', 'DELETE'].includes(method) &&
+        nextUrl.pathname.startsWith('/api/');
+
+    if (isWriteApiCall) {
+        const limited = await rateLimit(request, 60, 60_000);
+        if (limited) return limited;
+    }
+
     return await updateSession(request);
 }
 

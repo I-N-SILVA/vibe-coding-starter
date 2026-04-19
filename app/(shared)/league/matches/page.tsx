@@ -76,13 +76,13 @@ export default function AdminMatches() {
                             {filteredMatches.map((match) => (
                                 <MatchCard
                                     key={match.id}
-                                    homeTeam={match.homeTeam ?? { id: match.homeTeamId ?? '', name: 'Home Team', shortName: 'HOM' }}
-                                    awayTeam={match.awayTeam ?? { id: match.awayTeamId ?? '', name: 'Away Team', shortName: 'AWY' }}
-                                    homeScore={match.homeScore}
-                                    awayScore={match.awayScore}
+                                    homeTeam={match.home_team ?? { id: match.home_team_id ?? '', name: 'Home Team', shortName: 'HOM' }}
+                                    awayTeam={match.away_team ?? { id: match.away_team_id ?? '', name: 'Away Team', shortName: 'AWY' }}
+                                    homeScore={match.home_score}
+                                    awayScore={match.away_score}
                                     status={match.status}
-                                    matchTime={match.matchTime ?? undefined}
-                                    date={match.scheduledAt ? new Date(match.scheduledAt).toLocaleDateString() : 'TBD'}
+                                    matchTime={match.match_time ?? undefined}
+                                    date={match.scheduled_at ? new Date(match.scheduled_at).toLocaleDateString() : 'TBD'}
                                     venue={match.venue ?? undefined}
                                     onPress={() => router.push(`/league/referee/${match.id}`)}
                                 />

@@ -6,6 +6,7 @@ import { createPlayerApiSchema, updatePlayerApiSchema } from '@/lib/api/validati
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const teamId = searchParams.get('teamId');
+    const profileId = searchParams.get('profile_id');
 
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);
@@ -18,6 +19,10 @@ export async function GET(request: Request) {
 
     if (teamId) {
         query = query.eq('team_id', teamId);
+    }
+
+    if (profileId) {
+        query = query.eq('profile_id', profileId);
     }
 
     const { data, error } = await query.order('name');

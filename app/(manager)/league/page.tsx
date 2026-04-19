@@ -232,12 +232,12 @@ export default function AdminDashboard() {
                         {liveMatches.map((match) => (
                             <MatchCard
                                 key={match.id}
-                                homeTeam={match.homeTeam ?? { id: match.homeTeamId ?? '', name: 'Home' }}
-                                awayTeam={match.awayTeam ?? { id: match.awayTeamId ?? '', name: 'Away' }}
-                                homeScore={match.homeScore}
-                                awayScore={match.awayScore}
+                                homeTeam={match.home_team ?? { id: match.home_team_id ?? '', name: 'Home' }}
+                                awayTeam={match.away_team ?? { id: match.away_team_id ?? '', name: 'Away' }}
+                                homeScore={match.home_score}
+                                awayScore={match.away_score}
                                 status={match.status}
-                                matchTime={match.matchTime ?? undefined}
+                                matchTime={match.match_time ?? undefined}
                                 onPress={() => router.push(`/league/referee/${match.id}`)}
                             />
                         ))}
@@ -340,11 +340,11 @@ export default function AdminDashboard() {
                             {upcomingMatches.map((match) => (
                                 <MatchCard
                                     key={match.id}
-                                    homeTeam={match.homeTeam ?? { id: match.homeTeamId ?? '', name: 'Home' }}
-                                    awayTeam={match.awayTeam ?? { id: match.awayTeamId ?? '', name: 'Away' }}
+                                    homeTeam={match.home_team ?? { id: match.home_team_id ?? '', name: 'Home' }}
+                                    awayTeam={match.away_team ?? { id: match.away_team_id ?? '', name: 'Away' }}
                                     status={match.status}
-                                    matchTime={match.matchTime ?? undefined}
-                                    date={match.scheduledAt ? new Date(match.scheduledAt).toLocaleDateString() : 'TBD'}
+                                    matchTime={match.match_time ?? undefined}
+                                    date={match.scheduled_at ? new Date(match.scheduled_at).toLocaleDateString() : 'TBD'}
                                     venue={match.venue ?? undefined}
                                 />
                             ))}

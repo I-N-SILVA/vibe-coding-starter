@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
+import { getUserOrgId, apiError, parseBody, validateResourceOwner } from '@/lib/api/helpers';
 import { createPlayerApiSchema } from '@/lib/api/validation';
 
 type RouteParams = { params: Promise<{ teamId: string }> };
@@ -11,14 +11,8 @@ export async function GET(_request: Request, { params }: RouteParams) {
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
 
-    const { data: team, error: teamErr } = await supabase
-        .from('teams')
-        .select('id')
-        .eq('id', teamId)
-        .eq('organization_id', auth.orgId)
-        .single();
-
-    if (teamErr || !team) return apiError('Team not found or access denied', 404);
+    const ownershipError = await validateResourceOwner(supabase, 'teams', teamId, auth.orgId!);
+    if (ownershipError) return ownershipError;
 
     const { data, error } = await supabase
         .from('players')
@@ -39,14 +33,8 @@ export async function POST(request: Request, { params }: RouteParams) {
     const auth = await getUserOrgId(supabase);
     if (auth.error) return auth.error;
 
-    const { data: team, error: teamErr } = await supabase
-        .from('teams')
-        .select('id')
-        .eq('id', teamId)
-        .eq('organization_id', auth.orgId)
-        .single();
-
-    if (teamErr || !team) return apiError('Team not found or access denied', 404);
+    const ownershipError = await validateResourceOwner(supabase, 'teams', teamId, auth.orgId!);
+    if (ownershipError) return ownershipError;
 
     const parsed = await parseBody(request, createPlayerApiSchema);
     if (parsed.error) return parsed.error;

@@ -15,7 +15,6 @@ import {
     Input
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
-import { playerService } from '@/services/player';
 import { createClient } from '@/lib/supabase/client';
 
 const supabase = createClient();
@@ -176,8 +175,8 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
     const handleOpenEventModal = async (type: string, team: 'home' | 'away') => {
         const teamId = team === 'home' ? match.home_team_id : match.away_team_id;
         try {
-            const players = await playerService.getPlayers(teamId);
-            setTeamPlayers(players);
+            const res = await fetch(`/api/league/teams/${teamId}/players`);
+            if (res.ok) setTeamPlayers(await res.json());
         } catch (e) {
             console.error('Failed to load players', e);
         }

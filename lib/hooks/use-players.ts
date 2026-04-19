@@ -3,7 +3,6 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { playerService } from '@/services/player';
 import { apiClient } from '@/lib/api';
 import { queryKeys } from './query-keys';
 import type { CreatePlayerDto } from '@/types';
@@ -32,7 +31,7 @@ export function usePlayers(teamId: string) {
 
 export function useAllPlayers() {
     return useQuery({
-        queryKey: queryKeys.players('all'),
+        queryKey: queryKeys.allPlayers(),
         queryFn: () => apiClient.get<Player[]>('/api/league/players'),
         staleTime: 30_000,
     });
@@ -41,7 +40,10 @@ export function useAllPlayers() {
 export function useCurrentPlayer(profileId?: string) {
     return useQuery({
         queryKey: ['player', 'current', profileId],
-        queryFn: () => playerService.getPlayerByProfileId(profileId!),
+        queryFn: async () => {
+            const players = await apiClient.get<Player[]>(`/api/league/players?profile_id=${profileId}`);
+            return players[0] ?? null;
+        },
         enabled: !!profileId,
         staleTime: 30_000,
     });
@@ -67,7 +69,7 @@ export function useCreatePlayer() {
             if (teamId) {
                 queryClient.invalidateQueries({ queryKey: queryKeys.players(teamId) });
             }
-            queryClient.invalidateQueries({ queryKey: queryKeys.players('all') });
+            queryClient.invalidateQueries({ queryKey: queryKeys.allPlayers() });
         },
     });
 }
@@ -81,7 +83,7 @@ export function useUpdatePlayer() {
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.player(variables.teamId, variables.playerId) });
             queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });
-            queryClient.invalidateQueries({ queryKey: queryKeys.players('all') });
+            queryClient.invalidateQueries({ queryKey: queryKeys.allPlayers() });
         },
     });
 }
@@ -94,7 +96,7 @@ export function useRemovePlayer() {
             apiClient.delete(`/api/league/players/${playerId}`),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.players(variables.teamId) });
-            queryClient.invalidateQueries({ queryKey: queryKeys.players('all') });
+            queryClient.invalidateQueries({ queryKey: queryKeys.allPlayers() });
         },
     });
 }
