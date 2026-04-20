@@ -1,7 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useOrganization as useOrgQuery } from '@/lib/hooks/use-organizations';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api';
+import { queryKeys } from '@/lib/hooks/query-keys';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import type { Organization } from '@/lib/supabase/types';
 
 interface OrgContextType {
@@ -16,7 +19,13 @@ interface OrgContextType {
 const OrgContext = createContext<OrgContextType | undefined>(undefined);
 
 export function OrgProvider({ children }: { children: ReactNode }) {
-    const { data: organization, isLoading, isError } = useOrgQuery();
+    const { isAuthenticated } = useAuth();
+    const { data: organization, isLoading, isError } = useQuery({
+        queryKey: queryKeys.organization,
+        queryFn: () => apiClient.get<Organization | null>('/api/league/organizations'),
+        enabled: isAuthenticated,
+        staleTime: 60_000,
+    });
 
     const value: OrgContextType = {
         orgId: organization?.id || null,

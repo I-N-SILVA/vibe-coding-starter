@@ -17,3 +17,11 @@ export const name = '${pkg.name}';
 
 fs.writeFileSync(outputPath, content);
 console.warn('Generated app-info.js successfully.');
+
+// Generate public/search.json if it doesn't exist
+// KBarSearchProvider always fetches this file; an empty array is a valid response.
+const searchJsonPath = path.join(__dirname, '../public/search.json');
+if (!fs.existsSync(searchJsonPath)) {
+    fs.writeFileSync(searchJsonPath, '[]\n');
+    console.warn('Generated public/search.json successfully.');
+}
