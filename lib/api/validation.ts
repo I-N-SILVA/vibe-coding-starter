@@ -44,6 +44,7 @@ export const createCompetitionApiSchema = z.object({
     is_recruiting_referees: z.boolean().optional(),
     recruitment_message: z.string().max(500).optional().nullable(),
     registration_fee: z.number().min(0).optional(),
+    settings: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const updateCompetitionApiSchema = createCompetitionApiSchema.partial();

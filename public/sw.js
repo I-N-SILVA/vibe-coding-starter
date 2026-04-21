@@ -34,6 +34,9 @@ self.addEventListener('fetch', (event) => {
     // Skip Next.js internals
     if (url.pathname.startsWith('/_next/')) return;
 
+    // Skip PWA manifest — let browser handle auth cookies natively
+    if (url.pathname === '/manifest.json' || url.pathname.endsWith('.webmanifest')) return;
+
     // Network-first for everything else
     event.respondWith(
         fetch(event.request)

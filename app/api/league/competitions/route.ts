@@ -3,6 +3,33 @@ import { NextResponse } from 'next/server';
 import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
 import { createCompetitionApiSchema } from '@/lib/api/validation';
 import { rateLimit } from '@/lib/api/rate-limit';
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+function slugify(text: string): string {
+    return text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+}
+
+async function generateUniqueSlug(supabase: SupabaseClient, name: string): Promise<string> {
+    const base = slugify(name) || 'league';
+    let slug = base;
+    let counter = 2;
+    while (true) {
+        const { data } = await supabase
+            .from('competitions')
+            .select('id')
+            .eq('slug', slug)
+            .maybeSingle();
+        if (!data) return slug;
+        slug = `${base}-${counter++}`;
+    }
+}
 
 export async function GET() {
     const supabase = await createClient();
@@ -47,9 +74,11 @@ export async function POST(request: Request) {
     const parsed = await parseBody(request, createCompetitionApiSchema);
     if (parsed.error) return parsed.error;
 
+    const slug = await generateUniqueSlug(supabase, parsed.data.name);
+
     const { data, error } = await supabase
         .from('competitions')
-        .insert([{ ...parsed.data, organization_id: auth.orgId }])
+        .insert([{ ...parsed.data, organization_id: auth.orgId, slug }])
         .select()
         .single();
 

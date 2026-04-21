@@ -7,14 +7,14 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const isDev = process.env.NODE_ENV === 'development';
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://*.vercel-analytics.com https://*.vercel-scripts.com https://*.cloudflareinsights.com https://vercel.live;
+  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://*.vercel-analytics.com https://*.vercel-scripts.com https://*.cloudflareinsights.com https://vercel.live https://*.vercel.com;
   style-src 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com;
   style-src-elem 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com;
-  img-src 'self' https://*.supabase.co blob: data:;
+  img-src 'self' https://*.supabase.co https://*.vercel.com blob: data:;
   media-src 'self' https://*.s3.amazonaws.com https://*.shipixen.com;
-  connect-src 'self' https://*.supabase.co https://*.vercel-analytics.com https://*.vercel-scripts.com https://vercel.live https://api.fontshare.com https://fonts.googleapis.com https://cdn.fontshare.com;
-  font-src 'self' data: https://fonts.gstatic.com https://cdn.fontshare.com https://api.fontshare.com https://r2cdn.perplexity.ai;
-  frame-src 'self' https://vercel.live https://vercel.live/;
+  connect-src 'self' https://*.supabase.co https://*.vercel-analytics.com https://*.vercel-scripts.com https://vercel.live https://*.vercel.com https://api.fontshare.com https://fonts.googleapis.com https://cdn.fontshare.com;
+  font-src 'self' data: https://fonts.gstatic.com https://cdn.fontshare.com https://api.fontshare.com https://r2cdn.perplexity.ai https://vercel.live;
+  frame-src 'self' https://vercel.live https://vercel.live/ https://*.vercel.com;
 `
   .replace(/\s{2,}/g, ' ')
   .trim();

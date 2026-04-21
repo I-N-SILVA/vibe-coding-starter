@@ -5,6 +5,12 @@ import type { Profile } from '@/lib/supabase/types';
 const isSupabaseConfigured = () =>
     !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+const clearSimulationMode = () => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('plyaz_simulation_enabled');
+    localStorage.removeItem('plyaz_debug_persona');
+};
+
 type MockUser = { id: string; email: string; isActive: boolean };
 
 /**
@@ -63,6 +69,7 @@ export const authService = {
             const { createClient } = await import('@/lib/supabase/client');
             const supabase = createClient();
             const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (!error) clearSimulationMode();
             return { error: error?.message ?? null };
         }
 
@@ -93,6 +100,7 @@ export const authService = {
                     },
                 },
             });
+            if (!error) clearSimulationMode();
             return { error: error?.message ?? null };
         }
 

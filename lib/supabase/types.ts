@@ -41,6 +41,7 @@ export type Competition = {
     id: string;
     organization_id: string;
     name: string;
+    slug: string | null;
     description: string | null;
     type: 'league' | 'knockout' | 'group_knockout';
     status: 'draft' | 'active' | 'completed' | 'archived';
