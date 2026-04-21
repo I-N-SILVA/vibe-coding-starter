@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Button, PageLayout, EmptyState, NavIcons } from '@/components/plyaz';
+import { Button, NavIcons } from '@/components/plyaz';
 import { motion } from 'framer-motion';
 
 export default function ErrorBoundary({
