@@ -9,10 +9,12 @@ import { LocalStore } from '@/lib/mock/store';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-// Simulation Mode Check
+// Simulation Mode Check — only the explicit localStorage flag enables simulation.
+// Removing the NEXT_PUBLIC_SUPABASE_URL fallback prevents a missing env var from
+// silently routing all production API calls to mock data.
 const isSimulationMode = () => {
     if (typeof window === 'undefined') return false;
-    return localStorage.getItem('plyaz_simulation_enabled') === 'true' || !process.env.NEXT_PUBLIC_SUPABASE_URL;
+    return localStorage.getItem('plyaz_simulation_enabled') === 'true';
 };
 
 /**

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Card,
@@ -13,6 +14,7 @@ import {
 } from '@/components/plyaz';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useToast } from '@/components/providers/ToastProvider';
+import { queryKeys } from '@/lib/hooks/query-keys';
 
 const STEPS = [
     { id: 1, label: 'Basics', icon: '📋' },
@@ -36,6 +38,7 @@ const FORMATS: Format[] = [
 
 export default function CreateLeaguePage() {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const { profile } = useAuth();
     const toast = useToast();
     const [step, setStep] = useState(1);
@@ -90,6 +93,7 @@ export default function CreateLeaguePage() {
             });
 
             if (res.ok) {
+                await queryClient.invalidateQueries({ queryKey: queryKeys.competitions });
                 toast.success('League created successfully! ⚡');
                 router.push('/league');
             } else {

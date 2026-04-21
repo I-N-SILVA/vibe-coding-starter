@@ -70,12 +70,10 @@ export default function AdminDashboard() {
         if (upcomingError) console.error('Failed to fetch upcoming matches:', upcomingError);
     }, [compsError, liveError, upcomingError]);
 
-    // Redirect to onboarding if no competitions
+    // Redirect to onboarding if no competitions (after load confirms empty)
     useEffect(() => {
         if (!compsLoading && Array.isArray(competitions) && competitions.length === 0) {
-            setTimeout(() => {
-                router.push('/onboarding');
-            }, 1500);
+            router.push('/onboarding');
         }
     }, [compsLoading, competitions, router]);
 

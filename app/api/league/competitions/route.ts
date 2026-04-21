@@ -16,19 +16,22 @@ function slugify(text: string): string {
         .replace(/-+/g, '-');
 }
 
-async function generateUniqueSlug(supabase: SupabaseClient, name: string): Promise<string> {
-    const base = slugify(name) || 'league';
+async function generateUniqueSlug(supabase: SupabaseClient, name: string, orgId: string): Promise<string> {
+    const base = slugify(name).slice(0, 90) || 'league';
     let slug = base;
     let counter = 2;
-    while (true) {
+    while (counter < 1000) {
         const { data } = await supabase
             .from('competitions')
             .select('id')
+            .eq('organization_id', orgId)
             .eq('slug', slug)
             .maybeSingle();
         if (!data) return slug;
         slug = `${base}-${counter++}`;
     }
+    // Extremely unlikely — fall back to a timestamp suffix
+    return `${base}-${Date.now()}`;
 }
 
 export async function GET() {
@@ -74,7 +77,7 @@ export async function POST(request: Request) {
     const parsed = await parseBody(request, createCompetitionApiSchema);
     if (parsed.error) return parsed.error;
 
-    const slug = await generateUniqueSlug(supabase, parsed.data.name);
+    const slug = await generateUniqueSlug(supabase, parsed.data.name, auth.orgId);
 
     const { data, error } = await supabase
         .from('competitions')
