@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { PageLayout, PageHeader, Card, CardContent } from '@/components/plyaz';
+import { PageLayout, PageHeader } from '@/components/plyaz';
 import { publicNavItems } from '@/lib/constants/navigation';
 
 export default function AboutPage() {

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { PageLayout, PageHeader, Button, Card, CardContent } from '@/components/plyaz';
+import { PageLayout, PageHeader, Button } from '@/components/plyaz';
 import { publicNavItems } from '@/lib/constants/navigation';
 import { useOrganization } from '@/lib/hooks';
 import { toast } from 'sonner';
@@ -80,9 +80,10 @@ export default function PricingPage() {
       const data = await res.json();
       if (data.url) window.location.href = data.url;
       else throw new Error(data.error || 'Failed to create checkout session');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.message || 'Something went wrong. Please try again.');
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      toast.error(message);
     } finally {
       setLoadingPrice(null);
     }

@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import { PageLayout, PageHeader, Button, Input, Card, CardContent } from '@/components/plyaz';
 import { publicNavItems } from '@/lib/constants/navigation';
 import { toast } from 'sonner';

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     PageLayout,
@@ -12,6 +13,7 @@ import {
     SkeletonMatchCard,
     ShareableMatchCard,
     Modal,
+    NavIcons,
 } from '@/components/plyaz';
 import { publicNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUp } from '@/lib/animations';
@@ -59,7 +61,7 @@ export default function PublicMatches() {
             .on(
                 'postgres_changes',
                 { event: 'UPDATE', schema: 'public', table: 'matches' },
-                (payload: any) => {
+                (payload: { new: Match }) => {
                     setMatches((prev) => 
                         prev.map((m) => (m.id === payload.new.id ? { ...m, ...payload.new } : m))
                     );
