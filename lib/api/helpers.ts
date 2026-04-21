@@ -76,27 +76,22 @@ export async function parseBody<T>(
 }
 
 /**
- * Verify that a resource (by ID and Table) belongs to the user's organization.
+ * Create an audit log entry.
  */
-export async function validateResourceOwner(
+export async function createAuditLog(
     supabase: SupabaseClient,
-    table: string,
-    id: string,
-    orgId: string
+    orgId: string,
+    action: string,
+    details: Record<string, any> = {},
+    targetUserId?: string
 ) {
-    const { data: resource, error } = await supabase
-        .from(table)
-        .select('organization_id')
-        .eq('id', id)
-        .single();
-
-    if (error || !resource) {
-        return apiError('Resource not found', 404);
-    }
-
-    if (resource.organization_id !== orgId) {
-        return apiError('Forbidden: Resource belongs to another organization', 403);
-    }
-
-    return null;
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    return supabase.from('audit_logs').insert({
+        organization_id: orgId,
+        user_id: user?.id,
+        target_user_id: targetUserId,
+        action,
+        details
+    });
 }

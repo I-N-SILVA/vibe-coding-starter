@@ -49,6 +49,27 @@ export default function PublicMatches() {
             }
         }
         fetchMatches();
+
+        // Realtime updates
+        const { createClient } = require('@/lib/supabase/client');
+        const supabase = createClient();
+        
+        const channel = supabase
+            .channel('public-matches')
+            .on(
+                'postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'matches' },
+                (payload: any) => {
+                    setMatches((prev) => 
+                        prev.map((m) => (m.id === payload.new.id ? { ...m, ...payload.new } : m))
+                    );
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     const filteredMatches = activeTab === 'all'

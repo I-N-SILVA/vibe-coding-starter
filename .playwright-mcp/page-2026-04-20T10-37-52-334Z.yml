@@ -1,0 +1,199 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "PLYAZ" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img [ref=e7]
+          - generic [ref=e9]: PLYAZ
+        - generic [ref=e10]:
+          - generic [ref=e11]:
+            - link "Protocol" [ref=e12] [cursor=pointer]:
+              - /url: /about
+            - link "Live Data" [ref=e13] [cursor=pointer]:
+              - /url: /league/public/matches
+            - link "Access" [ref=e14] [cursor=pointer]:
+              - /url: /contact
+          - button "Toggle theme" [ref=e16] [cursor=pointer]:
+            - img [ref=e17]
+          - link "Sign In" [ref=e19] [cursor=pointer]:
+            - /url: /login
+          - link "CREATE LEAGUE" [ref=e20] [cursor=pointer]:
+            - /url: /login?mode=signup
+    - main [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e28]: Performance Protocol 01
+          - generic [ref=e29]:
+            - heading "Propelling" [level=1] [ref=e32]
+            - heading "Elite Talent" [level=1] [ref=e35]:
+              - generic [ref=e36]: Elite Talent
+          - paragraph [ref=e37]: Precision league management for the next generation of football. Streamlined, data-driven, and built for speed.
+          - generic [ref=e38]:
+            - link "CREATE YOUR LEAGUE" [ref=e39] [cursor=pointer]:
+              - /url: /login?mode=signup
+              - text: CREATE YOUR LEAGUE
+              - img [ref=e40]
+            - button "EXPLORE DATA" [ref=e42] [cursor=pointer]
+          - generic [ref=e43]:
+            - generic [ref=e44]:
+              - generic [ref=e46]: 0k+
+              - generic [ref=e47]: Matches
+            - generic [ref=e48]:
+              - generic [ref=e50]: 0+
+              - generic [ref=e51]: Players
+            - generic [ref=e52]:
+              - generic [ref=e54]: 0%
+              - generic [ref=e55]: Uptime
+        - generic [ref=e57]: System Optimized
+        - generic [ref=e60]: 51.5074° N, 0.1278° W
+      - generic [ref=e64]:
+        - img "Rise" [ref=e65]
+        - img "Arden University" [ref=e66]
+        - img "Grant Sports" [ref=e67]
+        - generic [ref=e68]: TRUSTED PROTOCOL
+      - generic [ref=e70]:
+        - generic [ref=e71]:
+          - heading "Interactive Preview" [level=2] [ref=e72]
+          - heading "Experience every role." [level=3] [ref=e73]:
+            - text: Experience
+            - text: every role.
+          - paragraph [ref=e74]: Click a profile to explore the platform from their perspective. No sign-up required.
+        - generic [ref=e75]:
+          - button "League Manager Full Control Enter →" [ref=e76] [cursor=pointer]:
+            - img [ref=e80]
+            - heading "League Manager" [level=4] [ref=e82]
+            - paragraph [ref=e83]: Full Control
+            - generic [ref=e84]: Enter →
+          - button "Referee Live Scoring Enter →" [ref=e85] [cursor=pointer]:
+            - img [ref=e89]
+            - heading "Referee" [level=4] [ref=e92]
+            - paragraph [ref=e93]: Live Scoring
+            - generic [ref=e94]: Enter →
+          - button "Player My Stats Enter →" [ref=e95] [cursor=pointer]:
+            - img [ref=e99]
+            - heading "Player" [level=4] [ref=e102]
+            - paragraph [ref=e103]: My Stats
+            - generic [ref=e104]: Enter →
+          - button "Fan Public View Enter →" [ref=e105] [cursor=pointer]:
+            - img [ref=e109]
+            - heading "Fan" [level=4] [ref=e112]
+            - paragraph [ref=e113]: Public View
+            - generic [ref=e114]: Enter →
+      - generic [ref=e116]:
+        - generic [ref=e117]:
+          - heading "Engineered for Performance" [level=2] [ref=e118]
+          - paragraph [ref=e119]: The data layer of modern football management.
+        - generic [ref=e120]:
+          - generic [ref=e121]:
+            - img [ref=e124]
+            - heading "Precision Analytics" [level=3] [ref=e126]
+            - paragraph [ref=e127]: Every goal, card, and substitution tracked with millisecond accuracy.
+            - generic [ref=e128]:
+              - generic [ref=e130]: 0%
+              - generic [ref=e131]: Capture Rate
+          - generic [ref=e132]:
+            - img [ref=e135]
+            - heading "Instant Distribution" [level=3] [ref=e137]
+            - paragraph [ref=e138]: Results and standings updated globally within seconds of the final whistle.
+            - generic [ref=e139]:
+              - generic [ref=e141]: 0s
+              - generic [ref=e142]: Sync Time
+          - generic [ref=e143]:
+            - img [ref=e146]
+            - heading "Secure Governance" [level=3] [ref=e149]
+            - paragraph [ref=e150]: Enterprise-grade security for player data and organizational privacy.
+            - generic [ref=e151]:
+              - generic [ref=e152]: "0"
+              - generic [ref=e153]: Encryption
+          - generic [ref=e154]:
+            - img [ref=e157]
+            - heading "Infinite Scale" [level=3] [ref=e159]
+            - paragraph [ref=e160]: Built on high-performance infrastructure to handle thousands of concurrent matches.
+            - generic [ref=e161]:
+              - generic [ref=e163]: 0k+
+              - generic [ref=e164]: Live Events
+      - generic [ref=e168]:
+        - generic [ref=e169]:
+          - heading "Network Statistics" [level=2] [ref=e170]
+          - heading "Validated by the numbers." [level=3] [ref=e171]:
+            - text: Validated
+            - text: by the numbers.
+          - paragraph [ref=e172]: A global network of organizers, players, and fans operating on a unified data standard.
+        - generic [ref=e173]:
+          - generic [ref=e174]:
+            - generic [ref=e175]: 24k+
+            - generic [ref=e176]: Matches Processed
+            - generic [ref=e177]: Precision Tracking
+          - generic [ref=e178]:
+            - generic [ref=e179]: 1.2k+
+            - generic [ref=e180]: Active Talents
+            - generic [ref=e181]: Validated Profiles
+          - generic [ref=e182]:
+            - generic [ref=e183]: "48"
+            - generic [ref=e184]: Leagues Active
+            - generic [ref=e185]: Global Deployment
+          - generic [ref=e186]:
+            - generic [ref=e187]: 99.9%
+            - generic [ref=e188]: Uptime Protocol
+            - generic [ref=e189]: High Availability
+      - generic [ref=e192]:
+        - heading "Ready to Deploy?" [level=2] [ref=e193]
+        - heading "START YOUR LEGACY NOW." [level=3] [ref=e194]:
+          - text: START YOUR
+          - text: LEGACY NOW.
+        - link "CREATE YOUR LEAGUE" [ref=e195] [cursor=pointer]:
+          - /url: /login?mode=signup
+          - text: CREATE YOUR LEAGUE
+          - img [ref=e196]
+    - contentinfo [ref=e198]:
+      - generic [ref=e199]:
+        - generic [ref=e200]:
+          - generic [ref=e201]:
+            - generic [ref=e202]:
+              - img [ref=e204]
+              - generic [ref=e206]: PLYAZ
+            - paragraph [ref=e207]: Performance Standard for Football Management.
+          - generic [ref=e208]:
+            - heading "Protocol" [level=5] [ref=e209]
+            - list [ref=e210]:
+              - listitem [ref=e211]:
+                - link "Network" [ref=e212] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e213]:
+                - link "Matches" [ref=e214] [cursor=pointer]:
+                  - /url: /league/public/matches
+              - listitem [ref=e215]:
+                - link "Terms" [ref=e216] [cursor=pointer]:
+                  - /url: /terms
+          - generic [ref=e217]:
+            - heading "Social" [level=5] [ref=e218]
+            - list [ref=e219]:
+              - listitem [ref=e220]:
+                - link "X / Twitter" [ref=e221] [cursor=pointer]:
+                  - /url: https://x.com/Plyaz_
+              - listitem [ref=e222]:
+                - link "LinkedIn" [ref=e223] [cursor=pointer]:
+                  - /url: https://www.linkedin.com/company/plyaz
+              - listitem [ref=e224]:
+                - link "Instagram" [ref=e225] [cursor=pointer]:
+                  - /url: https://www.instagram.com/plyaz_/
+          - generic [ref=e226]:
+            - heading "Legal" [level=5] [ref=e227]
+            - list [ref=e228]:
+              - listitem [ref=e229]:
+                - link "Privacy" [ref=e230] [cursor=pointer]:
+                  - /url: /privacy
+              - listitem [ref=e231]:
+                - link "Cookies" [ref=e232] [cursor=pointer]:
+                  - /url: /cookies
+              - listitem [ref=e233]:
+                - link "Security" [ref=e234] [cursor=pointer]:
+                  - /url: /security
+        - generic [ref=e235]:
+          - paragraph [ref=e236]: © 2026 PLYAZ. All rights reserved.
+          - generic [ref=e237]:
+            - generic [ref=e238]: BUILD 2026.04.14
+            - link "CONTACT" [ref=e239] [cursor=pointer]:
+              - /url: mailto:help@plyaz.co.uk
+  - alert [ref=e240]

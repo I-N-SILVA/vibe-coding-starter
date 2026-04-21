@@ -55,3 +55,27 @@ export function aggregatePlayerStats(
 
     return stats;
 }
+
+/**
+ * Calculates a team's form (e.g., 'WWWDL') from their last X matches.
+ * Returns an array of 'W' | 'D' | 'L'.
+ */
+export function calculateTeamForm(
+    matches: { home_team_id: string; away_team_id: string; home_score: number; away_score: number; status: string }[],
+    teamId: string,
+    limit: number = 5
+): ('W' | 'D' | 'L')[] {
+    const teamMatches = matches
+        .filter((m) => m.status === 'completed' && (m.home_team_id === teamId || m.away_team_id === teamId))
+        .slice(0, limit);
+
+    return teamMatches.map((m) => {
+        const isHome = m.home_team_id === teamId;
+        const score = isHome ? m.home_score : m.away_score;
+        const opponentScore = isHome ? m.away_score : m.home_score;
+
+        if (score > opponentScore) return 'W';
+        if (score < opponentScore) return 'L';
+        return 'D';
+    });
+}

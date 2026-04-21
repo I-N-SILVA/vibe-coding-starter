@@ -7,6 +7,7 @@ import { Metadata } from 'next';
 import { colors } from '@/data/config/colors.js';
 
 import './globals.css';
+import { CommandPalette } from '@/components/app/CommandPalette';
 import { SearchProvider } from '@/components/app/SearchProvider';
 import { AnalyticsWrapper } from '@/components/app/Analytics';
 import { QueryProvider, ToastProvider } from '@/components/providers';
@@ -111,6 +112,7 @@ export default function RootLayout({
                 <PWARegistration />
 
                 <SearchProvider>
+                  <CommandPalette />
                   <AuthProviderWrapper>
                     <OrgProvider>
                       <Suspense fallback={
