@@ -27,6 +27,7 @@ const TABS = [
 export default function PublicMatches() {
     const [matches, setMatches] = useState<Match[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState('all');
     const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 
@@ -34,9 +35,15 @@ export default function PublicMatches() {
         async function fetchMatches() {
             try {
                 const res = await fetch('/api/league/public/matches');
-                if (res.ok) setMatches(await res.json());
+                if (res.status === 503) {
+                    setError('SERVER_CONFIG_ERROR');
+                } else if (!res.ok) {
+                    setError('FETCH_ERROR');
+                } else {
+                    setMatches(await res.json());
+                }
             } catch {
-                // silently fail
+                setError('FETCH_ERROR');
             } finally {
                 setIsLoading(false);
             }
@@ -50,11 +57,35 @@ export default function PublicMatches() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'live': return 'bg-green-500';
-            case 'completed': return 'bg-neutral-300 dark:bg-neutral-600';
-            default: return 'bg-blue-400';
+            case 'live': return 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]';
+            case 'completed': return 'bg-emerald-500';
+            default: return 'bg-neutral-400 dark:bg-neutral-600';
         }
     };
+
+    if (error === 'SERVER_CONFIG_ERROR') {
+        return (
+            <PageLayout navItems={publicNavItems} title="PLYAZ MATCHES">
+                <div className="flex flex-col items-center justify-center py-32 text-center px-6">
+                    <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center mb-8">
+                        <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-black text-neutral-900 dark:text-white mb-4 uppercase tracking-tight">Configuration Required</h2>
+                    <p className="text-neutral-500 dark:text-neutral-400 max-w-md text-sm leading-relaxed mb-10">
+                        The live data protocol requires a valid Supabase connection. Please verify your <code className="bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-orange-500">NEXT_PUBLIC_SUPABASE_URL</code> and <code className="bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-orange-500">SUPABASE_SERVICE_ROLE_KEY</code>.
+                    </p>
+                    <Link 
+                        href="/"
+                        className="h-12 px-8 inline-flex items-center justify-center bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-bold tracking-[0.2em] rounded-full hover:scale-105 transition-transform uppercase"
+                    >
+                        Return Home
+                    </Link>
+                </div>
+            </PageLayout>
+        );
+    }
 
     return (
         <PageLayout navItems={publicNavItems} title="PLYAZ MATCHES">
@@ -149,8 +180,18 @@ export default function PublicMatches() {
                                 </motion.div>
                             );
                         }) : (
-                            <div className="text-center py-20 bg-neutral-50 dark:bg-neutral-800/30 rounded-2xl border-2 border-dashed border-neutral-100 dark:border-neutral-800" data-testid="empty-matches">
-                                <p className="text-neutral-400 dark:text-neutral-500 text-sm">No {activeTab} matches at the moment.</p>
+                            <div className="text-center py-24 bg-neutral-50/50 dark:bg-neutral-900/20 rounded-3xl border-2 border-dashed border-neutral-100 dark:border-neutral-800 flex flex-col items-center" data-testid="empty-matches">
+                                <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-2xl flex items-center justify-center mb-6 text-neutral-400 dark:text-neutral-500">
+                                    <NavIcons.Trophy className="w-8 h-8" />
+                                </div>
+                                <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-2 uppercase tracking-tight">No {activeTab} matches scheduled</h3>
+                                <p className="text-neutral-400 dark:text-neutral-500 text-sm max-w-xs mb-8">Matches will appear here as soon as the tournament organizers publish the schedule.</p>
+                                <Link 
+                                    href="/login?mode=signup"
+                                    className="h-10 px-6 inline-flex items-center justify-center bg-orange-500 text-white text-[10px] font-bold tracking-[0.2em] rounded-full hover:bg-orange-600 transition-colors uppercase"
+                                >
+                                    Launch Your Own League
+                                </Link>
                             </div>
                         )}
                     </motion.div>

@@ -10,7 +10,7 @@ export default function PlayerLayout({ children }: { children: ReactNode }) {
                 <Skeleton className="h-[60vh] w-full max-w-5xl rounded-2xl" />
             </div>
         }>
-            <AuthGuard roles={['player']}>
+            <AuthGuard roles={['player', 'coach', 'manager']}>
                 {children}
             </AuthGuard>
         </Suspense>

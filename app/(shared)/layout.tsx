@@ -10,7 +10,7 @@ export default function SharedLayout({ children }: { children: ReactNode }) {
                 <Skeleton className="h-[60vh] w-full max-w-5xl rounded-2xl" />
             </div>
         }>
-            <AuthGuard roles={['organizer', 'admin', 'player', 'referee']}>
+            <AuthGuard roles={['organizer', 'admin', 'player', 'referee', 'manager', 'coach']}>
                 {children}
             </AuthGuard>
         </Suspense>

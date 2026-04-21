@@ -92,15 +92,15 @@ export default function OnboardingPage() {
             setIsSuccess(true);
 
             // Redirect after delay — organizer needs more time for DB work
-            const delay = role === 'organizer' ? 1500 : 500;
+            const delay = role === 'organizer' ? 2000 : 500;
             setTimeout(() => {
                 let destination = '/league';
                 if (role === 'manager') destination = '/league/coach/dashboard';
                 else if (role === 'player') destination = '/league/player/dashboard';
                 else if (role === 'referee') destination = '/league/referee';
 
-                router.refresh();
-                router.push(destination);
+                // Use window.location for a hard refresh to ensure layout-level profile state is correct
+                window.location.href = destination;
             }, delay);
         } catch (err) {
             console.warn('[Onboarding] Error:', err);

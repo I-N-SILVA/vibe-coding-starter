@@ -2,11 +2,8 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/plyaz';
-import Image from 'next/image';
-import Link from 'next/link';
-
-import { fadeUpLarge } from '@/lib/animations';
+import { PageLayout, PageHeader, Button, Card, CardContent } from '@/components/plyaz';
+import { publicNavItems } from '@/lib/constants/navigation';
 
 const FAQS = [
   {
@@ -37,77 +34,53 @@ const FAQS = [
 
 export default function FAQPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="px-6 py-6 flex justify-between items-center border-b border-gray-50 bg-white sticky top-0 z-50">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/static/branding/logo-circle.png" alt="Plyaz" width={28} height={28} />
-          <span className="text-xs font-bold tracking-[0.2em] uppercase">PLYAZ</span>
-        </Link>
-        <div className="flex gap-6">
-          <Link href="/login" className="text-xs font-bold tracking-widest uppercase text-gray-400 hover:text-orange-500 transition-colors pt-3">Sign In</Link>
-          <Button variant="primary" size="sm" onClick={() => window.location.href = '/league/create'}>Start League</Button>
-        </div>
-      </nav>
+    <PageLayout navItems={publicNavItems} title="SUPPORT PROTOCOL">
+      <PageHeader
+        label="Support"
+        title="Frequently Asked Questions"
+        description="Everything you need to know about starting your league or building your player profile."
+      />
 
-      <section className="px-6 py-24 bg-gray-50 border-b border-gray-100 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-500/5 blur-[120px] rounded-full" />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <motion.div initial="hidden" animate="show" variants={fadeUpLarge}>
-            <p className="text-xs font-bold tracking-[0.4em] text-orange-500 uppercase mb-4">Support</p>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Frequently Asked Questions</h1>
-            <p className="text-gray-500 max-w-lg mx-auto">
-              Everything you need to know about starting your league or building your player profile.
-            </p>
+      <div className="max-w-3xl mx-auto mt-16 space-y-4">
+        {FAQS.map((faq, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            viewport={{ once: true }}
+          >
+            <Card elevated className="bg-neutral-50/50 dark:bg-neutral-900/30 border-neutral-100 dark:border-neutral-800 rounded-3xl overflow-hidden group hover:border-orange-500/30 transition-colors">
+              <CardContent className="p-8">
+                <h3 className="text-sm font-black text-neutral-900 dark:text-white mb-4 uppercase tracking-tight group-hover:text-orange-500 transition-colors">{faq.q}</h3>
+                <p className="text-xs text-neutral-400 dark:text-neutral-500 leading-relaxed font-medium">{faq.a}</p>
+              </CardContent>
+            </Card>
           </motion.div>
-        </div>
-      </section>
+        ))}
+      </div>
 
-      <section className="px-6 py-24">
-        <div className="max-w-3xl mx-auto divide-y divide-gray-100">
-          {FAQS.map((faq, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              viewport={{ once: true }}
-              className="py-10"
-            >
-              <h3 className="text-lg font-bold text-gray-900 mb-4">{faq.q}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{faq.a}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      <section className="px-6 py-24 bg-gray-900 text-white text-center">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold mb-4">Still have questions?</h2>
-          <p className="text-gray-400 mb-10 text-sm">Our support team is active pitch-side and digitally. Direct all inquiries to our help desk.</p>
+      <section className="mt-24 pb-20 text-center">
+        <div className="max-w-2xl mx-auto p-12 rounded-[2.5rem] bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-2xl shadow-black/10">
+          <h2 className="text-2xl font-black uppercase tracking-tighter mb-4">Still have questions?</h2>
+          <p className="text-xs font-medium opacity-50 mb-10 uppercase tracking-widest leading-loose">Our support team is active pitch-side and digitally. <br />Direct all inquiries to our help desk.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="primary" onClick={() => window.location.href = '/contact'}>Contact Support</Button>
-            <a href="mailto:help@plyaz.co.uk" className="px-8 py-4 border border-gray-700 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors pt-5">
-              Email help@plyaz.co.uk
+            <Button 
+                variant="primary" 
+                className="bg-orange-500 text-white hover:bg-orange-600 border-none h-12 px-8 text-[10px] font-bold tracking-[0.2em] uppercase rounded-full"
+                onClick={() => window.location.href = '/contact'}
+            >
+                Contact Support
+            </Button>
+            <a 
+                href="mailto:help@plyaz.co.uk" 
+                className="inline-flex items-center justify-center px-8 h-12 border border-neutral-700 dark:border-neutral-200 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-colors"
+            >
+                Email help@plyaz.co.uk
             </a>
           </div>
         </div>
       </section>
-
-      <footer className="px-6 py-24 bg-white">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
-          <div className="flex items-center gap-2">
-            <Image src="/static/branding/logo-circle.png" alt="Plyaz" width={24} height={24} />
-            <span className="text-xs font-bold tracking-[0.2em] uppercase text-gray-400">PLYAZ &copy; 2025</span>
-          </div>
-          <div className="flex gap-8">
-            {['Features', 'Matches', 'Terms', 'Privacy'].map((item) => (
-              <Link key={item} href={`/${item.toLowerCase()}`} className="text-[10px] font-bold tracking-widest uppercase text-gray-400 hover:text-orange-500 transition-colors">
-                {item}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </footer>
-    </div>
+    </PageLayout>
   );
 }

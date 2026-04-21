@@ -44,7 +44,10 @@ export default function AdminDashboard() {
     const [selectedCompId, setSelectedCompId] = useState<string | null>(null);
 
     const { data: org } = useOrganization();
-    const selectedComp = competitions.find(c => c.id === (selectedCompId || competitions[0]?.id));
+    const competitionsArray = Array.isArray(competitions) ? competitions : [];
+    const liveMatchesArray = Array.isArray(liveMatches) ? liveMatches : [];
+    const upcomingMatchesArray = Array.isArray(upcomingMatches) ? upcomingMatches : [];
+    const selectedComp = competitionsArray.find(c => c.id === (selectedCompId || competitionsArray[0]?.id));
 
     const isLoading = compsLoading || liveLoading || upcomingLoading;
 
@@ -204,7 +207,7 @@ export default function AdminDashboard() {
             </motion.section>
 
             {/* Needs Attention */}
-            {!isLoading && competitions.some(c => c.status === 'draft') && (
+            {!isLoading && competitionsArray.some(c => c.status === 'draft') && (
                 <motion.section
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -216,7 +219,7 @@ export default function AdminDashboard() {
                         Needs Attention
                     </h2>
                     <div className="space-y-3">
-                        {competitions.filter(c => c.status === 'draft').map(comp => (
+                        {competitionsArray.filter(c => c.status === 'draft').map(comp => (
                             <div
                                 key={comp.id}
                                 className="flex items-center justify-between p-4 rounded-2xl bg-orange-50 border border-orange-100 cursor-pointer hover:bg-orange-100 transition-colors"
@@ -259,9 +262,9 @@ export default function AdminDashboard() {
                         <SkeletonMatchCard />
                         <SkeletonMatchCard />
                     </div>
-                ) : liveMatches.length > 0 ? (
+                ) : liveMatchesArray.length > 0 ? (
                     <div className="space-y-4">
-                        {liveMatches.map((match) => (
+                        {liveMatchesArray.map((match) => (
                             <MatchCard
                                 key={match.id}
                                 homeTeam={match.home_team ?? { id: match.home_team_id ?? '', name: 'Home' }}
@@ -320,12 +323,12 @@ export default function AdminDashboard() {
                     <h2 className="text-[10px] font-medium tracking-[0.25em] uppercase text-secondary-main/30 mb-4">
                         Referee Recruitment
                     </h2>
-                    {competitions.length > 0 ? (
+                    {competitionsArray.length > 0 ? (
                         <div className="space-y-4">
                             <Select
                                 label="Select tournament to manage"
-                                options={competitions.map(c => ({ value: c.id, label: c.name }))}
-                                value={selectedCompId || competitions[0]?.id}
+                                options={competitionsArray.map(c => ({ value: c.id, label: c.name }))}
+                                value={selectedCompId || competitionsArray[0]?.id}
                                 onChange={(e) => setSelectedCompId(e.target.value)}
                             />
                             {selectedComp && (
@@ -367,9 +370,9 @@ export default function AdminDashboard() {
                     <h2 className="text-[10px] font-medium tracking-[0.25em] uppercase text-secondary-main/30 mb-4">
                         Upcoming
                     </h2>
-                    {upcomingMatches.length > 0 ? (
+                    {upcomingMatchesArray.length > 0 ? (
                         <div className="space-y-4">
-                            {upcomingMatches.map((match) => (
+                            {upcomingMatchesArray.map((match) => (
                                 <MatchCard
                                     key={match.id}
                                     homeTeam={match.home_team ?? { id: match.home_team_id ?? '', name: 'Home' }}

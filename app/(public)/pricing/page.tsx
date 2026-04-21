@@ -2,12 +2,10 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/plyaz';
-import Image from 'next/image';
-import Link from 'next/link';
+import { PageLayout, PageHeader, Button, Card, CardContent } from '@/components/plyaz';
+import { publicNavItems } from '@/lib/constants/navigation';
 import { useOrganization } from '@/lib/hooks';
-
-import { fadeUpLarge } from '@/lib/animations';
+import { toast } from 'sonner';
 
 const TIERS = [
   {
@@ -79,132 +77,97 @@ export default function PricingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ priceId }),
       });
-      const { url, error } = await res.json();
-      if (url) window.location.href = url;
-      else throw new Error(error || 'Failed to create checkout session');
-    } catch (err) {
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else throw new Error(data.error || 'Failed to create checkout session');
+    } catch (err: any) {
       console.error(err);
-      alert('Something went wrong. Please try again.');
+      toast.error(err.message || 'Something went wrong. Please try again.');
     } finally {
       setLoadingPrice(null);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="px-6 py-6 flex justify-between items-center border-b border-gray-50 bg-white sticky top-0 z-50">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/static/branding/logo-circle.png" alt="Plyaz" width={28} height={28} />
-          <span className="text-xs font-bold tracking-[0.2em] uppercase">PLYAZ</span>
-        </Link>
-        <div className="flex gap-6">
-          <Link href="/login" className="text-xs font-bold tracking-widest uppercase text-gray-400 hover:text-orange-500 transition-colors pt-3">Sign In</Link>
-          <Button variant="primary" size="sm" onClick={() => window.location.href = '/league/create'}>Start League</Button>
-        </div>
-      </nav>
+    <PageLayout navItems={publicNavItems} title="PRICING PROTOCOL">
+      <PageHeader
+        label="Pricing"
+        title="Invest in the Next Level"
+        description="Start for free and scale as your competition grows. Professional grade management for any size."
+      />
 
-      <section className="px-6 py-24 md:py-32 bg-gray-900 text-white relative overflow-hidden text-center border-b border-gray-800">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[80%] bg-orange-500 rounded-full blur-[200px]" />
-        </div>
-        <div className="max-w-4xl mx-auto relative z-10">
-          <motion.div initial="hidden" animate="show" variants={fadeUpLarge}>
-            <p className="text-xs font-bold tracking-[0.4em] text-orange-400 uppercase mb-6">Pricing</p>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-8 leading-[0.9]">
-              INVEST IN THE <br />
-              <span className="text-orange-500 italic">NEXT LEVEL</span>
-            </h1>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-              Start for free and scale as your competition grows.
-              Professional grade management for any size.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="px-6 py-24 md:py-32 bg-gray-50">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-          {TIERS.map((tier, i) => {
-            const isCurrent = org?.plan === tier.id;
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className={`p-8 md:p-10 rounded-3xl flex flex-col h-full ${tier.featured
-                  ? 'bg-gray-900 text-white shadow-2xl shadow-orange-500/10 ring-4 ring-orange-500/20'
-                  : 'bg-white border border-gray-100'
-                  }`}
-              >
-                <div className="mb-10">
-                  <h3 className={`text-xs font-bold tracking-widest uppercase mb-6 ${tier.featured ? 'text-orange-500' : 'text-gray-400'}`}>
-                    {tier.name}
-                  </h3>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black">{tier.price}</span>
-                    {tier.priceSuffix && <span className={`text-sm ${tier.featured ? 'text-gray-400' : 'text-gray-400'}`}>{tier.priceSuffix}</span>}
-                  </div>
-                  <p className={`mt-4 text-sm leading-relaxed ${tier.featured ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {tier.desc}
-                  </p>
+      <div className="grid md:grid-cols-3 gap-8 mt-16">
+        {TIERS.map((tier, i) => {
+          const isCurrent = org?.plan === tier.id;
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              viewport={{ once: true }}
+              className={`p-8 md:p-10 rounded-[2.5rem] flex flex-col h-full transition-all duration-500 hover:-translate-y-2 ${tier.featured
+                ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 shadow-2xl shadow-orange-500/20 ring-4 ring-orange-500/20'
+                : 'bg-neutral-50 dark:bg-neutral-900/40 border border-neutral-100 dark:border-neutral-800'
+                }`}
+            >
+              <div className="mb-10 text-center md:text-left">
+                <h3 className={`text-[10px] font-bold tracking-[0.25em] uppercase mb-8 ${tier.featured ? (tier.featured && 'text-orange-500') : 'text-neutral-400 dark:text-neutral-500'}`}>
+                  {tier.name}
+                </h3>
+                <div className="flex items-baseline justify-center md:justify-start gap-1">
+                  <span className="text-5xl font-black tracking-tighter">{tier.price}</span>
+                  {tier.priceSuffix && <span className={`text-sm font-bold opacity-40`}>{tier.priceSuffix}</span>}
                 </div>
+                <p className={`mt-6 text-xs leading-relaxed font-medium opacity-60`}>
+                  {tier.desc}
+                </p>
+              </div>
 
-                <ul className="space-y-4 mb-10 flex-1">
-                  {tier.features.map((f) => (
-                    <li key={f} className="flex gap-3 text-sm font-medium">
-                      <span className="text-orange-500 font-bold">✓</span>
-                      <span className={tier.featured ? 'text-gray-300' : 'text-gray-600'}>{f}</span>
-                    </li>
-                  ))}
-                </ul>
+              <div className="h-[1px] w-full bg-neutral-200/50 dark:bg-neutral-800/50 mb-10" />
 
-                <Button
-                  variant={tier.featured ? 'primary' : 'secondary'}
-                  fullWidth
-                  onClick={() => {
-                    if (tier.id === 'free') return;
-                    if (tier.price === 'Custom') window.location.href = '/contact';
-                    else if (tier.priceId) handleCheckout(tier.priceId);
-                  }}
-                  disabled={isCurrent || (tier.id === 'free' && !!org) || !!loadingPrice}
-                  isLoading={loadingPrice === tier.priceId}
-                  className="h-14 font-black uppercase tracking-widest text-xs"
-                >
-                  {isCurrent ? 'Current Plan' : tier.cta}
-                </Button>
-              </motion.div>
-            );
-          })}
+              <ul className="space-y-5 mb-12 flex-1">
+                {tier.features.map((f) => (
+                  <li key={f} className="flex gap-4 text-xs font-bold tracking-tight uppercase">
+                    <span className="text-orange-500">✓</span>
+                    <span className="opacity-80">{f}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Button
+                variant={tier.featured ? 'primary' : 'secondary'}
+                fullWidth
+                onClick={() => {
+                  if (tier.id === 'free') return;
+                  if (tier.priceId) handleCheckout(tier.priceId);
+                }}
+                disabled={isCurrent || (tier.id === 'free' && !!org) || !!loadingPrice}
+                isLoading={loadingPrice === tier.priceId}
+                className={`h-14 font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl ${tier.featured ? 'bg-orange-500 text-white hover:bg-orange-600' : ''}`}
+              >
+                {isCurrent ? 'Current Plan' : tier.cta}
+              </Button>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      <section className="mt-24 pb-20">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10 p-10 rounded-[2rem] bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 overflow-hidden relative group">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="text-center md:text-left relative z-10">
+            <h3 className="text-xl font-black uppercase tracking-tight mb-2">Non-profit or Community Charity?</h3>
+            <p className="text-xs font-medium opacity-60 max-w-md uppercase tracking-wider">We offer specialized discounts and free Pro access for qualified community organizations.</p>
+          </div>
+          <Button 
+            className="relative z-10 bg-orange-500 text-white hover:bg-orange-600 border-none px-8 h-12 text-[10px] font-bold tracking-widest rounded-full uppercase"
+            onClick={() => window.location.href = '/contact'}
+          >
+            Apply Now
+          </Button>
         </div>
       </section>
-
-      <section className="px-6 py-24 bg-white">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10 p-10 rounded-3xl bg-orange-50 border border-orange-100">
-          <div className="text-center md:text-left">
-            <h3 className="text-xl font-bold mb-2">Non-profit or Community Charity?</h3>
-            <p className="text-sm text-gray-500">We offer specialized discounts and free Pro access for qualified community organizations.</p>
-          </div>
-          <Button variant="secondary" onClick={() => window.location.href = '/contact'}>Apply Now</Button>
-        </div>
-      </section>
-
-      <footer className="px-6 py-24 bg-gray-50 mt-12">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
-          <div className="flex items-center gap-2">
-            <Image src="/static/branding/logo-circle.png" alt="Plyaz" width={24} height={24} />
-            <span className="text-xs font-bold tracking-[0.2em] uppercase text-gray-400">PLYAZ &copy; 2025</span>
-          </div>
-          <div className="flex gap-8">
-            {['Features', 'FAQ', 'Terms', 'Privacy'].map((item) => (
-              <Link key={item} href={`/${item.toLowerCase()}`} className="text-[10px] font-bold tracking-widest uppercase text-gray-400 hover:text-orange-500 transition-colors">
-                {item}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </footer>
-    </div>
+    </PageLayout>
   );
 }

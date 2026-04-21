@@ -10,7 +10,7 @@ export default function ManagerLayout({ children }: { children: ReactNode }) {
                 <Skeleton className="h-[60vh] w-full max-w-5xl rounded-2xl" />
             </div>
         }>
-            <AuthGuard roles={['manager', 'organizer']}>
+            <AuthGuard roles={['manager', 'organizer', 'admin']}>
                 {children}
             </AuthGuard>
         </Suspense>
