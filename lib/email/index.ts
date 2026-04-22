@@ -2,6 +2,10 @@ import { Resend } from 'resend';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
+// Use custom domain if configured, otherwise fallback to Resend onboarding email
+const FROM_EMAIL = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+const FROM_NAME = process.env.EMAIL_FROM_NAME || 'PLYAZ';
+
 interface EmailOptions {
     to: string;
     subject: string;
@@ -16,21 +20,30 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
     }
 
     try {
+        console.log(`[Email] Attempting to send via Resend to: ${to} from: ${FROM_EMAIL}`);
+        
         const { data, error } = await resend.emails.send({
-            from: 'PLYAZ <invites@plyaz.net>',
+            from: `${FROM_NAME} <${FROM_EMAIL}>`,
             to,
             subject,
             html,
         });
 
         if (error) {
-            console.error('Resend Error:', error);
+            console.error('[Email] Resend API Error:', JSON.stringify(error, null, 2));
+            
+            // Helpful tip for the common "unverified domain" error
+            if (error.name === 'validation_error' && FROM_EMAIL.includes('plyaz.net')) {
+                console.warn('TIP: You likely need to verify the domain "plyaz.net" in your Resend Dashboard or set EMAIL_FROM="onboarding@resend.dev" in your environment variables.');
+            }
+            
             return { data: null, error };
         }
 
+        console.log('[Email] Sent successfully. ID:', data?.id);
         return { data, error: null };
     } catch (err) {
-        console.error('Email send failure:', err);
+        console.error('[Email] Unexpected failure:', err);
         return { data: null, error: err };
     }
 }
