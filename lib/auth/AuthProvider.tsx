@@ -48,24 +48,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         let unsubscribeFn: (() => void) | null = null;
 
         const init = async () => {
-            // Load initial user state
-            const { user: authUser, profile: authProfile } = await authService.getCurrentUser();
+            try {
+                // Load initial user state
+                const { user: authUser, profile: authProfile } = await authService.getCurrentUser();
 
-            // If authenticated with real Supabase, ensure simulation mode is off
-            if (authUser && process.env.NEXT_PUBLIC_SUPABASE_URL) {
-                localStorage.removeItem('plyaz_simulation_enabled');
-                localStorage.removeItem('plyaz_debug_persona');
+                if (authUser) {
+                    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+                        localStorage.removeItem('plyaz_simulation_enabled');
+                        localStorage.removeItem('plyaz_debug_persona');
+                    }
+                    setUser(authUser);
+                    setProfile(authProfile);
+                }
+            } catch (err) {
+                console.error('[AuthProvider] Init Error:', err);
+            } finally {
+                setIsLoading(false);
+                setIsAuthInitialized(true);
             }
 
-            setUser(authUser);
-            setProfile(authProfile);
-            setIsLoading(false);
-            setIsAuthInitialized(true);
-
-            // Subscribe to auth state changes (Supabase only; no-op in mock)
+            // Subscribe to auth state changes
             const subscription = await authService.onAuthStateChange(async (userId, newSession) => {
                 if (userId) {
-                    // Clear simulation mode when real Supabase auth state arrives
                     if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
                         localStorage.removeItem('plyaz_simulation_enabled');
                         localStorage.removeItem('plyaz_debug_persona');
