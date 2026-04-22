@@ -1,57 +1,35 @@
-const CACHE_NAME = 'plyaz-v3';
+// PLYAZ Service Worker
+const CACHE_NAME = 'plyaz-v1';
 
 self.addEventListener('install', (event) => {
-    self.skipWaiting();
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
-    );
-    self.clients.claim();
+  event.waitUntil(clients.claim());
 });
 
-self.addEventListener('fetch', (event) => {
-    // Only handle GET requests
-    if (event.request.method !== 'GET') return;
+// Handle Push Notifications
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() ?? {};
+  const title = data.title || 'PLYAZ GOAL ALERT';
+  const options = {
+    body: data.body || 'A new event has been recorded in your league.',
+    icon: '/static/branding/logo-circle.png',
+    badge: '/static/branding/logo-circle.png',
+    vibrate: [200, 100, 200],
+    data: {
+      url: data.url || '/'
+    }
+  };
 
-    const url = new URL(event.request.url);
+  event.waitUntil(self.registration.showNotification(title, options));
+});
 
-    // Skip cross-origin requests
-    if (url.origin !== self.location.origin) return;
-
-    // Skip API routes — always go network-only, never cache
-    if (url.pathname.startsWith('/api/')) return;
-
-    // Skip Next.js internals
-    if (url.pathname.startsWith('/_next/')) return;
-
-    // Skip PWA manifest — let browser handle auth cookies natively
-    if (url.pathname === '/manifest.json' || url.pathname.endsWith('.webmanifest')) return;
-
-    // Network-first for everything else
-    event.respondWith(
-        fetch(event.request)
-            .then((networkResponse) => networkResponse)
-            .catch(() => {
-                // Offline fallback — only return cached response if it exists
-                return caches.match(event.request).then(async (cached) => {
-                    if (cached) return cached;
-                    // Return a proper offline response rather than undefined
-                    return new Response('Offline', {
-                        status: 503,
-                        statusText: 'Service Unavailable',
-                        headers: { 'Content-Type': 'text/plain' },
-                    });
-                });
-            })
-    );
+// Handle Notification Click
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow(event.notification.data.url)
+  );
 });

@@ -21,9 +21,10 @@ import { scheduleMatchAtSchema, type ScheduleMatchAtFormData } from '@/lib/valid
 
 export default function FixtureScheduler() {
     const router = useRouter();
-    const { success, error: showError } = useToast();
+    const { success, error: showError, warning } = useToast();
     const [competitions, setCompetitions] = useState<Array<{ id: string; name: string }>>([]);
     const [teams, setTeams] = useState<Array<{ id: string; name: string; competition_id?: string | null }>>([]);
+    const [existingMatches, setExistingMatches] = useState<any[]>([]);
     const [isLoadingData, setIsLoadingData] = useState(true);
 
     const {
@@ -43,26 +44,58 @@ export default function FixtureScheduler() {
         },
     });
 
-    const selectedCompetitionId = watch('competition_id');
+    const formValues = watch();
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const [comps, allTeams] = await Promise.all([
+                const [comps, allTeams, allMatches] = await Promise.all([
                     leagueApi.getCompetitions(),
-                    teamsApi.getTeams()
+                    teamsApi.getTeams(),
+                    leagueApi.getMatches()
                 ]);
                 setCompetitions(comps);
                 setTeams(allTeams);
+                setExistingMatches(allMatches);
             } catch (err) {
                 console.error('Failed to fetch data:', err);
-                showError('Could not load competitions or teams.');
+                showError('Could not load required management data.');
             } finally {
                 setIsLoadingData(false);
             }
         }
         fetchData();
     }, [showError]);
+
+    // Conflict Detector
+    useEffect(() => {
+        if (!formValues.scheduled_at || !formValues.home_team_id || !formValues.away_team_id) return;
+
+        const newTime = new Date(formValues.scheduled_at).getTime();
+        const BUFFER_MS = 2 * 60 * 60 * 1000; // 2 hours
+
+        const conflict = existingMatches.find(m => {
+            const matchTime = new Date(m.date || m.scheduled_at).getTime();
+            const timeDiff = Math.abs(newTime - matchTime);
+            
+            if (timeDiff < BUFFER_MS) {
+                const isTeamConflict = 
+                    m.homeTeam?.id === formValues.home_team_id || 
+                    m.awayTeam?.id === formValues.home_team_id ||
+                    m.homeTeam?.id === formValues.away_team_id || 
+                    m.awayTeam?.id === formValues.away_team_id;
+                
+                const isVenueConflict = m.venue && formValues.venue && m.venue.toLowerCase() === formValues.venue.toLowerCase();
+                
+                return isTeamConflict || isVenueConflict;
+            }
+            return false;
+        });
+
+        if (conflict) {
+            warning('Conflict detected: Selected teams or venue are booked within a 2-hour window of this time.');
+        }
+    }, [formValues.scheduled_at, formValues.home_team_id, formValues.away_team_id, formValues.venue, existingMatches, warning]);
 
     const onSubmit = async (data: ScheduleMatchAtFormData) => {
         try {

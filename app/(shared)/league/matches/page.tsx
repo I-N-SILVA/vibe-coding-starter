@@ -70,23 +70,37 @@ export default function AdminMatches() {
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}
-                            transition={{ duration: 0.2 }}
-                            className="space-y-4"
-                        >
-                            {filteredMatches.map((match) => (
-                                <MatchCard
-                                    key={match.id}
-                                    homeTeam={match.home_team ?? { id: match.home_team_id ?? '', name: 'Home Team', shortName: 'HOM' }}
-                                    awayTeam={match.away_team ?? { id: match.away_team_id ?? '', name: 'Away Team', shortName: 'AWY' }}
-                                    homeScore={match.home_score}
-                                    awayScore={match.away_score}
-                                    status={match.status}
-                                    matchTime={match.match_time ?? undefined}
-                                    date={match.scheduled_at ? new Date(match.scheduled_at).toLocaleDateString() : 'TBD'}
-                                    venue={match.venue ?? undefined}
-                                    onPress={() => router.push(`/league/referee/${match.id}`)}
-                                />
-                            ))}
+                            import { adminNavItems } from '@/lib/constants/navigation';
+                            import { generateMatchReport } from '@/lib/utils/pdf-generator';
+
+                            ...
+                                                        {filteredMatches.map((match) => (
+                                                            <MatchCard
+                                                                key={match.id}
+                                                                homeTeam={match.home_team ?? { id: match.home_team_id ?? '', name: 'Home Team', shortName: 'HOM' }}
+                                                                awayTeam={match.away_team ?? { id: match.away_team_id ?? '', name: 'Away Team', shortName: 'AWY' }}
+                                                                homeScore={match.home_score}
+                                                                awayScore={match.away_score}
+                                                                status={match.status}
+                                                                matchTime={match.match_time ?? undefined}
+                                                                date={match.scheduled_at ? new Date(match.scheduled_at).toLocaleDateString() : 'TBD'}
+                                                                venue={match.venue ?? undefined}
+                                                                onPress={() => router.push(`/league/referee/${match.id}`)}
+                                                                onDownloadReport={() => {
+                                                                    generateMatchReport({
+                                                                        homeTeam: match.home_team?.name ?? 'Home Team',
+                                                                        awayTeam: match.away_team?.name ?? 'Away Team',
+                                                                        homeScore: match.home_score ?? 0,
+                                                                        awayScore: match.away_score ?? 0,
+                                                                        date: match.scheduled_at ? new Date(match.scheduled_at).toLocaleDateString() : 'TBD',
+                                                                        venue: match.venue ?? 'TBD',
+                                                                        competition: 'PLYAZ LEAGUE',
+                                                                        events: [], // To be populated from match_events if available
+                                                                    });
+                                                                }}
+                                                            />
+                                                        ))}
+
                         </motion.div>
                     </AnimatePresence>
                 ) : (

@@ -5,14 +5,10 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Card } from './Card';
 import { StatusBadge, type MatchStatus } from './Badge';
+import { FileDown } from 'lucide-react';
 
 /**
- * MatchCard Component - PLYAZ Design System (Refined)
- * 
- * Premium styling with:
- * - Clean black/white typography
- * - Orange accent on hover only
- * - Large, bold scores
+ * MatchCard Component - PLYAZ Design System
  */
 
 interface Team {
@@ -32,6 +28,7 @@ interface MatchCardProps extends React.HTMLAttributes<HTMLDivElement> {
     venue?: string;
     date?: string;
     onPress?: () => void;
+    onDownloadReport?: (e: React.MouseEvent) => void;
 }
 
 const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
@@ -47,6 +44,7 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
             venue,
             date,
             onPress,
+            onDownloadReport,
             ...props
         },
         ref
@@ -62,7 +60,7 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                 hoverable={!!onPress}
                 className={cn(
                     'relative overflow-hidden',
-                    isLive && 'border-accent-main',
+                    isLive && 'border-primary',
                     className
                 )}
                 onClick={onPress}
@@ -72,10 +70,10 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                 {isLive && (
                     <div className="absolute top-4 left-4 flex items-center gap-2">
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-main/20 opacity-75" />
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-main" />
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/20 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
                         </span>
-                        <span className="text-[10px] font-bold text-accent-main tracking-wider">LIVE</span>
+                        <span className="text-[10px] font-bold text-primary tracking-wider">LIVE</span>
                     </div>
                 )}
 
@@ -95,7 +93,7 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                                     alt={homeTeam.name}
                                     width={40}
                                     height={40}
-                                    className="w-10 h-10 rounded-full object-cover bg-secondary-main/5"
+                                    className="w-10 h-10 rounded-full object-cover bg-secondary/5"
                                 />
                             ) : (
                                 <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
@@ -120,7 +118,7 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                                 <span className="text-4xl font-bold text-neutral-900 dark:text-white tracking-tighter">
                                     {homeScore}
                                 </span>
-                                <span className="text-xl text-neutral-200 dark:text-neutral-700">--</span>
+                                <span className="text-xl text-neutral-200 dark:text-neutral-700">:</span>
                                 <span className="text-4xl font-bold text-neutral-900 dark:text-white tracking-tighter">
                                     {awayScore}
                                 </span>
@@ -131,7 +129,7 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                             </div>
                         )}
                         {isLive && matchTime && hasScore && (
-                            <p className="text-xs font-semibold text-accent-main mt-1 tracking-wider">
+                            <p className="text-xs font-semibold text-primary mt-1 tracking-wider">
                                 {matchTime}
                             </p>
                         )}
@@ -152,7 +150,7 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                                     alt={awayTeam.name}
                                     width={40}
                                     height={40}
-                                    className="w-10 h-10 rounded-full object-cover bg-secondary-main/5"
+                                    className="w-10 h-10 rounded-full object-cover bg-secondary/5"
                                 />
                             ) : (
                                 <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
@@ -166,12 +164,25 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                 </div>
 
                 {/* Footer Info */}
-                {(date || venue) && (
-                    <div className="mt-6 pt-4 border-t border-neutral-100 dark:border-neutral-700/50 flex items-center justify-between text-[10px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                <div className="mt-6 pt-4 border-t border-neutral-100 dark:border-neutral-700/50 flex items-center justify-between">
+                    <div className="text-[10px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider flex gap-4">
                         {date && <span>{date}</span>}
                         {venue && <span>{venue}</span>}
                     </div>
-                )}
+
+                    {status === 'completed' && onDownloadReport && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDownloadReport(e);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/5 text-primary hover:bg-primary hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all group/btn"
+                        >
+                            <FileDown className="w-3.5 h-3.5" />
+                            <span>Download Protocol</span>
+                        </button>
+                    )}
+                </div>
             </Card>
         );
     }

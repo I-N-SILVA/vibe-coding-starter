@@ -18,6 +18,7 @@ import {
 import { publicNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUp } from '@/lib/animations';
 import type { Match } from '@/lib/supabase/types';
+import { PushSubscription } from '@/components/app/PushSubscription';
 
 const TABS = [
     { label: 'All', value: 'all' },
@@ -116,6 +117,7 @@ export default function PublicMatches() {
                 label="Match Results"
                 title="Fixtures & Scores"
                 description="Live scores and full-time results from across the league."
+                rightAction={<PushSubscription />}
             />
 
             <TabPills tabs={TABS} activeTab={activeTab} onChange={setActiveTab} className="mb-8" />
