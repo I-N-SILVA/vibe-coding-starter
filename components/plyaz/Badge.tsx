@@ -4,7 +4,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-    variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error';
+    variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'accent';
     size?: 'sm' | 'md';
 }
 
@@ -21,6 +21,7 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
             default: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300',
             primary: 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900',
             secondary: 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700',
+            accent: 'bg-orange-500 text-white',
             success: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
             warning: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
             error: 'bg-red-500/10 text-red-600 dark:text-red-400',
@@ -60,7 +61,7 @@ const StatusBadge = React.forwardRef<HTMLSpanElement, StatusBadgeProps>(
         > = {
             live: {
                 label: 'LIVE',
-                bg: 'bg-red-500',
+                bg: 'bg-orange-500',
                 text: 'text-white',
                 pulse: true,
             },

@@ -4,17 +4,17 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 /**
- * Button Component - PLYAZ Design System
+ * Button Component - PLYAZ Design System (Kinetic Order)
  * 
  * Aligned with PLYAZ brand identity:
- * - Primary: Brand Gradient (Purple to Orange)
- * - Secondary: Outlined Brand Color
- * - Ghost: Transparent with hover state
- * - Danger: Red accent
+ * - Primary: Solid Obsidian/White with "+" markers
+ * - Accent: Brand Gradient (Orange) with "+" markers
+ * - Outline: Bordered Obsidian
+ * - Ghost: Subtle transparent
  */
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'brand';
+    variant?: 'primary' | 'accent' | 'outline' | 'ghost' | 'danger' | 'secondary' | 'brand';
     size?: 'sm' | 'md' | 'lg';
     isLoading?: boolean;
     leftIcon?: React.ReactNode;
@@ -39,52 +39,70 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref
     ) => {
         const baseStyles = `
-      inline-flex items-center justify-center gap-2
-      font-bold tracking-tight
+      inline-flex items-center justify-center gap-3
+      font-bold tracking-widest
       transition-all duration-300 ease-out
       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary
       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none
       rounded-full
-      uppercase text-xs tracking-[0.1em]
+      uppercase text-[10px]
+      before:content-['+'] before:opacity-30 before:font-normal
+      after:content-['+'] after:opacity-30 after:font-normal
     `;
 
         const variants = {
-            // Primary: PLYAZ Brand Gradient
+            // Primary: Solid Obsidian (Light) / White (Dark)
             primary: `
-        bg-plyaz-gradient text-white shadow-lg shadow-primary/20
-        hover:opacity-90 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30
+        bg-foreground text-background
+        hover:bg-background hover:text-foreground hover:border-foreground border border-transparent
         active:scale-[0.98]
       `,
-            // Brand: Solid Primary Color
-            brand: `
-        bg-primary text-white
-        hover:bg-primary/90
+            // Accent: PLYAZ Brand Gradient
+            accent: `
+        bg-plyaz-gradient text-white border-none shadow-xl shadow-primary/20
+        hover:scale-[1.02] hover:shadow-primary/40
         active:scale-[0.98]
+        before:text-white before:opacity-50
+        after:text-white after:opacity-50
       `,
-            // Secondary: Outlined
-            secondary: `
-        bg-transparent text-foreground border-2 border-primary/20
-        hover:border-primary hover:text-primary
+            // Outline: Outlined Obsidian
+            outline: `
+        bg-transparent text-foreground border border-foreground/30
+        hover:border-foreground hover:bg-foreground/5
         active:scale-[0.98]
       `,
             // Ghost: Transparent
             ghost: `
-        bg-transparent text-muted-foreground
-        hover:text-primary hover:bg-primary/5
+        bg-transparent text-foreground/60
+        hover:text-foreground hover:bg-foreground/5
         active:scale-[0.98]
+        before:opacity-10 after:opacity-10
       `,
             // Danger: Red accent
             danger: `
-        bg-destructive text-white
-        hover:bg-destructive/90 hover:shadow-lg
+        bg-destructive text-destructive-foreground
+        hover:opacity-90
         active:scale-[0.98]
+      `,
+            // Aliases for backward compatibility
+            secondary: `
+        bg-transparent text-foreground border border-foreground/30
+        hover:border-foreground hover:bg-foreground/5
+        active:scale-[0.98]
+      `,
+            brand: `
+        bg-plyaz-gradient text-white border-none shadow-xl shadow-primary/20
+        hover:scale-[1.02] hover:shadow-primary/40
+        active:scale-[0.98]
+        before:text-white before:opacity-50
+        after:text-white after:opacity-50
       `,
         };
 
         const sizes = {
-            sm: 'px-5 py-2 text-[10px]',
-            md: 'px-7 py-3 text-xs',
-            lg: 'px-10 py-4 text-sm h-[60px] min-w-[140px]', // Referee controls / Hero
+            sm: 'px-5 py-2',
+            md: 'px-8 py-3.5',
+            lg: 'px-12 py-5 text-xs h-[64px]',
         };
 
         return (
@@ -92,7 +110,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 ref={ref}
                 className={cn(
                     baseStyles,
-                    variants[variant],
+                    variants[variant as keyof typeof variants] || variants.primary,
                     sizes[size],
                     fullWidth && 'w-full',
                     className
@@ -102,7 +120,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             >
                 {isLoading ? (
                     <svg
-                        className="animate-spin h-4 w-4"
+                        className="animate-spin h-3 w-3"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -123,9 +141,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                     </svg>
                 ) : (
                     <>
-                        {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
-                        {children}
-                        {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
+                        {leftIcon && <span className="flex-shrink-0 -ml-1">{leftIcon}</span>}
+                        <span className="flex-1 text-center">{children}</span>
+                        {rightIcon && <span className="flex-shrink-0 -mr-1">{rightIcon}</span>}
                     </>
                 )}
             </button>

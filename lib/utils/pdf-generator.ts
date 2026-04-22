@@ -10,66 +10,109 @@ interface MatchReportData {
     venue: string;
     competition: string;
     events: Array<{ minute: string; type: string; player: string; team: string }>;
+    refereeName: string;
+    refereeSignature?: string; // base64
+    homeCoachSignature?: string; // base64
+    awayCoachSignature?: string; // base64
 }
 
 export const generateMatchReport = (data: MatchReportData) => {
     const doc = new jsPDF();
-    const brandPurple = '#7C3AED';
-    const brandOrange = '#F97316';
+    const brandObsidian = '#000000';
+    const brandOrange = '#FF4D00';
+    const grayLight = '#F8FAFC';
 
-    // Header
-    doc.setFillColor(15, 23, 42); // slate-900
-    doc.rect(0, 0, 210, 40, 'F');
+    // 1. Header (Kinetic Order Style)
+    doc.setFillColor(brandObsidian);
+    doc.rect(0, 0, 210, 45, 'F');
     
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
+    doc.setFontSize(28);
     doc.setFont('helvetica', 'bold');
-    doc.text('PLYAZ MATCH PROTOCOL', 105, 20, { align: 'center' });
+    doc.text('OFFICIAL MATCH PROTOCOL', 105, 22, { align: 'center' });
     
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(data.competition.toUpperCase(), 105, 30, { align: 'center' });
+    doc.text(data.competition.toUpperCase() + ' — SEASON 2026', 105, 32, { align: 'center' });
 
-    // Match Info
-    doc.setTextColor(15, 23, 42);
-    doc.setFontSize(12);
-    doc.text(`DATE: ${data.date}`, 20, 50);
-    doc.text(`VENUE: ${data.venue}`, 20, 58);
-
-    // Scoreboard
-    doc.setDrawColor(226, 232, 240);
-    doc.line(20, 65, 190, 65);
-
-    doc.setFontSize(20);
-    doc.text(data.homeTeam.toUpperCase(), 60, 85, { align: 'right' });
+    // 2. Scoreboard Banner
+    doc.setFillColor(grayLight);
+    doc.rect(20, 60, 170, 30, 'F');
     
-    doc.setFillColor(248, 250, 252);
-    doc.roundedRect(85, 70, 40, 25, 5, 5, 'F');
+    doc.setTextColor(brandObsidian);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text(data.homeTeam.toUpperCase(), 65, 80, { align: 'right' });
+    doc.text(data.awayTeam.toUpperCase(), 145, 80, { align: 'left' });
+    
     doc.setTextColor(brandOrange);
-    doc.setFontSize(30);
-    doc.text(`${data.homeScore} : ${data.awayScore}`, 105, 88, { align: 'center' });
-    
-    doc.setTextColor(15, 23, 42);
-    doc.setFontSize(20);
-    doc.text(data.awayTeam.toUpperCase(), 150, 85, { align: 'left' });
+    doc.setFontSize(36);
+    doc.text(`${data.homeScore} - ${data.awayScore}`, 105, 81, { align: 'center' });
 
-    // Events Table
+    // 3. Match Details
+    doc.setTextColor(100, 116, 139);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('DATE', 20, 105);
+    doc.text('VENUE', 105, 105);
+    
+    doc.setTextColor(brandObsidian);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.date, 20, 112);
+    doc.text(data.venue.toUpperCase(), 105, 112);
+
+    // 4. Events Table
     if (data.events.length > 0) {
         doc.setFontSize(14);
-        doc.text('MATCH EVENTS', 20, 115);
+        doc.setFont('helvetica', 'bold');
+        doc.text('MATCH TIMELINE', 20, 130);
         
         (doc as any).autoTable({
-            startY: 120,
+            startY: 135,
             head: [['MIN', 'EVENT', 'PLAYER', 'TEAM']],
-            body: data.events.map(e => [e.minute, e.type.toUpperCase(), e.player, e.team]),
-            headStyles: { fillColor: [124, 58, 237] }, // brandPurple
-            styles: { fontSize: 10, cellPadding: 5 },
-            margin: { left: 20, right: 20 }
+            body: data.events.map(e => [e.minute + "'", e.type.replace('_', ' ').toUpperCase(), e.player, e.team]),
+            headStyles: { fillColor: [0, 0, 0], textColor: [255, 255, 255], fontStyle: 'bold' },
+            styles: { fontSize: 10, cellPadding: 6 },
+            margin: { left: 20, right: 20 },
+            alternateRowStyles: { fillColor: [249, 250, 251] }
         });
-    } else {
-        doc.setFontSize(10);
-        doc.setTextColor(100, 116, 139);
-        doc.text('No major events recorded for this match.', 105, 120, { align: 'center' });
+    }
+
+    // 5. Official Verification & Signatures
+    const finalY = (doc as any).lastAutoTable?.finalY || 140;
+    const sigY = Math.max(finalY + 20, 200);
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('OFFICIAL VERIFICATION', 20, sigY);
+    doc.line(20, sigY + 2, 190, sigY + 2);
+
+    // Signature Slots
+    const sigSlotWidth = 50;
+    const sigSlotHeight = 25;
+
+    // Referee
+    doc.setFontSize(8);
+    doc.text('REFEREE SIGNATURE', 20, sigY + 10);
+    doc.rect(20, sigY + 12, sigSlotWidth, sigSlotHeight);
+    if (data.refereeSignature) {
+        doc.addImage(data.refereeSignature, 'PNG', 22, sigY + 14, sigSlotWidth - 4, sigSlotHeight - 4);
+    }
+    doc.text(data.refereeName, 20, sigY + 42);
+
+    // Home Coach
+    doc.text('HOME COACH SIGNATURE', 80, sigY + 10);
+    doc.rect(80, sigY + 12, sigSlotWidth, sigSlotHeight);
+    if (data.homeCoachSignature) {
+        doc.addImage(data.homeCoachSignature, 'PNG', 82, sigY + 14, sigSlotWidth - 4, sigSlotHeight - 4);
+    }
+
+    // Away Coach
+    doc.text('AWAY COACH SIGNATURE', 140, sigY + 10);
+    doc.rect(140, sigY + 12, sigSlotWidth, sigSlotHeight);
+    if (data.awayCoachSignature) {
+        doc.addImage(data.awayCoachSignature, 'PNG', 142, sigY + 14, sigSlotWidth - 4, sigSlotHeight - 4);
     }
 
     // Footer
@@ -78,8 +121,8 @@ export const generateMatchReport = (data: MatchReportData) => {
         doc.setPage(i);
         doc.setFontSize(8);
         doc.setTextColor(148, 163, 184);
-        doc.text('GENERATED BY PLYAZ.NET — PROPELLING ELITE TALENT', 105, 285, { align: 'center' });
+        doc.text('THIS IS A LEGALLY BINDING DIGITAL PROTOCOL GENERATED BY PLYAZ.NET', 105, 285, { align: 'center' });
     }
 
-    doc.save(`match-report-${data.homeTeam}-vs-${data.awayTeam}.pdf`);
+    doc.save(`protocol-${data.homeTeam}-vs-${data.awayTeam}-${new Date().getTime()}.pdf`);
 };

@@ -94,6 +94,7 @@ export default function AdminMatches() {
                                                                         venue: match.venue ?? 'TBD',
                                                                         competition: 'PLYAZ LEAGUE',
                                                                         events: [], // To be populated from match_events if available
+                                                                        refereeName: 'Official Referee',
                                                                     });
                                                                 }}
                                                             />
