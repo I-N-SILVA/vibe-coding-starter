@@ -1,43 +1,46 @@
 /* PLYAZ League Manager - Design Tokens
  * Centralized design system configuration
+ * Aligned with PLYAZ brand identity (Purple to Orange)
  */
 
 export const designTokens = {
-    // Colors (matching plyaz.net and data/config/colors.js)
+    // Colors (matching docs/design-spec.md and data/config/colors.js)
     colors: {
         brand: {
-            orange: '#FF5C1A',      // PLYAZ Iconic Orange
-            orangeLight: '#FF7A3D',
-            orangeDark: '#E64A00',
+            purple: '#7C3AED',       // Brand Purple
+            orange: '#F97316',       // Brand Orange
+            gradient: 'linear-gradient(to right, #7C3AED, #F97316)',
         },
         text: {
-            primary: '#000000',     // Pure Black
-            secondary: '#262626',   // Off-Black
-            muted: '#737373',       // neutral-500
+            primary: '#0F172A',      // slate-900
+            secondary: '#334155',    // slate-700
+            muted: '#64748B',        // slate-500
             white: '#FFFFFF',
         },
         background: {
-            primary: '#FFFFFF',
-            secondary: '#F9FAFB',
-            tertiary: '#F3F4F6',
+            primary: '#F8FAFC',      // slate-50
+            secondary: '#F1F5F9',    // slate-100
+            tertiary: '#E2E8F0',     // slate-200
             surface: {
                 main: '#FFFFFF',
-                elevated: '#F9FAFB',
+                elevated: '#F8FAFC',
                 glass: 'rgba(255, 255, 255, 0.7)',
+                dark: '#0F172A',
+                darkElevated: '#1E293B',
             },
         },
         status: {
-            live: '#FF5C1A',      // Use accent for live
-            liveGlow: 'rgba(255, 92, 26, 0.2)',
-            upcoming: '#737373',
-            completed: '#10B981',
-            cancelled: '#EF4444',
+            live: '#EF4444',         // red-500
+            liveGlow: 'rgba(239, 68, 68, 0.2)',
+            upcoming: '#3B82F6',     // blue-500
+            completed: '#64748B',    // slate-500
+            cancelled: '#94A3B8',    // slate-400
         },
         semantic: {
-            success: '#10B981',
-            warning: '#F59E0B',
-            error: '#EF4444',
-            info: '#3B82F6',
+            success: '#10B981',      // green-500
+            warning: '#F59E0B',      // amber-500
+            error: '#EF4444',        // red-500
+            info: '#3B82F6',         // blue-500
         },
     },
 
@@ -45,7 +48,7 @@ export const designTokens = {
     typography: {
         fontFamily: {
             primary: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-            accent: "'Merriweather', Georgia, serif", // For italic accents like plyaz.net
+            accent: "'Montserrat', sans-serif",
         },
         fontSize: {
             hero: '48px',
@@ -93,7 +96,7 @@ export const designTokens = {
         md: '0 4px 6px rgba(0, 0, 0, 0.1)',
         lg: '0 10px 15px rgba(0, 0, 0, 0.1)',
         xl: '0 20px 25px rgba(0, 0, 0, 0.15)',
-        brand: '0 4px 12px rgba(249, 115, 22, 0.25)',
+        brand: '0 4px 12px rgba(124, 58, 237, 0.25)',
     },
 
     // Transitions

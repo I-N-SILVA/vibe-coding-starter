@@ -36,8 +36,8 @@ const features = [
         metricSuffix: '%',
         metricLabel: 'Capture Rate',
         icon: NavIcons.Trophy,
-        accent: 'from-orange-500 to-amber-500',
-        accentBg: 'bg-orange-500/10 dark:bg-orange-500/20',
+        accent: 'from-[#7C3AED] to-[#F97316]',
+        accentBg: 'bg-primary/10 dark:bg-primary/20',
     },
     {
         title: 'Instant Distribution',

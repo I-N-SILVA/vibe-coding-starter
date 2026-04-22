@@ -56,7 +56,7 @@ const TextReveal = ({ children, delay = 0 }: { children: React.ReactNode; delay?
 /* ─── Gradient Text ─── */
 const GradientText = ({ children }: { children: React.ReactNode }) => (
     <span className="relative">
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 dark:from-orange-400 dark:via-amber-400 dark:to-orange-500">
+        <span className="text-transparent bg-clip-text bg-plyaz-gradient">
             {children}
         </span>
     </span>
@@ -69,15 +69,15 @@ const StatusBadge = () => (
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full 
-            bg-neutral-900/90 dark:bg-white/10 
-            backdrop-blur-xl border border-neutral-800 dark:border-white/10
-            shadow-lg shadow-black/5"
+            bg-white dark:bg-slate-900 
+            border border-slate-200 dark:border-slate-800
+            shadow-lg shadow-black/5 dark:shadow-black/20"
     >
         <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-500 opacity-40" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-40" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
         </span>
-        <span className="text-[11px] font-semibold tracking-[0.15em] text-white uppercase">
+        <span className="text-[11px] font-bold tracking-[0.15em] text-slate-600 dark:text-slate-400 uppercase">
             Performance Protocol 01
         </span>
     </motion.div>
@@ -160,7 +160,7 @@ export const SportsTechHero = () => {
                     <Link
                         href="/login?mode=signup"
                         data-testid="hero-create-league-btn"
-                        className="h-14 px-8 text-xs font-bold tracking-[0.15em] rounded-xl border-0 bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300 hover:-translate-y-0.5 inline-flex items-center justify-center"
+                        className="h-14 px-8 text-xs font-bold tracking-[0.15em] rounded-xl border-0 bg-plyaz-gradient text-white hover:opacity-90 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-0.5 inline-flex items-center justify-center"
                     >
                         CREATE YOUR LEAGUE
                         <ArrowRight className="ml-2 w-4 h-4" />

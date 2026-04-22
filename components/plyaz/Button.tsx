@@ -4,16 +4,17 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 /**
- * Button Component - PLYAZ Design System (Refined)
+ * Button Component - PLYAZ Design System
  * 
- * Premium styling with:
- * - Black/white primary colors
- * - Orange accent on hover states only
- * - Premium typography (tracking, weight)
+ * Aligned with PLYAZ brand identity:
+ * - Primary: Brand Gradient (Purple to Orange)
+ * - Secondary: Outlined Brand Color
+ * - Ghost: Transparent with hover state
+ * - Danger: Red accent
  */
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+    variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'brand';
     size?: 'sm' | 'md' | 'lg';
     isLoading?: boolean;
     leftIcon?: React.ReactNode;
@@ -39,37 +40,43 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ) => {
         const baseStyles = `
       inline-flex items-center justify-center gap-2
-      font-medium tracking-tight
+      font-bold tracking-tight
       transition-all duration-300 ease-out
-      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900
+      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary
       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none
       rounded-full
-      uppercase text-xs tracking-widest
+      uppercase text-xs tracking-[0.1em]
     `;
 
         const variants = {
-            // Primary: Black button, orange glow on hover
+            // Primary: PLYAZ Brand Gradient
             primary: `
-        bg-primary-main text-white
-        hover:bg-primary-light hover:shadow-[0_0_20px_rgba(255,92,26,0.3)]
+        bg-plyaz-gradient text-white shadow-lg shadow-primary/20
+        hover:opacity-90 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/30
         active:scale-[0.98]
       `,
-            // Secondary: White with black border, orange border on hover
+            // Brand: Solid Primary Color
+            brand: `
+        bg-primary text-white
+        hover:bg-primary/90
+        active:scale-[0.98]
+      `,
+            // Secondary: Outlined
             secondary: `
-        bg-surface-main text-primary-main border-2 border-primary-main
-        hover:border-accent-main hover:text-accent-main
+        bg-transparent text-foreground border-2 border-primary/20
+        hover:border-primary hover:text-primary
         active:scale-[0.98]
       `,
-            // Ghost: Transparent, orange text on hover
+            // Ghost: Transparent
             ghost: `
-        bg-transparent text-secondary-main
-        hover:text-accent-main
+        bg-transparent text-muted-foreground
+        hover:text-primary hover:bg-primary/5
         active:scale-[0.98]
       `,
             // Danger: Red accent
             danger: `
-        bg-red-500 text-white
-        hover:bg-red-600 hover:shadow-lg
+        bg-destructive text-white
+        hover:bg-destructive/90 hover:shadow-lg
         active:scale-[0.98]
       `,
         };
@@ -77,7 +84,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         const sizes = {
             sm: 'px-5 py-2 text-[10px]',
             md: 'px-7 py-3 text-xs',
-            lg: 'px-10 py-4 text-sm h-[60px] min-w-[140px]', // Referee controls
+            lg: 'px-10 py-4 text-sm h-[60px] min-w-[140px]', // Referee controls / Hero
         };
 
         return (

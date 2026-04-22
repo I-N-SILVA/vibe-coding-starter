@@ -1,38 +1,40 @@
 /* PLYAZ League Manager - Color Configuration
- * Updated to premium monochromatic with vibrant accents.
+ * Aligned with PLYAZ brand identity (Purple to Orange).
  */
 const colors = {
   primary: {
-    lighter: '#262626',
-    light: '#171717',
-    main: '#000000',
-    dark: '#000000',
-    darker: '#000000',
+    lighter: '#A78BFA', // purple-400
+    light: '#8B5CF6',   // purple-500
+    main: '#7C3AED',    // purple-600 (Brand Purple)
+    dark: '#6D28D9',    // purple-700
+    darker: '#5B21B6',  // purple-800
   },
   secondary: {
-    lighter: '#F8F8F8',
-    light: '#F5F5F5',
-    main: '#262626',
-    dark: '#171717',
-    darker: '#000000',
+    lighter: '#F8FAFC', // slate-50
+    light: '#F1F5F9',   // slate-100
+    main: '#64748B',    // slate-500
+    dark: '#334155',    // slate-700
+    darker: '#0F172A',  // slate-900 (Brand Dark)
   },
   accent: {
-    lighter: '#FF9B6D',
-    light: '#FF7A3D',
-    main: '#FF5C1A',
-    dark: '#E64A00',
-    darker: '#B33900',
+    lighter: '#FB923C', // orange-400
+    light: '#FB7185',   // orange-500
+    main: '#F97316',    // orange-600 (Brand Orange)
+    dark: '#EA580C',    // orange-700
+    darker: '#C2410C',  // orange-800
   },
   surface: {
     main: '#FFFFFF',
-    elevated: '#F9FAFB',
+    elevated: '#F8FAFC',
     glass: 'rgba(255, 255, 255, 0.7)',
+    dark: '#0F172A',
+    darkElevated: '#1E293B',
   },
   status: {
-    live: '#FF5C1A',
-    upcoming: '#737373',
-    completed: '#10B981',
-    cancelled: '#EF4444',
+    live: '#EF4444',    // red-500 (per spec)
+    upcoming: '#3B82F6', // blue-500
+    completed: '#64748B', // slate-500
+    cancelled: '#94A3B8', // slate-400
   },
 };
 

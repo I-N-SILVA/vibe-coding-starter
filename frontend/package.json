@@ -1,8 +1,0 @@
-{
-  "name": "plyaz-frontend-runner",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "start": "cd /app && npx next dev --port 3000"
-  }
-}
