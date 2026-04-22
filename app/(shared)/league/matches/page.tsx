@@ -15,6 +15,7 @@ import {
     NavIcons,
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
+import { generateMatchReport } from '@/lib/utils/pdf-generator';
 
 const TABS = [
     { label: 'All', value: 'all' },
@@ -70,11 +71,8 @@ export default function AdminMatches() {
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}
-                            import { adminNavItems } from '@/lib/constants/navigation';
-                            import { generateMatchReport } from '@/lib/utils/pdf-generator';
-
-                            ...
-                                                        {filteredMatches.map((match) => (
+                        >
+                            {filteredMatches.map((match) => (
                                                             <MatchCard
                                                                 key={match.id}
                                                                 homeTeam={match.home_team ?? { id: match.home_team_id ?? '', name: 'Home Team', shortName: 'HOM' }}

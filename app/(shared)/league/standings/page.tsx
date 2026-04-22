@@ -143,18 +143,18 @@ export default function AdminStandings() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="border-b border-gray-100 bg-gray-50/50">
-                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 w-12 text-center">#</th>
-                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Team</th>
-                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">P</th>
-                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">W</th>
-                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">D</th>
-                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">L</th>
-                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center hidden md:table-cell">GF</th>
-                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center hidden md:table-cell">GA</th>
-                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center hidden sm:table-cell">GD</th>
-                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-900 text-center bg-gray-100/50">Pts</th>
-                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center hidden lg:table-cell">Form</th>
+                                    <tr className="border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 backdrop-blur-sm">
+                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground w-12 text-center">#</th>
+                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Team</th>
+                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">P</th>
+                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">W</th>
+                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">D</th>
+                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center">L</th>
+                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center hidden md:table-cell">GF</th>
+                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center hidden md:table-cell">GA</th>
+                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center hidden sm:table-cell">GD</th>
+                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-foreground text-center bg-primary/5">Pts</th>
+                                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center hidden lg:table-cell">Form</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -165,32 +165,32 @@ export default function AdminStandings() {
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ delay: idx * 0.04, duration: 0.3 }}
                                             className={cn(
-                                                'border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors',
-                                                row.rank <= 3 && 'border-l-2 border-l-orange-500'
+                                                'border-b border-neutral-100 dark:border-neutral-800 last:border-0 hover:bg-primary/[0.02] transition-colors',
+                                                row.rank <= 3 && 'border-l-2 border-l-primary'
                                             )}
                                         >
-                                            <td className="px-4 py-5 text-sm font-bold text-gray-400 text-center">{row.rank}</td>
+                                            <td className="px-4 py-5 text-sm font-bold text-muted-foreground text-center">{row.rank}</td>
                                             <td className="px-4 py-5">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-[10px] font-bold text-white">
+                                                    <div className="w-8 h-8 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center text-[10px] font-bold text-white dark:text-slate-900">
                                                         {row.shortName}
                                                     </div>
-                                                    <span className="text-sm font-semibold text-gray-900 tracking-tight">{row.team}</span>
+                                                    <span className="text-sm font-semibold text-foreground tracking-tight">{row.team}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-5 text-sm text-center text-gray-600 tabular-nums">{row.played}</td>
-                                            <td className="px-4 py-5 text-sm text-center text-gray-600 tabular-nums">{row.won}</td>
-                                            <td className="px-4 py-5 text-sm text-center text-gray-600 tabular-nums">{row.drawn}</td>
-                                            <td className="px-4 py-5 text-sm text-center text-gray-600 tabular-nums">{row.lost}</td>
-                                            <td className="px-4 py-5 text-sm text-center text-gray-600 tabular-nums hidden md:table-cell">{row.gf}</td>
-                                            <td className="px-4 py-5 text-sm text-center text-gray-600 tabular-nums hidden md:table-cell">{row.ga}</td>
+                                            <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.played}</td>
+                                            <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.won}</td>
+                                            <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.drawn}</td>
+                                            <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.lost}</td>
+                                            <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums hidden md:table-cell">{row.gf}</td>
+                                            <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums hidden md:table-cell">{row.ga}</td>
                                             <td className={cn(
                                                 'px-4 py-5 text-sm text-center tabular-nums hidden sm:table-cell',
-                                                row.gd > 0 ? 'text-green-600' : row.gd < 0 ? 'text-red-600' : 'text-gray-400'
+                                                row.gd > 0 ? 'text-emerald-500' : row.gd < 0 ? 'text-rose-500' : 'text-muted-foreground'
                                             )}>
                                                 {row.gd > 0 ? `+${row.gd}` : row.gd}
                                             </td>
-                                            <td className="px-4 py-5 text-sm font-bold text-center text-gray-900 tabular-nums bg-gray-50/30">
+                                            <td className="px-4 py-5 text-sm font-black text-center text-foreground tabular-nums bg-primary/[0.03]">
                                                 {row.points}
                                             </td>
                                             <td className="px-4 py-5 hidden lg:table-cell">
@@ -199,10 +199,10 @@ export default function AdminStandings() {
                                                         <span
                                                             key={i}
                                                             className={cn(
-                                                                'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold',
-                                                                res === 'W' ? 'bg-gray-900 text-white' :
-                                                                res === 'D' ? 'bg-gray-200 text-gray-600' :
-                                                                'border border-gray-200 text-gray-400'
+                                                                'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black text-white',
+                                                                res === 'W' ? 'bg-emerald-500' :
+                                                                res === 'D' ? 'bg-amber-500' :
+                                                                'bg-rose-500'
                                                             )}
                                                         >
                                                             {res}

@@ -38,6 +38,7 @@ export const playerNavItems: NavItem[] = [
 export const refereeNavItems: NavItem[] = [
     { label: 'My Matches', href: '/league/referee', icon: <NavIcons.Whistle /> },
     { label: 'Schedule', href: '/league/matches', icon: <NavIcons.Calendar /> },
+    { label: 'Earnings', href: '/league/referee/payouts', icon: <NavIcons.Dashboard /> },
     { label: 'Analytics', href: '/league/analytics', icon: <NavIcons.Analytics /> },
     { label: 'Discovery', href: '/league/discover', icon: <NavIcons.Public /> },
     { label: 'Settings', href: '/league/settings', icon: <NavIcons.Settings /> },

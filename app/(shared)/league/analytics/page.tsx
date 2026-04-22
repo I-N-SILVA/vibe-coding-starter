@@ -9,8 +9,12 @@ import {
     StatCard,
     Button,
     CompetitionSelector,
+    SkeletonStatCard,
 } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
+import { adminNavItems, refereeNavItems, playerNavItems, coachNavItems } from '@/lib/constants/navigation';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { useCompetitions } from '@/lib/hooks';
+import { useQuery } from '@tanstack/react-query';
 import {
     LineChart,
     Line,
@@ -34,42 +38,57 @@ const DynamicLine = Line;
 const DynamicBar = Bar;
 const DynamicCartesianGrid = CartesianGrid;
 
-const DEMO_COMPETITIONS = [
-    { id: '1', name: 'Premier Division' },
-    { id: '2', name: 'Sunday Cup' },
-];
-
-const goalsPerRound = [
-    { round: 'R1', goals: 12 },
-    { round: 'R2', goals: 18 },
-    { round: 'R3', goals: 15 },
-    { round: 'R4', goals: 22 },
-    { round: 'R5', goals: 19 },
-    { round: 'R6', goals: 25 },
-];
-
-const teamData = [
-    { name: 'FC United', goals: 24, conceded: 8 },
-    { name: 'City Rangers', goals: 18, conceded: 12 },
-    { name: 'Phoenix FC', goals: 21, conceded: 15 },
-    { name: 'Eagles', goals: 14, conceded: 19 },
-    { name: 'Rovers', goals: 12, conceded: 22 },
-];
-
-import { fadeUp } from '@/lib/animations';
+import { fadeUp, stagger } from '@/lib/animations';
 
 export default function AnalyticsDashboard() {
-    const [selectedComp, setSelectedComp] = useState('1');
+    const { profile } = useAuth();
+    const [selectedComp, setSelectedComp] = useState<string>('all');
+    const { data: competitions = [] } = useCompetitions();
+
+    const { data: analytics, isLoading } = useQuery({
+        queryKey: ['analytics', selectedComp],
+        queryFn: async () => {
+            const url = `/api/league/analytics${selectedComp !== 'all' ? `?competitionId=${selectedComp}` : ''}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Failed to fetch analytics');
+            return res.json();
+        }
+    });
+
+    const getNavItems = () => {
+        if (!profile) return playerNavItems;
+        switch (profile.role) {
+            case 'admin':
+            case 'organizer': return adminNavItems;
+            case 'referee': return refereeNavItems;
+            case 'player': return playerNavItems;
+            case 'coach':
+            case 'manager': return coachNavItems;
+            default: return playerNavItems;
+        }
+    };
+
+    const competitionOptions = [
+        { id: 'all', name: 'All Competitions' },
+        ...competitions.map(c => ({ id: c.id, name: c.name }))
+    ];
+
+    const stats = [
+        { title: 'Total Goals', value: analytics?.stats?.totalGoals?.toString() || '0' },
+        { title: 'Avg Goals/Match', value: analytics?.stats?.avgGoalsPerMatch || '0' },
+        { title: 'Clean Sheets', value: analytics?.stats?.cleanSheets?.toString() || '0' },
+        { title: 'Matches Played', value: analytics?.stats?.totalMatches?.toString() || '0' },
+    ];
 
     return (
-        <PageLayout navItems={adminNavItems} title="Analytics Dashboard">
+        <PageLayout navItems={getNavItems()} title="Analytics Dashboard">
             <PageHeader
                 label="Performance Insights"
                 title="League Statistics"
                 rightAction={
                     <div className="flex items-center gap-3">
                         <CompetitionSelector
-                            competitions={DEMO_COMPETITIONS}
+                            competitions={competitionOptions}
                             selected={selectedComp}
                             onChange={setSelectedComp}
                         />
@@ -84,19 +103,22 @@ export default function AnalyticsDashboard() {
             <motion.div
                 initial="hidden"
                 animate="show"
-                variants={{ show: { transition: { staggerChildren: 0.08 } } }}
-                className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
+                variants={stagger}
+                className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
             >
-                {[
-                    { title: 'Total Goals', value: '111', trend: { value: 12, isPositive: true } },
-                    { title: 'Avg Goals/Match', value: '2.8', trend: { value: 5, isPositive: true } },
-                    { title: 'Clean Sheets', value: '42', trend: { value: 3, isPositive: true } },
-                    { title: 'Matches Played', value: '38' },
-                ].map((stat) => (
-                    <motion.div key={stat.title} variants={fadeUp}>
-                        <StatCard title={stat.title} value={stat.value} trend={stat.trend} />
-                    </motion.div>
-                ))}
+                {isLoading ? (
+                    [1, 2, 3, 4].map((i) => (
+                        <motion.div key={i} variants={fadeUp}>
+                            <SkeletonStatCard />
+                        </motion.div>
+                    ))
+                ) : (
+                    stats.map((stat) => (
+                        <motion.div key={stat.title} variants={fadeUp}>
+                            <StatCard title={stat.title} value={stat.value} />
+                        </motion.div>
+                    ))
+                )}
             </motion.div>
 
             <motion.div
@@ -108,85 +130,97 @@ export default function AnalyticsDashboard() {
                 {/* Scoring Trend */}
                 <Card padding="lg">
                     <div className="mb-6">
-                        <h2 className="text-xs font-bold tracking-wider uppercase text-gray-900">
+                        <h2 className="text-xs font-black tracking-[0.2em] uppercase text-gray-900">
                             Goals Trend
                         </h2>
-                        <p className="text-[10px] text-gray-400 uppercase mt-1">Total goals per match day</p>
+                        <p className="text-[10px] text-gray-400 uppercase mt-1">Total goals over time</p>
                     </div>
                     <div className="h-[300px] w-full">
-                        <DynamicResponsiveContainer width="100%" height="100%">
-                            <DynamicLineChart data={goalsPerRound}>
-                                <DynamicCartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
-                                <DynamicXAxis
-                                    dataKey="round"
-                                    tick={{ fontSize: 10, fill: '#9CA3AF' }}
-                                    axisLine={false}
-                                    tickLine={false}
-                                />
-                                <DynamicYAxis
-                                    tick={{ fontSize: 10, fill: '#9CA3AF' }}
-                                    axisLine={false}
-                                    tickLine={false}
-                                />
-                                <DynamicTooltip
-                                    contentStyle={{
-                                        borderRadius: '8px',
-                                        border: 'none',
-                                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                                    }}
-                                />
-                                <DynamicLine
-                                    type="monotone"
-                                    dataKey="goals"
-                                    stroke="#F97316"
-                                    strokeWidth={3}
-                                    dot={{ r: 4, fill: '#F97316', strokeWidth: 2, stroke: '#fff' }}
-                                    activeDot={{ r: 6, strokeWidth: 0 }}
-                                />
-                            </DynamicLineChart>
-                        </DynamicResponsiveContainer>
+                        {isLoading ? (
+                            <div className="w-full h-full bg-gray-50 animate-pulse rounded-xl" />
+                        ) : (
+                            <DynamicResponsiveContainer width="100%" height="100%">
+                                <DynamicLineChart data={analytics?.goalsTrend || []}>
+                                    <DynamicCartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
+                                    <DynamicXAxis
+                                        dataKey="label"
+                                        tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                                        axisLine={false}
+                                        tickLine={false}
+                                    />
+                                    <DynamicYAxis
+                                        tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                                        axisLine={false}
+                                        tickLine={false}
+                                    />
+                                    <DynamicTooltip
+                                        contentStyle={{
+                                            borderRadius: '12px',
+                                            border: 'none',
+                                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                                            fontSize: '12px',
+                                            fontWeight: 'bold'
+                                        }}
+                                    />
+                                    <DynamicLine
+                                        type="monotone"
+                                        dataKey="goals"
+                                        stroke="#F97316"
+                                        strokeWidth={4}
+                                        dot={{ r: 4, fill: '#F97316', strokeWidth: 2, stroke: '#fff' }}
+                                        activeDot={{ r: 6, strokeWidth: 0 }}
+                                    />
+                                </DynamicLineChart>
+                            </DynamicResponsiveContainer>
+                        )}
                     </div>
                 </Card>
 
                 {/* Team Comparison */}
                 <Card padding="lg">
                     <div className="mb-6">
-                        <h2 className="text-xs font-bold tracking-wider uppercase text-gray-900">
-                            Team Efficiency
+                        <h2 className="text-xs font-black tracking-[0.2em] uppercase text-gray-900">
+                            Top Teams Performance
                         </h2>
                         <p className="text-[10px] text-gray-400 uppercase mt-1">Goals Scored vs Conceded</p>
                     </div>
                     <div className="h-[300px] w-full">
-                        <DynamicResponsiveContainer width="100%" height="100%">
-                            <DynamicBarChart data={teamData}>
-                                <DynamicCartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
-                                <DynamicXAxis
-                                    dataKey="name"
-                                    tick={{ fontSize: 10, fill: '#9CA3AF' }}
-                                    axisLine={false}
-                                    tickLine={false}
-                                />
-                                <DynamicTooltip
-                                    cursor={{ fill: '#F9FAFB' }}
-                                    contentStyle={{
-                                        borderRadius: '8px',
-                                        border: 'none',
-                                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                                    }}
-                                />
-                                <DynamicBar dataKey="goals" fill="#000000" radius={[4, 4, 0, 0]} barSize={20} />
-                                <DynamicBar dataKey="conceded" fill="#F97316" radius={[4, 4, 0, 0]} barSize={20} />
-                            </DynamicBarChart>
-                        </DynamicResponsiveContainer>
+                        {isLoading ? (
+                            <div className="w-full h-full bg-gray-50 animate-pulse rounded-xl" />
+                        ) : (
+                            <DynamicResponsiveContainer width="100%" height="100%">
+                                <DynamicBarChart data={analytics?.teamComparison || []}>
+                                    <DynamicCartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
+                                    <DynamicXAxis
+                                        dataKey="name"
+                                        tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                                        axisLine={false}
+                                        tickLine={false}
+                                    />
+                                    <DynamicTooltip
+                                        cursor={{ fill: '#F9FAFB' }}
+                                        contentStyle={{
+                                            borderRadius: '12px',
+                                            border: 'none',
+                                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                                            fontSize: '12px',
+                                            fontWeight: 'bold'
+                                        }}
+                                    />
+                                    <DynamicBar dataKey="goals" fill="#000000" radius={[4, 4, 0, 0]} barSize={24} />
+                                    <DynamicBar dataKey="conceded" fill="#F97316" radius={[4, 4, 0, 0]} barSize={24} />
+                                </DynamicBarChart>
+                            </DynamicResponsiveContainer>
+                        )}
                     </div>
-                    <div className="mt-4 flex gap-4 justify-center">
+                    <div className="mt-6 flex gap-6 justify-center">
                         <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-black rounded-sm" />
-                            <span className="text-[10px] font-bold text-gray-400 uppercase">Scored</span>
+                            <div className="w-3 h-3 bg-black rounded-full" />
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Scored</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-orange-500 rounded-sm" />
-                            <span className="text-[10px] font-bold text-gray-400 uppercase">Conceded</span>
+                            <div className="w-3 h-3 bg-orange-500 rounded-full" />
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Conceded</span>
                         </div>
                     </div>
                 </Card>

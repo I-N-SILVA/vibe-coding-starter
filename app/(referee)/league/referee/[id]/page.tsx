@@ -154,6 +154,10 @@ export default function RefereeController() {
 
     const recordEvent = async (type: MatchEventType, teamId: string, playerId: string) => {
         try {
+            const { triggerHaptic } = await import('@/lib/utils');
+            if (type === 'goal') triggerHaptic('heavy');
+            else triggerHaptic('medium');
+
             const newEvent = await leagueApi.addMatchEvent({
                 matchId,
                 type,

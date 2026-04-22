@@ -19,12 +19,14 @@ import { useToast } from '@/components/providers';
 import { leagueApi, teamsApi } from '@/lib/api';
 import { scheduleMatchAtSchema, type ScheduleMatchAtFormData } from '@/lib/validations';
 
+import { MatchUI } from '@/lib/mappers';
+
 export default function FixtureScheduler() {
     const router = useRouter();
     const { success, error: showError, warning } = useToast();
     const [competitions, setCompetitions] = useState<Array<{ id: string; name: string }>>([]);
     const [teams, setTeams] = useState<Array<{ id: string; name: string; competition_id?: string | null }>>([]);
-    const [existingMatches, setExistingMatches] = useState<any[]>([]);
+    const [existingMatches, setExistingMatches] = useState<MatchUI[]>([]);
     const [isLoadingData, setIsLoadingData] = useState(true);
 
     const {
@@ -75,7 +77,7 @@ export default function FixtureScheduler() {
         const BUFFER_MS = 2 * 60 * 60 * 1000; // 2 hours
 
         const conflict = existingMatches.find(m => {
-            const matchTime = new Date(m.date || m.scheduled_at).getTime();
+            const matchTime = new Date(m.scheduledAt || '').getTime();
             const timeDiff = Math.abs(newTime - matchTime);
             
             if (timeDiff < BUFFER_MS) {
@@ -115,6 +117,7 @@ export default function FixtureScheduler() {
         }
     };
 
+    const selectedCompetitionId = formValues.competition_id;
     const filteredTeams = selectedCompetitionId
         ? teams.filter(t => t.competition_id === selectedCompetitionId)
         : teams;

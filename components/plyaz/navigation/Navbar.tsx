@@ -35,18 +35,18 @@ export const Navbar: React.FC<NavbarProps> = ({
     };
 
     return (
-        <header className="sticky top-0 z-50 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border-b border-neutral-100 dark:border-neutral-800" data-testid="app-navbar">
-            <div className="h-14 px-4 flex items-center justify-between max-w-7xl mx-auto">
+        <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50" data-testid="app-navbar">
+            <div className="h-16 px-4 flex items-center justify-between max-w-7xl mx-auto">
                 {/* Left: Back button or Logo */}
                 <div className="flex items-center gap-3">
                     {showBackButton ? (
                         <button
                             onClick={onBackClick}
-                            className="p-2 -ml-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors group"
+                            className="p-2 -ml-2 rounded-xl hover:bg-primary/5 transition-colors group"
                             aria-label="Go back"
                         >
                             <svg
-                                className="w-5 h-5 text-neutral-500 dark:text-neutral-400 group-hover:text-orange-500 transition-colors"
+                                className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
