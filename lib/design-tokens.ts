@@ -1,75 +1,76 @@
 /* PLYAZ League Manager - Design Tokens
  * Centralized design system configuration
- * Aligned with PLYAZ brand identity (Purple to Orange)
+ * Aligned with PLYAZ "Kinetic Order" brand identity.
  */
 
 export const designTokens = {
     // Colors (matching docs/design-spec.md and data/config/colors.js)
     colors: {
         brand: {
-            purple: '#7C3AED',       // Brand Purple
-            orange: '#F97316',       // Brand Orange
-            gradient: 'linear-gradient(to right, #7C3AED, #F97316)',
+            obsidian: '#000000',
+            charcoal: '#262626',
+            orange: '#FF4D00',
+            gradient: 'linear-gradient(135deg, #FFA132 0%, #FF4D00 100%)',
         },
         text: {
-            primary: '#0F172A',      // slate-900
-            secondary: '#334155',    // slate-700
-            muted: '#64748B',        // slate-500
+            primary: '#000000',
+            secondary: '#262626',
+            muted: '#737373',
             white: '#FFFFFF',
         },
         background: {
-            primary: '#F8FAFC',      // slate-50
-            secondary: '#F1F5F9',    // slate-100
-            tertiary: '#E2E8F0',     // slate-200
+            primary: '#FFFFFF',
+            secondary: '#F5F5F5',
+            tertiary: '#E5E5E5',
             surface: {
                 main: '#FFFFFF',
-                elevated: '#F8FAFC',
+                elevated: '#F5F5F5',
                 glass: 'rgba(255, 255, 255, 0.7)',
-                dark: '#0F172A',
-                darkElevated: '#1E293B',
+                dark: '#000000',
+                darkElevated: '#262626',
             },
         },
         status: {
-            live: '#EF4444',         // red-500
-            liveGlow: 'rgba(239, 68, 68, 0.2)',
-            upcoming: '#3B82F6',     // blue-500
-            completed: '#64748B',    // slate-500
-            cancelled: '#94A3B8',    // slate-400
+            live: '#FF4D00',
+            liveGlow: 'rgba(255, 77, 0, 0.2)',
+            upcoming: '#FFA132',
+            completed: '#262626',
+            cancelled: '#A3A3A3',
         },
         semantic: {
-            success: '#10B981',      // green-500
-            warning: '#F59E0B',      // amber-500
-            error: '#EF4444',        // red-500
-            info: '#3B82F6',         // blue-500
+            success: '#10B981',
+            warning: '#F59E0B',
+            error: '#EF4444',
+            info: '#3B82F6',
         },
     },
 
     // Typography
     typography: {
         fontFamily: {
-            primary: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-            accent: "'Montserrat', sans-serif",
+            primary: "'General Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            accent: "'Playfair Display', serif",
         },
         fontSize: {
-            hero: '48px',
-            h1: '36px',
-            h2: '30px',
+            hero: '64px',
+            h1: '48px',
+            h2: '32px',
             h3: '24px',
-            h4: '20px',
+            h4: '18px',
             body: '16px',
             small: '14px',
-            tiny: '12px',
+            tiny: '10px',
         },
         fontWeight: {
             regular: 400,
             medium: 500,
             semibold: 600,
             bold: 700,
-            extrabold: 800,
+            black: 900,
         },
     },
 
-    // Spacing
+    // Spacing (8px system)
     spacing: {
         xs: '4px',
         sm: '8px',
@@ -80,12 +81,12 @@ export const designTokens = {
         '3xl': '64px',
     },
 
-    // Border Radius
+    // Border Radius (Brand requires full round or sharp)
     borderRadius: {
-        sm: '8px',
-        md: '12px',
-        lg: '16px',
-        xl: '20px',
+        sm: '4px',
+        md: '8px',
+        lg: '24px',
+        xl: '32px',
         full: '9999px',
     },
 
@@ -96,41 +97,14 @@ export const designTokens = {
         md: '0 4px 6px rgba(0, 0, 0, 0.1)',
         lg: '0 10px 15px rgba(0, 0, 0, 0.1)',
         xl: '0 20px 25px rgba(0, 0, 0, 0.15)',
-        brand: '0 4px 12px rgba(124, 58, 237, 0.25)',
+        brand: '0 12px 24px rgba(255, 77, 0, 0.15)',
     },
 
     // Transitions
     transitions: {
-        fast: '150ms ease',
-        normal: '250ms ease',
-        slow: '400ms ease',
-    },
-
-    // Component-specific tokens
-    components: {
-        button: {
-            height: '44px',
-            heightLg: '60px', // For referee controls
-            borderRadius: '12px',
-        },
-        card: {
-            borderRadius: '16px',
-            padding: '24px',
-        },
-        input: {
-            height: '44px',
-            borderRadius: '12px',
-        },
-        badge: {
-            borderRadius: '9999px',
-            padding: '4px 12px',
-        },
-        navbar: {
-            height: '64px',
-        },
-        bottomNav: {
-            height: '64px',
-        },
+        fast: '150ms cubic-bezier(0.19, 1, 0.22, 1)',
+        normal: '300ms cubic-bezier(0.19, 1, 0.22, 1)',
+        slow: '800ms cubic-bezier(0.19, 1, 0.22, 1)',
     },
 };
 

@@ -4,64 +4,66 @@
 
 @layer base {
   :root {
-    /* Base shadcn variables — Light Mode (Slate 50) */
-    --background: 210 40% 98%;
-    --foreground: 222.2 47.4% 11.2%;
+    /* Kinetic Order - Light Mode */
+    --background: 0 0% 100%; /* CANVAS WHITE #FFFFFF */
+    --foreground: 0 0% 0%;   /* OBSIDIAN #000000 */
+    
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 0%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 0%;
     
-    /* PLYAZ Brand Primary (Purple) */
-    --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 18 100% 50%;   /* PLYAZ ORANGE #FF4D00 */
+    --primary-foreground: 0 0% 100%;
     
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0 0% 15%;    /* CHARCOAL #262626 */
+    --secondary-foreground: 0 0% 100%;
     
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
     
-    /* PLYAZ Brand Accent (Orange) */
-    --accent: 24.6 95% 53.1%;
+    --accent: 18 100% 50%;
     --accent-foreground: 0 0% 100%;
     
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
     
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 262.1 83.3% 57.8%;
-    --radius: 0.75rem;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 18 100% 50%;
+    --radius: 9999px; /* Force pill shape as default for brand */
   }
 
   .dark {
-    /* Base shadcn variables — Dark Mode (Slate 900) */
-    --background: 222.2 47.4% 11.2%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 47.4% 13%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 47.4% 11.2%;
-    --popover-foreground: 210 40% 98%;
+    /* Kinetic Order - Dark Mode */
+    --background: 0 0% 0%;    /* OBSIDIAN #000000 */
+    --foreground: 0 0% 100%;  /* CANVAS WHITE #FFFFFF */
     
-    --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 40% 98%;
+    --card: 0 0% 10%;         /* CHARCOAL VARIANT */
+    --card-foreground: 0 0% 100%;
     
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
     
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --primary: 18 100% 50%;
+    --primary-foreground: 0 0% 100%;
     
-    --accent: 24.6 95% 53.1%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    
+    --accent: 18 100% 50%;
     --accent-foreground: 0 0% 100%;
     
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
     
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 262.1 83.3% 57.8%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 18 100% 50%;
   }
 }
 
@@ -71,6 +73,22 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-bold tracking-tighter uppercase;
+    line-height: 0.9;
+  }
+}
+
+@layer components {
+  .serif-accent {
+    @apply font-serif italic font-bold;
+    background: linear-gradient(135deg, #FFA132 0%, #FF4D00 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 }
 
@@ -85,10 +103,22 @@
   
   /* PLYAZ Brand Gradient */
   .bg-plyaz-gradient {
-    @apply bg-gradient-to-r from-[#7C3AED] to-[#F97316];
+    background: linear-gradient(135deg, #FFA132 0%, #FF4D00 100%);
   }
   
   .text-plyaz-gradient {
-    @apply bg-gradient-to-r from-[#7C3AED] to-[#F97316] bg-clip-text text-transparent;
+    background: linear-gradient(135deg, #FFA132 0%, #FF4D00 100%);
+    @apply bg-clip-text text-transparent;
+  }
+
+  .grid-pattern {
+    background-image: linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  
+  .dark .grid-pattern {
+    background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
   }
 }

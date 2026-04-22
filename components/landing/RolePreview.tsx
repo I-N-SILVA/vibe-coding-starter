@@ -36,7 +36,7 @@ const roles: RoleProfile[] = [
         sublabel: 'Full Control',
         icon: <Shield className="w-8 h-8 md:w-10 md:h-10" />,
         route: '/league',
-        gradient: 'from-orange-500 to-amber-600',
+        gradient: 'from-orange-500 to-orange-700',
         hoverBorder: 'hover:border-orange-500',
     },
     {
@@ -44,18 +44,18 @@ const roles: RoleProfile[] = [
         label: 'Referee',
         sublabel: 'Live Scoring',
         icon: <PlayCircle className="w-8 h-8 md:w-10 md:h-10" />,
-        route: '/league/matches/schedule',
-        gradient: 'from-blue-500 to-indigo-600',
-        hoverBorder: 'hover:border-blue-500',
+        route: '/league/referee',
+        gradient: 'from-neutral-800 to-black',
+        hoverBorder: 'hover:border-white',
     },
     {
         id: 'player',
         label: 'Player',
         sublabel: 'My Stats',
         icon: <User className="w-8 h-8 md:w-10 md:h-10" />,
-        route: '/league/statistics',
-        gradient: 'from-green-500 to-emerald-600',
-        hoverBorder: 'hover:border-green-500',
+        route: '/league/player/dashboard',
+        gradient: 'from-orange-400 to-orange-600',
+        hoverBorder: 'hover:border-orange-400',
     },
     {
         id: 'fan',
@@ -63,8 +63,8 @@ const roles: RoleProfile[] = [
         sublabel: 'Public View',
         icon: <Eye className="w-8 h-8 md:w-10 md:h-10" />,
         route: '/league/public',
-        gradient: 'from-purple-500 to-violet-600',
-        hoverBorder: 'hover:border-purple-500',
+        gradient: 'from-neutral-700 to-neutral-900',
+        hoverBorder: 'hover:border-neutral-500',
     },
 ];
 
@@ -147,7 +147,7 @@ export const RolePreview: React.FC = () => {
     );
 
     return (
-        <section className="py-28 md:py-36 bg-neutral-900 dark:bg-neutral-950 text-white relative overflow-hidden" data-testid="role-preview-section">
+        <section className="py-28 md:py-36 bg-black text-white relative overflow-hidden" data-testid="role-preview-section">
             {/* Dot grid background */}
             <div
                 className="absolute inset-0 opacity-[0.04] pointer-events-none"

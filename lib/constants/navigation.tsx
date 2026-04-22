@@ -13,8 +13,8 @@ export const adminNavItems: NavItem[] = [
     { label: 'Categories', href: '/league/categories', icon: <NavIcons.Trophy /> },
     { label: 'Invites', href: '/league/invites', icon: <NavIcons.Public /> },
     { label: 'Analytics', href: '/league/analytics', icon: <NavIcons.Analytics /> },
-    { label: 'Referee', href: '/league/referee', icon: <NavIcons.Matches /> },
-    { label: 'Discovery', href: '/league/discover', icon: <NavIcons.Public /> },
+    { label: 'Referee', href: '/league/referee', icon: <NavIcons.Whistle /> },
+    { label: 'Discovery', href: '/discover', icon: <NavIcons.Public /> },
     { label: 'Settings', href: '/league/settings', icon: <NavIcons.Settings /> },
 ];
 
@@ -31,7 +31,7 @@ export const playerNavItems: NavItem[] = [
     { label: 'My Card', href: '/league/player/card', icon: <NavIcons.Statistics /> },
     { label: 'Matchday', href: '/league/player/convocation', icon: <NavIcons.Calendar /> },
     { label: 'My Team', href: '/league/player/dashboard#team', icon: <NavIcons.Teams /> },
-    { label: 'Discovery', href: '/league/discover', icon: <NavIcons.Public /> },
+    { label: 'Discovery', href: '/discover', icon: <NavIcons.Public /> },
     { label: 'Profile', href: '/league/player/profile', icon: <NavIcons.Settings /> },
 ];
 
@@ -40,7 +40,7 @@ export const refereeNavItems: NavItem[] = [
     { label: 'Schedule', href: '/league/matches', icon: <NavIcons.Calendar /> },
     { label: 'Earnings', href: '/league/referee/payouts', icon: <NavIcons.Dashboard /> },
     { label: 'Analytics', href: '/league/analytics', icon: <NavIcons.Analytics /> },
-    { label: 'Discovery', href: '/league/discover', icon: <NavIcons.Public /> },
+    { label: 'Discovery', href: '/discover', icon: <NavIcons.Public /> },
     { label: 'Settings', href: '/league/settings', icon: <NavIcons.Settings /> },
 ];
 

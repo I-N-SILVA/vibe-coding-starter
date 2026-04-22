@@ -229,7 +229,7 @@ export default function AdminDashboard() {
                                     <p className="text-sm font-bold text-gray-900">{comp.name}</p>
                                     <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest mt-0.5">Draft — not published</p>
                                 </div>
-                                <Button variant="ghost" size="sm" className="text-orange-500 hover:text-orange-600">
+                                <Button variant="ghost" size="sm" className="text-orange-500 hover:text-orange-600" onClick={(e) => { e.stopPropagation(); router.push(`/league/competitions/${comp.id}/config`); }}>
                                     Set Up
                                 </Button>
                             </div>
@@ -273,7 +273,7 @@ export default function AdminDashboard() {
                                 awayScore={match.away_score}
                                 status={match.status}
                                 matchTime={match.match_time ?? undefined}
-                                onPress={() => router.push(`/league/referee/${match.id}`)}
+                                onPress={() => router.push(`/league/referee/live/${match.id}`)}
                             />
                         ))}
                     </div>
