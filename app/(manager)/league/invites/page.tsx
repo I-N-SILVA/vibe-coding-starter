@@ -68,6 +68,8 @@ export default function InvitesPage() {
         type: 'player_join' as 'team_join' | 'player_join' | 'referee_invite' | 'admin_invite',
         role: 'player' as string,
     });
+    const [freshLink, setFreshLink] = useState<string | null>(null);
+    const [freshLinkCopied, setFreshLinkCopied] = useState(false);
     const [filter, setFilter] = useState<string>('all');
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -85,20 +87,26 @@ export default function InvitesPage() {
     };
 
     const handleCreate = async () => {
-        if (!newInvite.email) return;
-
         try {
-            await createInvite.mutateAsync({
+            const result = await createInvite.mutateAsync({
                 type: newInvite.type,
-                email: newInvite.email,
+                email: newInvite.email || undefined,
                 role: newInvite.role as 'admin' | 'organizer' | 'referee' | 'manager' | 'player' | 'fan',
-            });
-            toast.success('Invitation sent successfully');
+            }) as ApiInvite;
+            const link = `${window.location.origin}/invites/accept?token=${result.token}`;
+            setFreshLink(link);
             setShowCreate(false);
             setNewInvite({ email: '', type: 'player_join', role: 'player' });
         } catch (err: unknown) {
-            toast.error(err instanceof Error ? err.message : 'Failed to send invitation');
+            toast.error(err instanceof Error ? err.message : 'Failed to create invitation');
         }
+    };
+
+    const handleCopyFreshLink = () => {
+        if (!freshLink) return;
+        navigator.clipboard.writeText(freshLink);
+        setFreshLinkCopied(true);
+        setTimeout(() => setFreshLinkCopied(false), 2000);
     };
 
     return (
@@ -115,6 +123,32 @@ export default function InvitesPage() {
                     }
                 />
 
+                {/* Fresh invite link — shown immediately after creation */}
+                {freshLink && (
+                    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+                        <Card elevated>
+                            <CardContent className="p-5 md:p-6">
+                                <div className="flex items-start justify-between gap-3 mb-3">
+                                    <div>
+                                        <p className="text-xs font-bold tracking-widest uppercase text-green-600 mb-0.5">Invite Ready</p>
+                                        <p className="text-sm text-gray-500">Copy this link and share it directly with the person you&apos;re inviting.</p>
+                                    </div>
+                                    <button onClick={() => setFreshLink(null)} className="text-gray-300 hover:text-gray-500 text-lg leading-none mt-0.5">×</button>
+                                </div>
+                                <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+                                    <p className="flex-1 text-xs font-mono text-gray-600 truncate">{freshLink}</p>
+                                    <button
+                                        onClick={handleCopyFreshLink}
+                                        className="flex-shrink-0 px-3 py-1.5 bg-gray-900 text-white rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all hover:bg-gray-700"
+                                    >
+                                        {freshLinkCopied ? '✓ Copied' : 'Copy'}
+                                    </button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
+
                 {/* Create invite card */}
                 {showCreate && (
                     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
@@ -124,7 +158,7 @@ export default function InvitesPage() {
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                                     <div className="sm:col-span-3">
                                         <Input
-                                            label="Email"
+                                            label="Email (optional)"
                                             type="email"
                                             placeholder="invite@example.com"
                                             value={newInvite.email}
@@ -147,11 +181,11 @@ export default function InvitesPage() {
                                 <div className="flex gap-3">
                                     <Button
                                         onClick={handleCreate}
-                                        disabled={!newInvite.email || createInvite.isPending}
+                                        disabled={createInvite.isPending}
                                         isLoading={createInvite.isPending}
                                         className="h-10 text-xs"
                                     >
-                                        Send Invite
+                                        Generate Link
                                     </Button>
                                     <Button variant="secondary" onClick={() => setShowCreate(false)} className="h-10 text-xs">
                                         Cancel
