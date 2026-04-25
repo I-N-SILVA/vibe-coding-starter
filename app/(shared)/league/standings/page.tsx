@@ -55,9 +55,9 @@ export default function AdminStandings() {
             won: entry.won,
             drawn: entry.drawn,
             lost: entry.lost,
-            gf: entry.gf,
-            ga: entry.ga,
-            gd: entry.gd,
+            gf: entry.goalsFor,
+            ga: entry.goalsAgainst,
+            gd: entry.goalDifference,
             points: entry.points,
             form: entry.form ?? [],
           }))
@@ -65,64 +65,50 @@ export default function AdminStandings() {
 
     const isLoading = competitionsLoading || standingsLoading;
 
-    if (!competitionsLoading && competitions.length === 0) {
-        return (
-            <PageLayout navItems={adminNavItems} title="STANDINGS">
-                <PageHeader label="Competitions" title="Current Rankings" />
-                <EmptyState
-                    icon={<NavIcons.Standings />}
-                    title="No Competitions"
-                    description="Create a competition to start tracking standings."
-                />
-            </PageLayout>
-        );
-    }
-
     return (
         <PageLayout navItems={adminNavItems} title="STANDINGS">
             <PageHeader
-                label="Competitions"
-                title="Current Rankings"
-                rightAction={
-                    competitions.length > 0 ? (
-                        <CompetitionSelector
-                            competitions={competitions}
-                            selected={selectedComp}
-                            onChange={setSelectedComp}
-                        />
-                    ) : undefined
-                }
+                label="Competition"
+                title="League Table"
+                description="Real-time standings and performance data"
             />
 
+            <div className="mb-8">
+                <CompetitionSelector
+                    competitions={competitions}
+                    selected={selectedComp}
+                    onChange={setSelectedComp}
+                />
+            </div>
+
             {isLoading ? (
-                <Card padding="md" className="overflow-hidden p-0">
+                <Card padding="sm" className="overflow-hidden">
                     <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="border-b border-gray-100 bg-gray-50/50">
-                                <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 w-12 text-center">#</th>
-                                <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">Team</th>
-                                <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">P</th>
-                                <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">W</th>
-                                <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">D</th>
-                                <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">L</th>
-                                <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center hidden sm:table-cell">GD</th>
-                                <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-gray-900 text-center bg-gray-100/50">Pts</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <SkeletonTableRow key={i} />
-                            ))}
-                        </tbody>
-                    </table>
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
+                                    <th className="px-4 py-4 w-12" />
+                                    <th className="px-4 py-4">Team</th>
+                                    <th className="px-4 py-4 text-center">P</th>
+                                    <th className="px-4 py-4 text-center">W</th>
+                                    <th className="px-4 py-4 text-center">D</th>
+                                    <th className="px-4 py-4 text-center">L</th>
+                                    <th className="px-4 py-4 text-center">Pts</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {[1, 2, 3, 4, 5].map((i) => (
+                                    <SkeletonTableRow key={i} />
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </Card>
             ) : standings.length === 0 ? (
                 <EmptyState
                     icon={<NavIcons.Standings />}
-                    title="No Standings Available"
-                    description="Standings will appear here once matches have been played in this competition."
+                    title="No Standings Data"
+                    description={selectedComp ? "No matches have been played in this competition yet." : "Select a competition to view the league table."}
                 />
             ) : (
                 <motion.div
@@ -130,7 +116,7 @@ export default function AdminStandings() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                 >
-                    <Card padding="md" className="overflow-hidden p-0">
+                    <Card padding="sm" className="overflow-hidden p-0">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
@@ -191,40 +177,41 @@ export default function AdminStandings() {
                                                         </div>
                                                     </div>
                                                 </td>
-                                            <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.played}</td>
-                                            <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.won}</td>
-                                            <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.drawn}</td>
-                                            <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.lost}</td>
-                                            <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums hidden md:table-cell">{row.gf}</td>
-                                            <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums hidden md:table-cell">{row.ga}</td>
-                                            <td className={cn(
-                                                'px-4 py-5 text-sm text-center tabular-nums hidden sm:table-cell',
-                                                row.gd > 0 ? 'text-emerald-500' : row.gd < 0 ? 'text-rose-500' : 'text-muted-foreground'
-                                            )}>
-                                                {row.gd > 0 ? `+${row.gd}` : row.gd}
-                                            </td>
-                                            <td className="px-4 py-5 text-sm font-black text-center text-foreground tabular-nums bg-primary/[0.03]">
-                                                {row.points}
-                                            </td>
-                                            <td className="px-4 py-5 hidden lg:table-cell">
-                                                <div className="flex items-center justify-center gap-1">
-                                                    {row.form?.map((res, i) => (
-                                                        <span
-                                                            key={i}
-                                                            className={cn(
-                                                                'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black text-white',
-                                                                res === 'W' ? 'bg-emerald-500' :
-                                                                res === 'D' ? 'bg-amber-500' :
-                                                                'bg-rose-500'
-                                                            )}
-                                                        >
-                                                            {res}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </td>
-                                        </motion.tr>
-                                    ))}
+                                                <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.played}</td>
+                                                <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.won}</td>
+                                                <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.drawn}</td>
+                                                <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.lost}</td>
+                                                <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums hidden md:table-cell">{row.gf}</td>
+                                                <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums hidden md:table-cell">{row.ga}</td>
+                                                <td className={cn(
+                                                    'px-4 py-5 text-sm text-center tabular-nums hidden sm:table-cell',
+                                                    row.gd > 0 ? 'text-emerald-500' : row.gd < 0 ? 'text-rose-500' : 'text-muted-foreground'
+                                                )}>
+                                                    {row.gd > 0 ? `+${row.gd}` : row.gd}
+                                                </td>
+                                                <td className="px-4 py-5 text-sm font-black text-center text-foreground tabular-nums bg-primary/[0.03]">
+                                                    {row.points}
+                                                </td>
+                                                <td className="px-4 py-5 hidden lg:table-cell">
+                                                    <div className="flex items-center justify-center gap-1">
+                                                        {row.form?.map((res, i) => (
+                                                            <span
+                                                                key={i}
+                                                                className={cn(
+                                                                    'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black text-white',
+                                                                    res === 'W' ? 'bg-emerald-500' :
+                                                                    res === 'D' ? 'bg-amber-500' :
+                                                                    'bg-rose-500'
+                                                                )}
+                                                            >
+                                                                {res}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </td>
+                                            </motion.tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

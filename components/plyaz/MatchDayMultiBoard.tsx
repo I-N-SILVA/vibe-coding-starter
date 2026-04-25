@@ -48,8 +48,8 @@ export function MatchDayMultiBoard({ matches, onMatchPress }: MatchDayMultiBoard
                                         homeScore={match.homeScore}
                                         awayScore={match.awayScore}
                                         status={match.status}
-                                        matchTime={match.matchTime}
-                                        venue={match.venue}
+                                        matchTime={match.matchTime ?? undefined}
+                                        venue={match.venue ?? undefined}
                                         onPress={() => onMatchPress?.(match.id)}
                                         className="relative bg-white dark:bg-slate-900 border-primary/20 shadow-2xl"
                                     />
@@ -83,7 +83,7 @@ export function MatchDayMultiBoard({ matches, onMatchPress }: MatchDayMultiBoard
                                 homeTeam={match.homeTeam!}
                                 awayTeam={match.awayTeam!}
                                 status={match.status}
-                                matchTime={match.matchTime}
+                                matchTime={match.matchTime ?? undefined}
                                 date={match.scheduledAt ? new Date(match.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD'}
                                 onPress={() => onMatchPress?.(match.id)}
                                 className="scale-95 hover:scale-100 transition-transform opacity-70 hover:opacity-100"
