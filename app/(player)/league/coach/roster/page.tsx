@@ -7,7 +7,6 @@ import {
     PageHeader,
     Badge,
 } from '@/components/plyaz';
-import { coachNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUp } from '@/lib/animations';
 import { useAllPlayers } from '@/lib/hooks';
 import type { Player } from '@/lib/supabase/types';
@@ -89,7 +88,7 @@ export default function CoachRosterPage() {
     const suspendedCount = players.filter((p) => p.status === 'suspended').length;
 
     return (
-        <PageLayout navItems={coachNavItems} title="SQUAD">
+        <PageLayout title="SQUAD">
             <PageHeader
                 label="Team Management"
                 title="Full Roster"

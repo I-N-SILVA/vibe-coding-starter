@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
     PageLayout,
     PageHeader,
@@ -12,8 +12,10 @@ import {
     Badge,
 } from '@/components/plyaz';
 import { useToast } from '@/components/providers/ToastProvider';
-import { playerNavItems } from '@/lib/constants/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { uploadImage } from '@/lib/supabase/storage';
+import { Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 const POSITIONS = [
     { value: 'GK', label: 'Goalkeeper' },
@@ -35,6 +37,8 @@ export default function PlayerProfilePage() {
     const { profile, updateProfile } = useAuth();
     const toast = useToast();
     const [isLoading, setIsLoading] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [formData, setFormData] = useState({
         full_name: profile?.full_name || '',
@@ -42,7 +46,33 @@ export default function PlayerProfilePage() {
         jersey_number: profile?.jersey_number?.toString() || '',
         bio: profile?.bio || '',
         nationality: profile?.nationality || '',
+        avatar_url: profile?.avatar_url || '',
     });
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !profile?.id) return;
+
+        setIsUploading(true);
+        try {
+            const fileName = `${profile.id}-${Date.now()}.${file.name.split('.').pop()}`;
+            const publicUrl = await uploadImage(file, 'avatars', `profiles/${fileName}`);
+            
+            // Immediately update profile in DB with new avatar URL
+            const { error } = await updateProfile({ avatar_url: publicUrl });
+            
+            if (!error) {
+                setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+                toast.success('Profile picture updated! 📸');
+            } else {
+                throw new Error('Failed to update profile record');
+            }
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Upload failed');
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
     const handleSave = async () => {
         setIsLoading(true);
@@ -69,7 +99,7 @@ export default function PlayerProfilePage() {
     };
 
     return (
-        <PageLayout navItems={playerNavItems} title="MY PROFILE">
+        <PageLayout title="MY PROFILE">
             <PageHeader
                 label="Identity"
                 title="Personal Profile"
@@ -81,12 +111,38 @@ export default function PlayerProfilePage() {
                     <CardContent className="p-8">
                         <div className="flex flex-col md:flex-row gap-8 items-start mb-10">
                             <div className="relative group">
-                                <div className="w-24 h-24 rounded-3xl bg-gray-900 flex items-center justify-center text-3xl font-black text-white shadow-xl group-hover:scale-105 transition-transform">
-                                    {formData.jersey_number || '#'}
+                                <div className="w-24 h-24 rounded-3xl bg-neutral-900 overflow-hidden flex items-center justify-center text-3xl font-black text-white shadow-xl group-hover:scale-105 transition-transform relative">
+                                    {formData.avatar_url ? (
+                                        <Image 
+                                            src={formData.avatar_url} 
+                                            alt={formData.full_name} 
+                                            fill 
+                                            className="object-cover"
+                                        />
+                                    ) : (
+                                        formData.jersey_number || '#'
+                                    )}
+
+                                    {isUploading && (
+                                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-20">
+                                            <Loader2 className="w-6 h-6 text-white animate-spin" />
+                                        </div>
+                                    )}
                                 </div>
-                                <button className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-orange-600 text-white flex items-center justify-center shadow-lg hover:bg-orange-700 transition-colors border-2 border-white">
+                                <button 
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={isUploading}
+                                    className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-orange-600 text-white flex items-center justify-center shadow-lg hover:bg-orange-700 transition-colors border-2 border-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
                                     <span className="text-[10px]">📷</span>
                                 </button>
+                                <input 
+                                    type="file" 
+                                    ref={fileInputRef} 
+                                    onChange={handleFileChange} 
+                                    accept="image/*" 
+                                    className="hidden" 
+                                />
                             </div>
                             <div className="flex-1">
                                 <h3 className="text-sm font-bold tracking-widest uppercase text-gray-400 mb-2">Registration Status</h3>

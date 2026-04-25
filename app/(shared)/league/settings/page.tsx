@@ -15,7 +15,6 @@ import {
     Toggle,
     ConfirmModal,
 } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { useToast } from '@/components/providers';
 import { useOrganization } from '@/lib/hooks';
 import { stagger, fadeUp } from '@/lib/animations';
@@ -55,7 +54,7 @@ export default function AdminSettings() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
     return (
-        <PageLayout navItems={adminNavItems} title="SETTINGS">
+        <PageLayout title="SETTINGS">
             <div className="max-w-3xl">
                 <PageHeader label="Account & System" title="League Settings" />
 

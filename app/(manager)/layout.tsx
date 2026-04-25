@@ -1,6 +1,8 @@
 import { ReactNode, Suspense } from 'react';
 import { Skeleton } from '@/components/plyaz/Skeleton';
 import { AuthGuard } from '@/lib/auth/AuthGuard';
+import { DashboardShell } from '@/components/plyaz/navigation/DashboardShell';
+import { adminNavGroups, adminNavItems } from '@/lib/constants/navigation';
 
 export default function ManagerLayout({ children }: { children: ReactNode }) {
     return (
@@ -11,7 +13,9 @@ export default function ManagerLayout({ children }: { children: ReactNode }) {
             </div>
         }>
             <AuthGuard roles={['manager', 'organizer', 'admin']}>
-                {children}
+                <DashboardShell navItems={adminNavItems} navGroups={adminNavGroups}>
+                    {children}
+                </DashboardShell>
             </AuthGuard>
         </Suspense>
     );

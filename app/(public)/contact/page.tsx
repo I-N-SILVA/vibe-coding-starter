@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PageLayout, PageHeader, Button, Input, Card, CardContent } from '@/components/plyaz';
-import { publicNavItems } from '@/lib/constants/navigation';
 import { toast } from 'sonner';
 
 export default function ContactPage() {
@@ -29,7 +28,7 @@ export default function ContactPage() {
     };
 
     return (
-        <PageLayout navItems={publicNavItems} title="CONTACT PLYAZ">
+        <PageLayout title="CONTACT PLYAZ">
             <PageHeader
                 label="Get in Touch"
                 title="Contact Protocol"

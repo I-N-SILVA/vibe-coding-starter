@@ -14,7 +14,6 @@ import {
 } from '@/components/plyaz';
 import { NavIcons } from '@/components/plyaz';
 import { PageLayout } from '@/components/plyaz/navigation/PageLayout';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { useToast } from '@/components/providers';
 import { stagger, fadeUp } from '@/lib/animations';
 
@@ -101,7 +100,7 @@ export default function InvitationsPage() {
     };
 
     return (
-        <PageLayout navItems={adminNavItems} title="Organization Invitations">
+        <PageLayout title="Organization Invitations">
             <div className="space-y-6">
                 <PageHeader
                     label="Organization"

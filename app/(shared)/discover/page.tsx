@@ -45,7 +45,7 @@ export default function DiscoveryPage() {
     const navItems = getNavItems();
 
     return (
-        <PageLayout navItems={navItems} title="DISCOVERY">
+        <PageLayout title="DISCOVERY">
             <PageHeader
                 label="Recruitment Marketplace"
                 title="Find Your Next Opportunity"

@@ -4,11 +4,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { PageLayout, PageHeader } from '@/components/plyaz';
-import { publicNavItems } from '@/lib/constants/navigation';
 
 export default function AboutPage() {
     return (
-        <PageLayout navItems={publicNavItems} title="ABOUT PLYAZ">
+        <PageLayout title="ABOUT PLYAZ">
             <PageHeader
                 label="Our Mission"
                 title="Keeping Football Dreams Alive"

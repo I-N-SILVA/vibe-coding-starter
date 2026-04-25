@@ -12,7 +12,6 @@ import {
     SkeletonCard,
     EmptyState,
 } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { motion } from 'framer-motion';
 import { stagger, fadeUp } from '@/lib/animations';
 import { useOrganizations } from '@/lib/hooks';
@@ -25,7 +24,7 @@ export default function OrganizationsPage() {
     const organizationList = (orgs || []) as (Organization & { member_count?: number; status?: string })[];
 
     return (
-        <PageLayout navItems={adminNavItems} title="ORGANIZATIONS">
+        <PageLayout title="ORGANIZATIONS">
             <PageHeader
                 label="Platform Management"
                 title="Organizations & Tenants"

@@ -13,7 +13,6 @@ import {
     NavIcons,
 } from '@/components/plyaz';
 import { PageLayout } from '@/components/plyaz/navigation/PageLayout';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { useToast } from '@/components/providers';
 import { stagger, fadeUp } from '@/lib/animations';
 import { useCategories, useCreateCategory } from '@/lib/hooks';
@@ -59,7 +58,7 @@ export default function CategoriesPage() {
     };
 
     return (
-        <PageLayout navItems={adminNavItems} title="Categories">
+        <PageLayout title="Categories">
             <div className="space-y-6">
                 <PageHeader
                     label="Management"

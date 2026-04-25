@@ -14,7 +14,6 @@ import {
     SkeletonMatchCard,
     SkeletonCard,
 } from '@/components/plyaz';
-import { playerNavItems } from '@/lib/constants/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { stagger, fadeUp } from '@/lib/animations';
 import { DiscoveryBoard } from '@/components/plyaz/DiscoveryBoard';
@@ -70,7 +69,7 @@ export default function PlayerDashboard() {
 
     if (isGlobalLoading) {
         return (
-            <PageLayout navItems={playerNavItems} title="PLAYER HUB">
+            <PageLayout title="PLAYER HUB">
                 <div className="space-y-8 pb-20 mt-10">
                     <SkeletonStatCard />
                     <SkeletonMatchCard />
@@ -84,7 +83,7 @@ export default function PlayerDashboard() {
     }
 
     return (
-        <PageLayout navItems={playerNavItems} title="PLAYER HUB">
+        <PageLayout title="PLAYER HUB">
             <PageHeader
                 label="Athlete Dashboard"
                 title={`${profile?.full_name?.split(' ')[0] || 'Player'}`}

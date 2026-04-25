@@ -9,7 +9,6 @@ import {
     TabPills,
 } from '@/components/plyaz';
 import { PlayerCard } from '@/components/plyaz/cards/PlayerCard';
-import { publicNavItems } from '@/lib/constants/navigation';
 import { cn } from '@/lib/utils';
 
 const TABS = [
@@ -32,7 +31,7 @@ export default function StatisticsPage() {
     const [statType, setStatType] = useState('goals');
 
     return (
-        <PageLayout navItems={publicNavItems} title="Statistics">
+        <PageLayout title="Statistics">
             <PageHeader label="Player Performance" title="Leaderboards" />
 
             <TabPills tabs={TABS} activeTab={statType} onChange={setStatType} className="mb-8" />

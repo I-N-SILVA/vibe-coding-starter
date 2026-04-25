@@ -14,7 +14,6 @@ import { useLiveMatch } from '@/lib/hooks';
 import { leagueApi, teamsApi } from '@/lib/api';
 import type { MatchUI } from '@/lib/mappers';
 import type { Player, MatchEvent, MatchEventType } from '@/types';
-import { refereeNavItems } from '@/lib/constants/navigation';
 import { generateMatchReport } from '@/lib/utils/pdf-generator';
 
 const INITIAL_MATCH: MatchUI = {
@@ -223,7 +222,7 @@ export default function RefereeController() {
     const currentMatch = match;
 
     return (
-        <PageLayout navItems={refereeNavItems} title="REFEREE">
+        <PageLayout title="REFEREE">
             <div className="min-h-screen bg-black text-white -mx-4 -mt-2 px-4 py-6 pb-32">
                 {/* Header Info */}
                 <div className="text-center mb-8">

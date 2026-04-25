@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { PageLayout, PageHeader, Button, Badge } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { GripVertical, Check, RotateCcw, ChevronDown } from 'lucide-react';
 import { usePlayers } from '@/lib/hooks';
 import type { Player } from '@/types';
@@ -213,14 +212,14 @@ export default function LineupBuilderPage() {
 
     if (playersLoading) {
         return (
-            <PageLayout navItems={adminNavItems} title="LINEUP">
+            <PageLayout title="LINEUP">
                 <div className="h-20 animate-pulse bg-gray-100 rounded-2xl" />
             </PageLayout>
         );
     }
 
     return (
-        <PageLayout navItems={adminNavItems} title="LINEUP">
+        <PageLayout title="LINEUP">
             <PageHeader
                 label="Match Preparation"
                 title="Build Lineup"

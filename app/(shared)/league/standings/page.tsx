@@ -12,7 +12,6 @@ import {
     SkeletonTableRow,
     NavIcons,
 } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { cn } from '@/lib/utils';
 import { mapStandingsToUI } from '@/lib/mappers';
 
@@ -66,7 +65,7 @@ export default function AdminStandings() {
     const isLoading = competitionsLoading || standingsLoading;
 
     return (
-        <PageLayout navItems={adminNavItems} title="STANDINGS">
+        <PageLayout title="STANDINGS">
             <PageHeader
                 label="Competition"
                 title="League Table"

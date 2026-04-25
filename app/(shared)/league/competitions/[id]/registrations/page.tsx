@@ -13,7 +13,6 @@ import {
     TabPills,
 } from '@/components/plyaz';
 import { PageLayout } from '@/components/plyaz/navigation/PageLayout';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { useToast } from '@/components/providers';
 import { stagger, fadeUp } from '@/lib/animations';
 import { useRegistrations } from '@/lib/hooks';
@@ -171,7 +170,7 @@ export default function RegistrationsPage() {
     // ---------- Render ----------
 
     return (
-        <PageLayout navItems={adminNavItems} title="Registrations">
+        <PageLayout title="Registrations">
             <div className="space-y-6">
                 <PageHeader
                     label="Championship"

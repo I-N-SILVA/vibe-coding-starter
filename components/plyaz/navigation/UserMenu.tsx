@@ -35,8 +35,6 @@ export function UserMenu() {
         ? profile.full_name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
         : '?';
 
-    const currentLocale = LOCALES.find((l) => l.value === locale) ?? LOCALES[0];
-
     const themeOptions = [
         { value: 'light', icon: Sun, label: 'Light' },
         { value: 'dark', icon: Moon, label: 'Dark' },

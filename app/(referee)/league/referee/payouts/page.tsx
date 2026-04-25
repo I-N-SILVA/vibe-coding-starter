@@ -12,7 +12,6 @@ import {
     StatCard,
     NavIcons,
 } from '@/components/plyaz';
-import { refereeNavItems } from '@/lib/constants/navigation';
 import { useMatches } from '@/lib/hooks';
 import { stagger, fadeUp } from '@/lib/animations';
 
@@ -23,7 +22,7 @@ export default function RefereePayoutsPage() {
     const pendingBalance = totalEarnings; // Simple logic for now
 
     return (
-        <PageLayout navItems={refereeNavItems} title="EARNINGS">
+        <PageLayout title="EARNINGS">
             <PageHeader
                 label="Referee Payouts"
                 title="Financial Overview"

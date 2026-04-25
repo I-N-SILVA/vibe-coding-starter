@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { PageLayout, PageHeader, Card, CardContent, Button, Badge, Modal } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { Copy, Check, Plus, Link2, RefreshCw, QrCode } from 'lucide-react';
 import { useToast } from '@/components/providers';
 import { QRCodeSVG } from 'qrcode.react';
@@ -87,7 +86,7 @@ export default function InviteCodesPage() {
     };
 
     return (
-        <PageLayout navItems={adminNavItems} title="INVITE CODES">
+        <PageLayout title="INVITE CODES">
             <PageHeader
                 label="Competition Access"
                 title="Invite Codes"

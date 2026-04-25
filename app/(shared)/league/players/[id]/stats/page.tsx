@@ -12,7 +12,6 @@ import {
 } from '@/components/plyaz';
 import { AnimatedCounter } from '@/components/plyaz/AnimatedCounter';
 import { PageLayout } from '@/components/plyaz/navigation/PageLayout';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUp } from '@/lib/animations';
 import { usePlayerCareerStats } from '@/lib/hooks';
 
@@ -57,7 +56,7 @@ export default function PlayerStatsPage() {
 
     if (isLoading) {
         return (
-            <PageLayout navItems={adminNavItems} title="Player Stats">
+            <PageLayout title="Player Stats">
                 <div className="animate-pulse space-y-4">
                     <div className="h-8 bg-gray-100 rounded w-1/3" />
                     <div className="grid grid-cols-4 gap-4">
@@ -71,7 +70,7 @@ export default function PlayerStatsPage() {
     }
 
     return (
-        <PageLayout navItems={adminNavItems} title="Player Stats">
+        <PageLayout title="Player Stats">
             <div className="space-y-6">
                 <PageHeader
                     label="Statistics"

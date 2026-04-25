@@ -14,7 +14,6 @@ import {
     NavIcons,
     StatCard,
 } from '@/components/plyaz';
-import { refereeNavItems } from '@/lib/constants/navigation';
 import { DiscoveryBoard } from '@/components/plyaz/DiscoveryBoard';
 import { useMatches } from '@/lib/hooks';
 import type { Match } from '@/lib/supabase/types';
@@ -78,7 +77,7 @@ export default function RefereeDashboard() {
     const isLoading = liveLoading || upcomingLoading;
 
     return (
-        <PageLayout navItems={refereeNavItems} title="REFEREE">
+        <PageLayout title="REFEREE">
             <PageHeader
                 label="Referee Panel"
                 title="My Dashboard"

@@ -13,7 +13,6 @@ import {
     EmptyState,
     NavIcons,
 } from '@/components/plyaz';
-import { publicNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUpLarge } from '@/lib/animations';
 
 interface PublicCompetition {
@@ -55,7 +54,7 @@ export default function PublicCompetitions() {
     };
 
     return (
-        <PageLayout navItems={publicNavItems} title="PLYAZ FAN">
+        <PageLayout title="PLYAZ FAN">
             <PageHeader label="Competitions" title="PLYAZ Leagues" />
             <div className="max-w-4xl mx-auto">
 

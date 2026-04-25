@@ -8,7 +8,6 @@ import {
     Badge,
     Button,
 } from '@/components/plyaz';
-import { coachNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUp } from '@/lib/animations';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useTeams } from '@/lib/hooks';
@@ -36,7 +35,7 @@ export default function CoachDashboard() {
     const managedTeam = (teams as Team[]).find(t => t.manager_id === profile?.id) || (teams[0] as Team); // Fallback to first team for demo
 
     return (
-        <PageLayout navItems={coachNavItems} title="COACH HUB">
+        <PageLayout title="COACH HUB">
             <PageHeader
                 label="Coaching Dashboard"
                 title={`${managedTeam?.name || MOCK_TEAM.name}`}

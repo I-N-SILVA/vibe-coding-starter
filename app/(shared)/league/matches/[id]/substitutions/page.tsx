@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageLayout, PageHeader, Card, CardContent, Button, Badge } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { ArrowLeftRight, Check, Clock, ChevronLeft } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -125,7 +124,7 @@ export default function SubstitutionsPage() {
     const isLoading = !match || playersLoading || !initialized;
 
     return (
-        <PageLayout navItems={adminNavItems} title="SUBS">
+        <PageLayout title="SUBS">
             <div className="max-w-2xl pb-24">
                 <button
                     onClick={() => router.back()}

@@ -3,7 +3,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { PageLayout, PageHeader, Button, Card, CardContent } from '@/components/plyaz';
-import { publicNavItems } from '@/lib/constants/navigation';
 
 const FAQS = [
   {
@@ -34,7 +33,7 @@ const FAQS = [
 
 export default function FAQPage() {
   return (
-    <PageLayout navItems={publicNavItems} title="SUPPORT PROTOCOL">
+    <PageLayout title="SUPPORT PROTOCOL">
       <PageHeader
         label="Support"
         title="Frequently Asked Questions"

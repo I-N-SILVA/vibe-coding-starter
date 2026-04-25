@@ -10,7 +10,6 @@ import {
     CardContent,
     Button,
 } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { useCompetition, useUpdateCompetition } from '@/lib/hooks';
 import { useInvites, useCreateInvite } from '@/lib/hooks';
 import { useToast } from '@/components/providers';
@@ -120,7 +119,7 @@ export default function CompetitionHubPage() {
 
     if (isLoading) {
         return (
-            <PageLayout navItems={adminNavItems} title="Competition">
+            <PageLayout title="Competition">
                 <div className="animate-pulse space-y-4">
                     <div className="h-8 bg-gray-100 rounded w-1/3" />
                     <div className="h-40 bg-gray-100 rounded" />
@@ -136,7 +135,7 @@ export default function CompetitionHubPage() {
 
     if (!competition) {
         return (
-            <PageLayout navItems={adminNavItems} title="Competition">
+            <PageLayout title="Competition">
                 <div className="py-24 text-center">
                     <p className="text-sm text-gray-400">Competition not found.</p>
                     <Button variant="secondary" className="mt-4" onClick={() => router.push('/league')}>
@@ -150,7 +149,7 @@ export default function CompetitionHubPage() {
     const isDraft = competition.status === 'draft';
 
     return (
-        <PageLayout navItems={adminNavItems} title={competition.name}>
+        <PageLayout title={competition.name}>
             <div className="space-y-8 max-w-2xl">
                 <PageHeader
                     label="Competition"

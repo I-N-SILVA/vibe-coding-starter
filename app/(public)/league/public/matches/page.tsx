@@ -15,7 +15,6 @@ import {
     Modal,
     NavIcons,
 } from '@/components/plyaz';
-import { publicNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUp } from '@/lib/animations';
 import type { Match } from '@/lib/supabase/types';
 import { PushSubscription } from '@/components/app/PushSubscription';
@@ -89,7 +88,7 @@ export default function PublicMatches() {
 
     if (error === 'SERVER_CONFIG_ERROR') {
         return (
-            <PageLayout navItems={publicNavItems} title="PLYAZ MATCHES">
+            <PageLayout title="PLYAZ MATCHES">
                 <div className="flex flex-col items-center justify-center py-32 text-center px-6">
                     <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center mb-8">
                         <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,7 +111,7 @@ export default function PublicMatches() {
     }
 
     return (
-        <PageLayout navItems={publicNavItems} title="PLYAZ MATCHES">
+        <PageLayout title="PLYAZ MATCHES">
             <PageHeader
                 label="Match Results"
                 title="Fixtures & Scores"

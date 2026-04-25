@@ -3,7 +3,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { PageLayout, Badge, Button } from '@/components/plyaz';
-import { playerNavItems } from '@/lib/constants/navigation';
 import { Share2, Download, ChevronLeft, Star, Zap, Target, Footprints, Shield, Dumbbell } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -116,7 +115,7 @@ export default function PlayerCardPage() {
     const player = MOCK_PLAYER;
 
     return (
-        <PageLayout navItems={playerNavItems} title="MY CARD">
+        <PageLayout title="MY CARD">
             <div className="max-w-md mx-auto pb-24">
                 {/* Back */}
                 <button

@@ -9,7 +9,6 @@ import {
     Input,
 } from '@/components/plyaz';
 import { PageLayout } from '@/components/plyaz/navigation/PageLayout';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { useToast } from '@/components/providers';
 
 interface Player {
@@ -57,7 +56,7 @@ export default function PlayersAdminPage() {
     });
 
     return (
-        <PageLayout navItems={adminNavItems} title="Players">
+        <PageLayout title="Players">
             <div className="space-y-6">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

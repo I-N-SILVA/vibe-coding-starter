@@ -11,7 +11,6 @@ import {
     SkeletonMatchCard,
     NavIcons,
 } from '@/components/plyaz';
-import { publicNavItems } from '@/lib/constants/navigation';
 import { subscribeToAllLiveMatches } from '@/lib/supabase/realtime';
 import type { Match } from '@/lib/supabase/types';
 
@@ -58,7 +57,7 @@ export default function PublicScoreboard() {
     const upcomingMatches = matches.filter(m => m.status === 'scheduled' || m.status === 'upcoming');
 
     return (
-        <PageLayout navItems={publicNavItems} title="PLYAZ LIVE">
+        <PageLayout title="PLYAZ LIVE">
             <PageHeader
                 label="Public Scoreboard"
                 title="Live Matches"

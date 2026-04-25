@@ -14,7 +14,6 @@ import {
     Select,
     Modal,
 } from '@/components/plyaz';
-import { playerNavItems } from '@/lib/constants/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useToast } from '@/components/providers/ToastProvider';
 import { useCompetitions } from '@/lib/hooks/use-competitions';
@@ -229,7 +228,7 @@ export default function PlayerRegistration() {
     };
 
     return (
-        <PageLayout navItems={playerNavItems} title="REGISTRATIONS">
+        <PageLayout title="REGISTRATIONS">
             <PageHeader
                 label="Registrations"
                 title="Available Competitions"

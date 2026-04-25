@@ -26,7 +26,6 @@ import {
     Select,
     SkeletonMatchCard,
 } from '@/components/plyaz';
-import { adminNavItems, adminNavGroups } from '@/lib/constants/navigation';
 import { useToast } from '@/components/providers';
 import { fadeUp } from '@/lib/animations';
 import { CheckCircle2, Circle, ArrowRight, Copy, Check, Link2, Zap } from 'lucide-react';
@@ -522,7 +521,7 @@ export default function AdminDashboard() {
     };
 
     return (
-        <PageLayout navItems={adminNavItems} navGroups={adminNavGroups} title="PLYAZ">
+        <PageLayout title="PLYAZ">
             {/* Header row */}
             <div className="flex items-center justify-between mb-6 md:mb-8 gap-3">
                 <div>

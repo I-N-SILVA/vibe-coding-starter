@@ -9,7 +9,6 @@ import {
     CardContent,
     Badge,
 } from '@/components/plyaz';
-import { publicNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUp } from '@/lib/animations';
 
 export default function PublicTeams() {
@@ -42,7 +41,7 @@ export default function PublicTeams() {
     }, []);
 
     return (
-        <PageLayout navItems={publicNavItems} title="PLYAZ TEAMS">
+        <PageLayout title="PLYAZ TEAMS">
             <PageHeader
                 label="Champions & Challengers"
                 title="League Teams"

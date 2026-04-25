@@ -12,7 +12,6 @@ import {
     PageHeader,
 } from '@/components/plyaz';
 import { PageLayout } from '@/components/plyaz/navigation/PageLayout';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { useToast } from '@/components/providers';
 import { useChampionshipConfig, useUpsertChampionshipConfig } from '@/lib/hooks';
 
@@ -86,7 +85,7 @@ export default function ChampionshipConfigPage() {
 
     if (isLoading) {
         return (
-            <PageLayout navItems={adminNavItems} title="Championship Config">
+            <PageLayout title="Championship Config">
                 <div className="animate-pulse space-y-4">
                     <div className="h-8 bg-gray-100 rounded w-1/3" />
                     <div className="h-64 bg-gray-100 rounded" />
@@ -96,7 +95,7 @@ export default function ChampionshipConfigPage() {
     }
 
     return (
-        <PageLayout navItems={adminNavItems} title="Championship Config">
+        <PageLayout title="Championship Config">
             <div className="space-y-6 max-w-2xl">
                 <PageHeader
                     label="Configuration"

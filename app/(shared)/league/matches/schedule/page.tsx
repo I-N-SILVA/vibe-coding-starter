@@ -14,7 +14,6 @@ import {
     Input,
     Select,
 } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { useToast } from '@/components/providers';
 import { leagueApi, teamsApi } from '@/lib/api';
 import { scheduleMatchAtSchema, type ScheduleMatchAtFormData } from '@/lib/validations';
@@ -123,7 +122,7 @@ export default function FixtureScheduler() {
         : teams;
 
     return (
-        <PageLayout navItems={adminNavItems} title="FIXTURES">
+        <PageLayout title="FIXTURES">
             <div className="max-w-2xl mx-auto">
                 <PageHeader label="Scheduler" title="New Match Fixture" />
 

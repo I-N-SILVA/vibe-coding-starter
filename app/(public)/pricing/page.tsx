@@ -3,7 +3,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { PageLayout, PageHeader, Button } from '@/components/plyaz';
-import { publicNavItems } from '@/lib/constants/navigation';
 import { useOrganization } from '@/lib/hooks';
 import { toast } from 'sonner';
 
@@ -90,7 +89,7 @@ export default function PricingPage() {
   };
 
   return (
-    <PageLayout navItems={publicNavItems} title="PRICING PROTOCOL">
+    <PageLayout title="PRICING PROTOCOL">
       <PageHeader
         label="Pricing"
         title="Invest in the Next Level"

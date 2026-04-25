@@ -12,7 +12,6 @@ import {
     NavIcons,
 } from '@/components/plyaz';
 import { PageLayout } from '@/components/plyaz/navigation/PageLayout';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { useToast } from '@/components/providers';
 import { stagger, fadeUp } from '@/lib/animations';
 import { useGroups, useCreateGroup, useExecuteDraw } from '@/lib/hooks';
@@ -63,7 +62,7 @@ export default function DrawPage() {
     };
 
     return (
-        <PageLayout navItems={adminNavItems} title="Draw">
+        <PageLayout title="Draw">
             <div className="space-y-6">
                 <PageHeader
                     label="Championship"

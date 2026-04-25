@@ -1,6 +1,8 @@
 import { ReactNode, Suspense } from 'react';
 import { Skeleton } from '@/components/plyaz/Skeleton';
 import { AuthGuard } from '@/lib/auth/AuthGuard';
+import { DashboardShell } from '@/components/plyaz/navigation/DashboardShell';
+import { refereeNavItems } from '@/lib/constants/navigation';
 
 export default function RefereeLayout({ children }: { children: ReactNode }) {
     return (
@@ -11,7 +13,9 @@ export default function RefereeLayout({ children }: { children: ReactNode }) {
             </div>
         }>
             <AuthGuard roles={['referee']}>
-                {children}
+                <DashboardShell navItems={refereeNavItems}>
+                    {children}
+                </DashboardShell>
             </AuthGuard>
         </Suspense>
     );

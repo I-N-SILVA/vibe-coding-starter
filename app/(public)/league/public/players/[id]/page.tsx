@@ -9,7 +9,6 @@ import {
     StatCard,
     Badge,
 } from '@/components/plyaz';
-import { publicNavItems } from '@/lib/constants/navigation';
 import { usePlayer, usePlayerCareerStats } from '@/lib/hooks/use-players';
 import { useTeam } from '@/lib/hooks/use-teams';
 import { Instagram, Twitter, Linkedin } from 'lucide-react';
@@ -59,7 +58,6 @@ export default function PublicPlayerProfile() {
 
     return (
         <PageLayout
-            navItems={publicNavItems}
             title={player.name}
             showBackButton
             onBackClick={() => router.back()}

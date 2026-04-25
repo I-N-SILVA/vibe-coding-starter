@@ -14,7 +14,6 @@ import {
     NavIcons,
     SkeletonMatchCard,
 } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { generateRoundRobin, generateKnockout, type GeneratedFixture } from '@/lib/utils/fixture-generator';
 import { useToast } from '@/components/providers';
 import { useTeams, useCompetitions } from '@/lib/hooks';
@@ -91,7 +90,7 @@ export default function FixturesPage() {
     const isLoading = compsLoading || teamsLoading;
 
     return (
-        <PageLayout navItems={adminNavItems} title="Fixtures Manager">
+        <PageLayout title="Fixtures Manager">
             <PageHeader label="Competition Management" title="Generate Schedule" />
 
             <motion.div

@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageLayout, Badge, Button, Card, CardContent } from '@/components/plyaz';
-import { playerNavItems } from '@/lib/constants/navigation';
 import { MapPin, Clock, Calendar, ChevronLeft, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -34,7 +33,7 @@ export default function ConvocationPage() {
     const status = STATUS_CONFIG[MOCK_CONVOCATION.status];
 
     return (
-        <PageLayout navItems={playerNavItems} title="MATCH DAY">
+        <PageLayout title="MATCH DAY">
             <div className="max-w-md mx-auto pb-24">
                 {/* Back */}
                 <button

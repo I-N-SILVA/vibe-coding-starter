@@ -31,6 +31,7 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
     const dialogRef = useRef<HTMLDivElement>(null);
     const previousFocusRef = useRef<HTMLElement | null>(null);
+    const wasOpenRef = useRef(false);
 
     // Focus trap: keep focus inside modal
     const handleKeyDown = useCallback(
@@ -66,26 +67,33 @@ const Modal: React.FC<ModalProps> = ({
 
     useEffect(() => {
         if (isOpen) {
-            previousFocusRef.current = document.activeElement as HTMLElement;
+            if (!wasOpenRef.current) {
+                previousFocusRef.current = document.activeElement as HTMLElement;
+                // Focus first focusable element inside modal
+                requestAnimationFrame(() => {
+                    const dialog = dialogRef.current;
+                    if (dialog) {
+                        const firstFocusable = dialog.querySelector<HTMLElement>(
+                            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                        );
+                        firstFocusable?.focus();
+                    }
+                });
+            }
             document.addEventListener('keydown', handleKeyDown);
-            // Focus first focusable element inside modal
-            requestAnimationFrame(() => {
-                const dialog = dialogRef.current;
-                if (dialog) {
-                    const firstFocusable = dialog.querySelector<HTMLElement>(
-                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-                    );
-                    firstFocusable?.focus();
+            wasOpenRef.current = true;
+        } else {
+            if (wasOpenRef.current) {
+                // Restore focus when modal closes
+                if (previousFocusRef.current) {
+                    previousFocusRef.current.focus();
                 }
-            });
+            }
+            wasOpenRef.current = false;
         }
 
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
-            // Restore focus when modal closes
-            if (previousFocusRef.current) {
-                previousFocusRef.current.focus();
-            }
         };
     }, [isOpen, handleKeyDown]);
 

@@ -10,7 +10,6 @@ import {
     NavIcons,
     SkeletonMatchCard,
 } from '@/components/plyaz';
-import { publicNavItems } from '@/lib/constants/navigation';
 import { cn } from '@/lib/utils';
 import { stagger, fadeUpLarge } from '@/lib/animations';
 import type { Team, Player, Match } from '@/lib/supabase/types';
@@ -45,7 +44,7 @@ export default function TeamProfile() {
 
     if (notFound) {
         return (
-            <PageLayout navItems={publicNavItems} title="Team Not Found" showBackButton onBackClick={() => router.back()}>
+            <PageLayout title="Team Not Found" showBackButton onBackClick={() => router.back()}>
                 <EmptyState
                     icon={<NavIcons.Teams />}
                     title="Team Not Found"
@@ -57,7 +56,7 @@ export default function TeamProfile() {
 
     if (isLoading) {
         return (
-            <PageLayout navItems={publicNavItems} title="Loading..." showBackButton onBackClick={() => router.back()}>
+            <PageLayout title="Loading..." showBackButton onBackClick={() => router.back()}>
                 <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
                         <div key={i} className="h-20 bg-gray-50 rounded-2xl animate-pulse" />
@@ -69,7 +68,7 @@ export default function TeamProfile() {
 
     if (!profileData) {
         return (
-            <PageLayout navItems={publicNavItems} title="Error" showBackButton onBackClick={() => router.back()}>
+            <PageLayout title="Error" showBackButton onBackClick={() => router.back()}>
                 <EmptyState
                     icon={<NavIcons.Teams />}
                     title="Could not load team"
@@ -96,7 +95,6 @@ export default function TeamProfile() {
 
     return (
         <PageLayout
-            navItems={publicNavItems}
             title={team.name}
             showBackButton
             onBackClick={() => router.back()}

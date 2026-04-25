@@ -9,7 +9,6 @@ import {
     Card,
     KnockoutBracket
 } from '@/components/plyaz';
-import { publicNavItems } from '@/lib/constants/navigation';
 import { cn } from '@/lib/utils';
 import { Trophy, LayoutGrid, List } from 'lucide-react';
 import { MOCK_STANDINGS, MOCK_BRACKET } from '@/lib/mock/fixtures';
@@ -35,7 +34,7 @@ export default function PublicStandings() {
     }, [competitionId]);
 
     return (
-        <PageLayout navItems={publicNavItems} title="PLYAZ PULSE">
+        <PageLayout title="PLYAZ PULSE">
             <PageHeader
                 label={format === 'league' ? "League Table" : "Tournament Bracket"}
                 title="Pulse Rankings"

@@ -1,6 +1,7 @@
 import { ReactNode, Suspense } from 'react';
 import { Skeleton } from '@/components/plyaz/Skeleton';
 import { AuthGuard } from '@/lib/auth/AuthGuard';
+import { DynamicDashboardShell } from '@/components/plyaz/navigation/DynamicDashboardShell';
 
 export default function SharedLayout({ children }: { children: ReactNode }) {
     return (
@@ -11,7 +12,9 @@ export default function SharedLayout({ children }: { children: ReactNode }) {
             </div>
         }>
             <AuthGuard roles={['organizer', 'admin', 'player', 'referee', 'manager', 'coach']}>
-                {children}
+                <DynamicDashboardShell>
+                    {children}
+                </DynamicDashboardShell>
             </AuthGuard>
         </Suspense>
     );

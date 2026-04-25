@@ -16,7 +16,6 @@ import {
     MatchDayMultiBoard,
     SocialTicker
 } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { generateMatchReport } from '@/lib/utils/pdf-generator';
 import { triggerHaptic } from '@/lib/utils';
 import { mapMatchToUI } from '@/lib/mappers';
@@ -54,7 +53,7 @@ export default function AdminMatches() {
         }));
 
     return (
-        <PageLayout navItems={adminNavItems} title="MATCHES">
+        <PageLayout title="MATCHES">
             <PageHeader
                 label="Management"
                 title="Schedule & Results"

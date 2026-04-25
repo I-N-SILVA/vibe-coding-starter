@@ -14,7 +14,6 @@ import {
     NavIcons,
 } from '@/components/plyaz';
 import { PageLayout } from '@/components/plyaz/navigation/PageLayout';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { useToast } from '@/components/providers';
 import { stagger, fadeUp } from '@/lib/animations';
 import { useVenues, useCreateVenue, useDeleteVenue } from '@/lib/hooks';
@@ -80,7 +79,7 @@ export default function VenuesPage() {
     };
 
     return (
-        <PageLayout navItems={adminNavItems} title="Venues">
+        <PageLayout title="Venues">
             <div className="space-y-6">
                 <PageHeader
                     label="Management"

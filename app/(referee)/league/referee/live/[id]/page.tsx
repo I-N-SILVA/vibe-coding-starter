@@ -14,7 +14,6 @@ import {
     Modal,
     Input
 } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { triggerHaptic } from '@/lib/utils';
 
@@ -379,7 +378,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
     const pendingCount = eventQueue.filter(e => e.status === 'pending').length;
 
     return (
-        <PageLayout navItems={adminNavItems} title="MATCH CONTROL">
+        <PageLayout title="MATCH CONTROL">
             {/* High-Contrast Scoreboard */}
             <div className="sticky top-0 z-30 -mx-4 px-4 py-6 bg-black text-white shadow-2xl border-b border-orange-500/20 relative">
                 <div className="flex items-center justify-between max-w-lg mx-auto">

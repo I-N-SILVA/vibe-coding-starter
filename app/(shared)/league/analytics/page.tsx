@@ -81,7 +81,7 @@ export default function AnalyticsDashboard() {
     ];
 
     return (
-        <PageLayout navItems={getNavItems()} title="Analytics Dashboard">
+        <PageLayout title="Analytics Dashboard">
             <PageHeader
                 label="Performance Insights"
                 title="League Statistics"

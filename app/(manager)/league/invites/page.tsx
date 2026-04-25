@@ -13,7 +13,6 @@ import {
 } from '@/components/plyaz';
 import { PageLayout } from '@/components/plyaz/navigation/PageLayout';
 import { NavIcons } from '@/components/plyaz';
-import { adminNavItems } from '@/lib/constants/navigation';
 import { useInvites, useCreateInvite } from '@/lib/hooks';
 import { useToast } from '@/components/providers';
 import { stagger, fadeUp } from '@/lib/animations';
@@ -110,7 +109,7 @@ export default function InvitesPage() {
     };
 
     return (
-        <PageLayout navItems={adminNavItems} title="Invites">
+        <PageLayout title="Invites">
             <div className="space-y-6">
                 <PageHeader
                     label="Management"
