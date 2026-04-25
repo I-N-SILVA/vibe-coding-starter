@@ -9,14 +9,17 @@ import type { CreateTeamDto } from '@/types';
 import type { Team } from '@/lib/supabase/types';
 
 function toApiTeamDto(data: CreateTeamDto) {
-    return {
+    const dto: Record<string, any> = {
         name: data.name,
         short_name: data.short_name ?? data.shortName,
         competition_id: data.competition_id ?? data.competitionId,
-        logo_url: data.logoUrl,
-        primary_color: data.primary_color ?? data.primaryColor,
-        secondary_color: data.secondary_color ?? data.secondaryColor,
     };
+
+    if (data.logoUrl) dto.logo_url = data.logoUrl;
+    if (data.primaryColor || data.primary_color) dto.primary_color = data.primaryColor ?? data.primary_color;
+    if (data.secondaryColor || data.secondary_color) dto.secondary_color = data.secondaryColor ?? data.secondary_color;
+
+    return dto;
 }
 
 export function useTeams(competitionId?: string) {

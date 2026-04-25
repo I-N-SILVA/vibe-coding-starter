@@ -12,11 +12,11 @@ import { z } from 'zod';
 
 export const createTeamApiSchema = z.object({
     name: z.string().min(1, 'Team name is required').max(100),
-    short_name: z.string().max(10).optional(),
+    short_name: z.string().max(10).optional().nullable().or(z.literal('')),
     competition_id: z.string().uuid('Invalid competition ID').optional().nullable(),
-    primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color').optional(),
-    secondary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color').optional(),
-    logo_url: z.string().url().optional().nullable(),
+    primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color').optional().nullable().or(z.literal('')),
+    secondary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color').optional().nullable().or(z.literal('')),
+    logo_url: z.string().url().optional().nullable().or(z.literal('')),
     manager_id: z.string().uuid().optional().nullable(),
     is_recruiting_players: z.boolean().optional(),
     needed_positions: z.array(z.string()).optional(),

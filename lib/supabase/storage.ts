@@ -11,22 +11,32 @@ const supabase = createClient();
  * @returns The public URL of the uploaded image
  */
 export async function uploadImage(file: File, bucket: string, path: string): Promise<string> {
-    // 1. Upload the file
-    const { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(path, file, {
-            upsert: true,
-            contentType: file.type,
-        });
+    try {
+        // 1. Upload the file
+        const { data, error: uploadError } = await supabase.storage
+            .from(bucket)
+            .upload(path, file, {
+                upsert: true,
+                contentType: file.type,
+            });
 
-    if (uploadError) {
-        throw new Error(`Upload failed: ${uploadError.message}`);
+        if (uploadError) {
+            console.error('Supabase Storage Error:', uploadError);
+            throw new Error(`Upload failed: ${uploadError.message}. Ensure the "${bucket}" bucket exists and is public.`);
+        }
+
+        if (!data) {
+            throw new Error('Upload failed: No data returned from Supabase');
+        }
+
+        // 2. Get the public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from(bucket)
+            .getPublicUrl(path);
+
+        return publicUrl;
+    } catch (err) {
+        console.error('Storage Utility Catch:', err);
+        throw err;
     }
-
-    // 2. Get the public URL
-    const { data: { publicUrl } } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(path);
-
-    return publicUrl;
 }
