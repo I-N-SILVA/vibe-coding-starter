@@ -62,6 +62,7 @@ export interface CreateCompetitionDto {
     name: string;
     description?: string;
     type: 'league' | 'knockout' | 'group_knockout';
+    status?: string;
     season?: string;
     seasonYear?: string;
     startDate?: Date | string;

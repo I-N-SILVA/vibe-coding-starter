@@ -31,12 +31,13 @@ import { useToast } from '@/components/providers';
 import { fadeUp } from '@/lib/animations';
 import { CheckCircle2, Circle, ArrowRight, Copy, Check, Link2, Zap } from 'lucide-react';
 import type { Competition } from '@/types';
+import type { MatchStatus } from '@/types/models';
 
 // ─── Setup Checklist ──────────────────────────────────────────────────────────
 
 function SetupChecklist({ competitionId }: { competitionId: string | null }) {
     const router = useRouter();
-    const { steps, completed, total, percentage, nextStep, primaryComp } = useSetupChecklist(competitionId);
+    const { steps, completed, total, percentage, nextStep } = useSetupChecklist(competitionId);
     const toast = useToast();
     const createInvite = useCreateInvite();
     const [freshLink, setFreshLink] = useState<string | null>(null);
@@ -373,7 +374,7 @@ function OperationsDashboard({
                 ) : (liveMatches as unknown[]).length > 0 ? (
                     <div className="space-y-3">
                         {(liveMatches as Parameters<typeof MatchCard>[0]['homeTeam'][]).slice(0, 3).map((match) => {
-                            const m = match as Record<string, unknown>;
+                            const m = match as unknown as Record<string, unknown>;
                             return (
                                 <MatchCard
                                     key={m.id as string}
@@ -381,7 +382,7 @@ function OperationsDashboard({
                                     awayTeam={(m.away_team as { id: string; name: string }) ?? { id: m.away_team_id as string ?? '', name: 'Away' }}
                                     homeScore={m.home_score as number}
                                     awayScore={m.away_score as number}
-                                    status={m.status as string}
+                                    status={m.status as MatchStatus}
                                     matchTime={m.match_time as string ?? undefined}
                                     onPress={() => router.push(`/league/referee/live/${m.id as string}`)}
                                 />
@@ -418,7 +419,7 @@ function OperationsDashboard({
                                     key={match.id as string}
                                     homeTeam={(match.home_team as { id: string; name: string }) ?? { id: match.home_team_id as string ?? '', name: 'Home' }}
                                     awayTeam={(match.away_team as { id: string; name: string }) ?? { id: match.away_team_id as string ?? '', name: 'Away' }}
-                                    status={match.status as string}
+                                    status={match.status as MatchStatus}
                                     matchTime={match.match_time as string ?? undefined}
                                     date={match.scheduled_at ? new Date(match.scheduled_at as string).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'TBD'}
                                     venue={match.venue as string ?? undefined}
@@ -583,9 +584,9 @@ export default function AdminDashboard() {
             {!compsLoading && hasActive && (
                 <OperationsDashboard
                     competitions={compsArray}
-                    liveMatches={liveMatches as Competition[]}
-                    upcomingMatches={upcomingMatches as Competition[]}
-                    teams={teams as Competition[]}
+                    liveMatches={liveMatches as unknown as Competition[]}
+                    upcomingMatches={upcomingMatches as unknown as Competition[]}
+                    teams={teams as unknown as Competition[]}
                     pendingInvites={pendingInvites}
                     isLoading={isLoading}
                 />
