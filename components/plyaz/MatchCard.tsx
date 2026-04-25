@@ -112,7 +112,7 @@ const MatchCard = React.forwardRef<HTMLDivElement, MatchCardProps>(
                     </div>
 
                     {/* Score / Time */}
-                    <div className="text-center px-6">
+                    <div className={cn("text-center px-6 transition-all duration-500", isLive && hasScore && "animate-heartbeat text-primary")}>
                         {hasScore ? (
                             <div className="flex items-center gap-3">
                                 <span className="text-4xl font-bold text-neutral-900 dark:text-white tracking-tighter">

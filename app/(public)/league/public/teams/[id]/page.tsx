@@ -104,9 +104,12 @@ export default function TeamProfile() {
         >
             {/* Hero Section */}
             <div className="relative -mx-4 md:-mx-8 -mt-8 mb-16 overflow-hidden min-h-[40vh] flex items-end">
-                <div className="absolute inset-0 bg-primary-main">
+                <div 
+                    className="absolute inset-0"
+                    style={{ backgroundColor: team.primary_color || 'var(--primary-main)' }}
+                >
                     <div className="absolute inset-0 opacity-20 bg-[url('/static/branding/pattern.png')] bg-repeat mix-blend-overlay" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-surface-elevated via-primary-main/80 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-surface-elevated via-transparent to-transparent" />
                 </div>
 
                 <div className="absolute -right-20 -bottom-20 w-[60vh] h-[60vh] opacity-[0.03] select-none pointer-events-none">
@@ -122,7 +125,10 @@ export default function TeamProfile() {
                         transition={{ duration: 0.7 }}
                         className="max-w-7xl mx-auto flex flex-col md:flex-row items-end gap-8"
                     >
-                        <div className="w-32 h-32 md:w-48 md:h-48 rounded-3xl bg-surface-elevated shadow-2xl border-4 border-surface-elevated flex items-center justify-center text-5xl md:text-7xl font-black text-primary-main relative overflow-hidden group">
+                        <div 
+                            className="w-32 h-32 md:w-48 md:h-48 rounded-3xl bg-surface-elevated shadow-2xl border-4 flex items-center justify-center text-5xl md:text-7xl font-black relative overflow-hidden group"
+                            style={{ borderColor: team.primary_color || 'var(--primary-main)', color: team.primary_color || 'var(--primary-main)' }}
+                        >
                             <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-300" />
                             {team.logo_url ? (
                                 // eslint-disable-next-line @next/next/no-img-element

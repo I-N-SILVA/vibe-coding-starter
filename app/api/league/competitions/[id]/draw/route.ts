@@ -82,14 +82,13 @@ export async function POST(request: Request, { params }: RouteParams) {
         return apiError('No teams found for this competition', 400);
     }
 
-    // Shuffle teams randomly
-    const shuffled = [...teams].sort(() => Math.random() - 0.5);
+    const { randomDraw } = await import('@/lib/domain/draw-engine');
+    const drawResults = randomDraw(teams, groupIds.length);
 
-    // Distribute teams across groups in round-robin fashion
-    const rows = shuffled.map((team, index) => ({
-        team_id: team.id,
-        group_id: groupIds[index % groupIds.length],
-        seed: Math.floor(index / groupIds.length) + 1,
+    const rows = drawResults.map((result) => ({
+        team_id: result.teamId,
+        group_id: groupIds[result.groupIndex],
+        seed: 1, // Default seed for random draw
     }));
 
     const { error: insertError } = await supabase

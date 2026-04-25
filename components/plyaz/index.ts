@@ -35,7 +35,10 @@ export { EmptyState } from './EmptyState';
 export { TabPills } from './TabPills';
 export { CompetitionSelector } from './CompetitionSelector';
 export { KnockoutBracket } from './KnockoutBracket';
+export { MatchDayMultiBoard } from './MatchDayMultiBoard';
+export { SocialTicker } from './SocialTicker';
 export { SimulationBanner } from './SimulationBanner';
+export { AnimatedCounter } from './AnimatedCounter';
 export {
     Skeleton,
     SkeletonStatCard,

@@ -42,13 +42,19 @@ export default function PublicPlayerProfile() {
     }
 
     // Map stats for the Ultimate card
+    const calculateRating = () => {
+        if (!careerStats) return 75;
+        const total = (careerStats.goals || 0) * 5 + (careerStats.assists || 0) * 3 + (careerStats.games_played || 0) * 2;
+        return Math.min(99, 70 + Math.floor(total / 5));
+    };
+
     const cardStats = [
-        { label: 'PAC', value: 85 },
-        { label: 'SHO', value: 88 },
-        { label: 'PAS', value: 78 },
-        { label: 'DRI', value: 82 },
-        { label: 'DEF', value: 42 },
-        { label: 'PHY', value: 75 }
+        { label: 'GOL', value: careerStats?.goals || 0 },
+        { label: 'AST', value: careerStats?.assists || 0 },
+        { label: 'APP', value: careerStats?.games_played || 0 },
+        { label: 'YEL', value: careerStats?.yellow_cards || 0 },
+        { label: 'RED', value: careerStats?.red_cards || 0 },
+        { label: 'MIN', value: Math.floor((careerStats?.minutes_played || 0) / 90) }
     ];
 
     return (
@@ -60,32 +66,38 @@ export default function PublicPlayerProfile() {
             className="bg-surface-elevated"
         >
             {/* Dynamic Background */}
-            <div className="absolute top-0 left-0 right-0 h-[50vh] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 -z-10 overflow-hidden">
-                <div className="absolute inset-0 bg-[url('/static/branding/pattern.png')] bg-repeat opacity-5 mix-blend-overlay" />
-                <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-accent-main/10 rounded-full blur-[100px] -mr-20 -mt-20" />
-                <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-surface-elevated to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-[60vh] -z-10 overflow-hidden" 
+                 style={{ backgroundColor: team?.primary_color || '#111827' }}>
+                <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/40 to-black/80" />
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay" />
+                <div className="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-surface-elevated via-surface-elevated/80 to-transparent" />
             </div>
 
             <div className="max-w-6xl mx-auto pt-8">
                 <div className="grid lg:grid-cols-12 gap-8 lg:gap-16">
 
                     {/* Left Column: The Card (Centerpiece) */}
-                    <div className="lg:col-span-5 flex flex-col items-center lg:items-start">
+                    <div className="lg:col-span-5 flex flex-col items-center lg:items-center">
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
+                            transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
                             className="w-full max-w-sm relative group"
                         >
-                            <div className="absolute inset-0 bg-accent-main/20 blur-2xl rounded-full scale-90 group-hover:scale-100 transition-transform duration-700 -z-10" />
+                            <div 
+                                className="absolute inset-0 blur-[120px] rounded-full scale-90 group-hover:scale-110 transition-transform duration-1000 -z-10 opacity-30" 
+                                style={{ backgroundColor: team?.primary_color || '#F97316' }}
+                            />
                             <UltimatePlayerCard
                                 name={player.name}
                                 position={player.position || 'ST'}
                                 number={player.jersey_number || 0}
-                                overallRating={88} // Mock rating if not in DB
+                                overallRating={calculateRating()}
                                 stats={cardStats}
+                                teamColor={team?.primary_color}
                                 variant="special"
-                                className="shadow-2xl shadow-black/50 border-4 border-gray-800/50"
+                                showActions
+                                className="shadow-2xl shadow-black/80"
                             />
                         </motion.div>
 

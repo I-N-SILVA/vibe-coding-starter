@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import anime from 'animejs';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, Button } from '@/components/plyaz';
 import { Trophy, Maximize2, Minimize2, MousePointer2 } from 'lucide-react';
@@ -31,12 +32,31 @@ interface KnockoutBracketProps {
 
 export const KnockoutBracket: React.FC<KnockoutBracketProps> = ({ rounds, onMatchClick }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const bracketRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!bracketRef.current) return;
+        
+        anime({
+            targets: bracketRef.current.querySelectorAll('.bracket-line'),
+            scaleX: [0, 1],
+            scaleY: [0, 1],
+            opacity: [0, 1],
+            transformOrigin: ['0% 50%', '0% 0%'],
+            duration: 1200,
+            delay: anime.stagger(150, { start: 300 }),
+            easing: 'easeOutExpo'
+        });
+    }, [isExpanded, rounds]); // Re-animate if opened in modal or rounds change
 
     const BracketContent = ({ expanded = false }: { expanded?: boolean }) => (
-        <div className={cn(
-            "flex gap-12 pt-8 px-4 hide-scrollbar",
-            expanded ? "min-w-max pb-32" : "overflow-x-auto pb-12"
-        )}>
+        <div 
+            ref={expanded ? undefined : bracketRef}
+            className={cn(
+                "flex gap-12 pt-8 px-4 hide-scrollbar",
+                expanded ? "min-w-max pb-32" : "overflow-x-auto pb-12"
+            )}
+        >
             {rounds.map((round, roundIdx) => (
                 <div key={round.round} className="flex flex-col gap-8 min-w-[280px]">
                     {/* Round Header */}
@@ -53,7 +73,7 @@ export const KnockoutBracket: React.FC<KnockoutBracketProps> = ({ rounds, onMatc
                             <div key={matchup.id} className="relative flex items-center py-4">
                                 {/* Connecting Lines (except for first round) */}
                                 {roundIdx > 0 && (
-                                    <div className="absolute -left-12 w-12 h-0.5 bg-neutral-200 dark:bg-neutral-800" />
+                                    <div className="bracket-line absolute -left-12 w-12 h-0.5 bg-neutral-200 dark:bg-neutral-800 origin-left" />
                                 )}
 
                                 <motion.div
@@ -119,7 +139,7 @@ export const KnockoutBracket: React.FC<KnockoutBracketProps> = ({ rounds, onMatc
                                 {/* Forward Connecting Lines (except for last round) */}
                                 {roundIdx < rounds.length - 1 && (
                                     <div className={cn(
-                                        "absolute -right-12 w-12 border-neutral-200 dark:border-neutral-800",
+                                        "bracket-line absolute -right-12 w-12 border-neutral-200 dark:border-neutral-800 origin-left",
                                         matchIdx % 2 === 0
                                             ? "h-1/2 border-t-2 border-r-2 top-1/2 rounded-tr-xl"
                                             : "h-1/2 border-b-2 border-r-2 bottom-1/2 rounded-br-xl"

@@ -227,6 +227,16 @@ module.exports = {
             transform: 'rotate(-.5deg)',
           },
         },
+        heartbeat: {
+          '0%, 100%': {
+            transform: 'scale(1)',
+            textShadow: '0 0 0 rgba(249, 115, 22, 0)'
+          },
+          '50%': {
+            transform: 'scale(1.05)',
+            textShadow: '0 0 15px rgba(249, 115, 22, 0.6)'
+          },
+        },
         marquee: {
           '0%': {
             transform: 'translateX(0)',

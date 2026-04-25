@@ -4,10 +4,11 @@ import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { PageLayout, PageHeader, Card, CardContent, Button, Badge } from '@/components/plyaz';
+import { PageLayout, PageHeader, Card, CardContent, Button, Badge, Modal } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
-import { Copy, Check, Plus, Link2, RefreshCw } from 'lucide-react';
+import { Copy, Check, Plus, Link2, RefreshCw, QrCode } from 'lucide-react';
 import { useToast } from '@/components/providers';
+import { QRCodeSVG } from 'qrcode.react';
 
 /**
  * Competition Invite Code Generator
@@ -50,6 +51,11 @@ export default function InviteCodesPage() {
     const toast = useToast();
     const [codeType, setCodeType] = useState<'team' | 'player'>('team');
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [qrCodeState, setQrCodeState] = useState<{ open: boolean; url: string; code: string }>({
+        open: false,
+        url: '',
+        code: '',
+    });
 
     const { data: rawCodes = [], isLoading } = useQuery({
         queryKey: ['codes', id],
@@ -159,6 +165,15 @@ export default function InviteCodesPage() {
                                                 <div className="flex items-center gap-3">
                                                     <span className="font-mono text-lg font-black text-gray-900 tracking-wider">{code.code}</span>
                                                     <button
+                                                        onClick={() => {
+                                                            const url = `${window.location.origin}/invites/accept?token=${code.code}`;
+                                                            setQrCodeState({ open: true, url, code: code.code });
+                                                        }}
+                                                        className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                                                    >
+                                                        <QrCode className="w-4 h-4 text-gray-400" />
+                                                    </button>
+                                                    <button
                                                         onClick={() => handleCopy(code)}
                                                         className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
                                                     >
@@ -204,6 +219,33 @@ export default function InviteCodesPage() {
                     </Button>
                 </div>
             </div>
+
+            {/* QR Modal */}
+            <Modal
+                isOpen={qrCodeState.open}
+                onClose={() => setQrCodeState({ ...qrCodeState, open: false })}
+                title="Share Access"
+            >
+                <div className="flex flex-col items-center py-6 gap-6">
+                    <div className="p-4 bg-white rounded-3xl border shadow-xl">
+                        <QRCodeSVG value={qrCodeState.url} size={200} fgColor="#F97316" />
+                    </div>
+                    <div className="text-center">
+                        <p className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Invite Link</p>
+                        <p className="text-sm font-mono text-gray-500 break-all px-6">{qrCodeState.url}</p>
+                    </div>
+                    <Button 
+                        fullWidth 
+                        onClick={() => {
+                            navigator.clipboard.writeText(qrCodeState.url);
+                            toast.success('Link copied');
+                        }}
+                        className="bg-black text-white"
+                    >
+                        Copy Link
+                    </Button>
+                </div>
+            </Modal>
         </PageLayout>
     );
 }

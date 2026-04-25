@@ -14,9 +14,11 @@ import {
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
 import { cn } from '@/lib/utils';
+import { mapStandingsToUI } from '@/lib/mappers';
 
 type StandingsRow = {
     rank: number;
+    teamId: string;
     team: string;
     shortName: string;
     played: number;
@@ -44,29 +46,18 @@ export default function AdminStandings() {
     }, [competitions, selectedComp]);
 
     const standings: StandingsRow[] = Array.isArray(fetchedStandings)
-        ? (fetchedStandings as Array<{
-            id: string;
-            played: number;
-            won: number;
-            drawn: number;
-            lost: number;
-            goals_for: number;
-            goals_against: number;
-            goal_difference: number;
-            points: number;
-            form: string[];
-            team?: { id: string; name: string; short_name: string };
-          }>).map((entry, idx) => ({
+        ? fetchedStandings.map(mapStandingsToUI).map((entry, idx) => ({
             rank: idx + 1,
+            teamId: entry.teamId,
             team: entry.team?.name ?? '',
-            shortName: entry.team?.short_name ?? '',
+            shortName: entry.team?.shortName ?? '',
             played: entry.played,
             won: entry.won,
             drawn: entry.drawn,
             lost: entry.lost,
-            gf: entry.goals_for,
-            ga: entry.goals_against,
-            gd: entry.goal_difference,
+            gf: entry.gf,
+            ga: entry.ga,
+            gd: entry.gd,
             points: entry.points,
             form: entry.form ?? [],
           }))
@@ -158,26 +149,48 @@ export default function AdminStandings() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {standings.map((row, idx) => (
-                                        <motion.tr
-                                            key={`${row.team}-${row.rank}`}
-                                            initial={{ opacity: 0, x: -8 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: idx * 0.04, duration: 0.3 }}
-                                            className={cn(
-                                                'border-b border-neutral-100 dark:border-neutral-800 last:border-0 hover:bg-primary/[0.02] transition-colors',
-                                                row.rank <= 3 && 'border-l-2 border-l-primary'
-                                            )}
-                                        >
-                                            <td className="px-4 py-5 text-sm font-bold text-muted-foreground text-center">{row.rank}</td>
-                                            <td className="px-4 py-5">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-slate-900 dark:bg-white flex items-center justify-center text-[10px] font-bold text-white dark:text-slate-900">
-                                                        {row.shortName}
+                                    {standings.map((row, idx) => {
+                                        const isPromotion = row.rank <= 2;
+                                        const isRelegation = row.rank > standings.length - 2 && standings.length > 4;
+                                        
+                                        return (
+                                            <motion.tr
+                                                key={row.teamId}
+                                                initial={{ opacity: 0, x: -8 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: idx * 0.04, duration: 0.3 }}
+                                                className={cn(
+                                                    'border-b border-neutral-100 dark:border-neutral-800 last:border-0 hover:bg-primary/[0.02] transition-all duration-500 relative',
+                                                    isPromotion && 'bg-emerald-500/[0.03] border-l-4 border-l-emerald-500 shadow-[inset_10px_0_20px_-10px_rgba(16,185,129,0.1)]',
+                                                    isRelegation && 'bg-rose-500/[0.03] border-l-4 border-l-rose-500 shadow-[inset_10px_0_20px_-10px_rgba(244,63,94,0.1)]',
+                                                    !isPromotion && !isRelegation && row.rank <= 3 && 'border-l-2 border-l-primary'
+                                                )}
+                                            >
+                                                <td className="px-4 py-5 text-sm font-bold text-muted-foreground text-center">
+                                                    <div className="flex flex-col items-center gap-0.5">
+                                                        <span>{row.rank}</span>
+                                                        {isPromotion && <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />}
+                                                        {isRelegation && <div className="w-1 h-1 rounded-full bg-rose-500 animate-pulse" />}
                                                     </div>
-                                                    <span className="text-sm font-semibold text-foreground tracking-tight">{row.team}</span>
-                                                </div>
-                                            </td>
+                                                </td>
+                                                <td className="px-4 py-5">
+                                                    <div className="flex items-center gap-3">
+                                                        <div 
+                                                            className={cn(
+                                                                "w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white transition-transform group-hover:scale-110",
+                                                                isPromotion ? "bg-emerald-600 shadow-lg shadow-emerald-500/20" : 
+                                                                isRelegation ? "bg-rose-600 shadow-lg shadow-rose-500/20" : "bg-slate-900 dark:bg-white dark:text-slate-900"
+                                                            )}
+                                                        >
+                                                            {row.shortName}
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm font-semibold text-foreground tracking-tight">{row.team}</span>
+                                                            {isPromotion && <span className="text-[7px] font-black uppercase text-emerald-600 tracking-widest">Promotion Zone</span>}
+                                                            {isRelegation && <span className="text-[7px] font-black uppercase text-rose-600 tracking-widest">Relegation Zone</span>}
+                                                        </div>
+                                                    </div>
+                                                </td>
                                             <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.played}</td>
                                             <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.won}</td>
                                             <td className="px-4 py-5 text-sm text-center text-muted-foreground tabular-nums">{row.drawn}</td>

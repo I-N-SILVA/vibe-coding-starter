@@ -10,6 +10,7 @@ import {
     EmptyState,
     NavIcons,
 } from '@/components/plyaz';
+import { AnimatedCounter } from '@/components/plyaz/AnimatedCounter';
 import { PageLayout } from '@/components/plyaz/navigation/PageLayout';
 import { adminNavItems } from '@/lib/constants/navigation';
 import { stagger, fadeUp } from '@/lib/animations';
@@ -102,7 +103,7 @@ export default function PlayerStatsPage() {
                         <motion.div key={stat.label} variants={fadeUp}>
                             <Card>
                                 <CardContent className="p-4 text-center">
-                                    <p className="text-2xl font-black">{stat.value}</p>
+                                    <AnimatedCounter value={stat.value} className="text-2xl font-black" />
                                     <p className="text-[10px] font-bold tracking-widest uppercase text-gray-400 mt-1">
                                         {stat.label}
                                     </p>

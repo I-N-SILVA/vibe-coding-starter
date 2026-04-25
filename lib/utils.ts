@@ -6,27 +6,23 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Trigger haptic feedback on mobile devices.
- * 'light' for simple taps, 'medium' for confirmations, 'error' for failures.
+ * Triggers haptic feedback on supported devices.
  */
-export function triggerHaptic(type: 'light' | 'medium' | 'heavy' | 'error' = 'light') {
-    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-        switch (type) {
-            case 'light':
-                window.navigator.vibrate(10);
-                break;
-            case 'medium':
-                window.navigator.vibrate(30);
-                break;
-            case 'heavy':
-                window.navigator.vibrate([50, 20, 50]);
-                break;
-            case 'error':
-                window.navigator.vibrate([100, 50, 100]);
-                break;
-        }
-    }
+export function triggerHaptic(type: 'light' | 'medium' | 'heavy' | 'success' | 'error' | 'warning' = 'medium') {
+    if (typeof navigator === 'undefined' || !navigator.vibrate) return;
+
+    const patterns = {
+        light: [10],
+        medium: [20],
+        heavy: [50],
+        success: [10, 30, 10],
+        error: [50, 50, 50],
+        warning: [30, 30],
+    };
+
+    navigator.vibrate(patterns[type]);
 }
+
 export function convertToRgba({
   color,
   opacity,

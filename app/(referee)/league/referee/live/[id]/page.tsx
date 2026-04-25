@@ -16,6 +16,7 @@ import {
 } from '@/components/plyaz';
 import { adminNavItems } from '@/lib/constants/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { triggerHaptic } from '@/lib/utils';
 
 const supabase = createClient();
 
@@ -269,6 +270,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
 
     const handleOpenEventModal = async (type: string, team: 'home' | 'away') => {
         if (!match) return;
+        triggerHaptic('light');
         const teamId = team === 'home' ? match.home_team_id : match.away_team_id;
         try {
             const res = await fetch(`/api/league/teams/${teamId}/players`);
@@ -309,6 +311,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
         setEventModal({ open: false, type: '', team: 'home' });
         setSelectedPlayer('');
         setNotes('');
+        triggerHaptic('success');
 
         // Optimistic score update for goals
         if (mappedType === 'goal') {
@@ -336,6 +339,7 @@ export default function RefereeLiveConsole({ params }: { params: Promise<{ id: s
     }, [selectedPlayer, match, eventModal, teamPlayers, notes, getMatchMinute, queryClient, matchId]);
 
     const toggleMatchStatus = () => {
+        triggerHaptic('medium');
         if (!isRunning) {
             startMatchMutation.mutate();
         } else {
