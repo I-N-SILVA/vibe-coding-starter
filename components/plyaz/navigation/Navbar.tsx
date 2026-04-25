@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlyazLogo } from './PlyazLogo';
-import { LiveTicker } from './LiveTicker';
 import { UserMenu } from './UserMenu';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 
@@ -167,14 +166,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                     )}
                 </div>
 
-                {/* Center */}
-                <div className="hidden md:block absolute left-1/2 -translate-x-1/2">
-                    {!showBackButton ? <LiveTicker /> : (
-                        <h1 className="text-xs font-black tracking-[0.3em] uppercase text-slate-400">{title}</h1>
-                    )}
-                </div>
+                {/* Center — page title when back button is shown */}
                 {showBackButton && (
-                    <h1 className="md:hidden absolute left-1/2 -translate-x-1/2 text-[10px] font-black tracking-[0.25em] uppercase text-neutral-900 dark:text-white">
+                    <h1 className="absolute left-1/2 -translate-x-1/2 text-[10px] font-black tracking-[0.25em] uppercase text-neutral-900 dark:text-white">
                         {title}
                     </h1>
                 )}
