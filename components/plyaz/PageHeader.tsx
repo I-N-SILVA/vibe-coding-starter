@@ -21,29 +21,44 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
             className={cn(
-                'mb-8',
-                rightAction && 'flex flex-col md:flex-row justify-between items-start md:items-end gap-4',
+                'mb-10 relative',
+                rightAction && 'flex flex-col md:flex-row justify-between items-start md:items-end gap-6',
                 className
             )}
         >
-            <div>
-                <h1 className="text-[10px] font-semibold tracking-[0.25em] uppercase text-neutral-400 dark:text-neutral-500 mb-2">
-                    {label}
-                </h1>
-                <p className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">
+            <div className="relative">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="h-4 w-1 bg-primary rounded-full shadow-[0_0_8px_rgba(249,115,22,0.5)]" />
+                    <h1 className="text-[11px] font-black tracking-[0.4em] uppercase text-neutral-400 dark:text-neutral-500">
+                        {label}
+                    </h1>
+                </div>
+                
+                <h2 className="text-4xl font-black text-neutral-900 dark:text-white tracking-tight uppercase italic leading-none">
                     {title}
-                </p>
+                </h2>
+                
                 {description && (
-                    <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1 max-w-md">
+                    <p className="text-xs font-medium text-neutral-400 dark:text-neutral-500 mt-3 max-w-lg leading-relaxed">
                         {description}
                     </p>
                 )}
             </div>
-            {rightAction && <div className="flex-shrink-0">{rightAction}</div>}
+
+            {rightAction && (
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex-shrink-0"
+                >
+                    {rightAction}
+                </motion.div>
+            )}
         </motion.div>
     );
 };

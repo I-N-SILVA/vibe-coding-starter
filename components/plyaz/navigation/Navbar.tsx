@@ -46,33 +46,41 @@ function NotificationBell({ onSearchOpen }: { onSearchOpen?: () => void }) {
 
     return (
         <div className="relative" ref={panelRef}>
-            {/* ⌘K search trigger — desktop only */}
-            {onSearchOpen && (
-                <button
-                    onClick={onSearchOpen}
-                    className="hidden md:flex items-center gap-2 h-8 px-3 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors text-xs mr-1"
-                >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <span className="text-[10px] font-medium">Search</span>
-                    <kbd className="text-[9px] font-mono bg-neutral-200 dark:bg-neutral-700 px-1 rounded">⌘K</kbd>
-                </button>
-            )}
-
-            {/* Bell */}
-            <button
-                onClick={() => setOpen((v) => !v)}
-                className="relative p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-                aria-label="Notifications"
-            >
-                <svg className="w-5 h-5 text-neutral-600 dark:text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                </svg>
-                {count > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full" />
+            <div className="flex items-center gap-1.5 bg-neutral-100/50 dark:bg-white/5 p-1 rounded-2xl border border-neutral-200/50 dark:border-white/5">
+                {/* ⌘K search trigger — desktop only */}
+                {onSearchOpen && (
+                    <button
+                        onClick={onSearchOpen}
+                        className="hidden md:flex items-center gap-3 h-9 pl-3 pr-2 rounded-xl bg-white dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500 hover:text-primary dark:hover:text-primary transition-all duration-300 shadow-sm border border-neutral-200 dark:border-white/5 group/search"
+                    >
+                        <svg className="w-4 h-4 transition-transform group-hover/search:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Global Search</span>
+                        <kbd className="text-[9px] font-mono bg-neutral-100 dark:bg-neutral-700 px-2 py-0.5 rounded-lg border border-neutral-200 dark:border-white/10 shadow-inner">⌘K</kbd>
+                    </button>
                 )}
-            </button>
+
+                {/* Bell */}
+                <button
+                    onClick={() => setOpen((v) => !v)}
+                    className="relative w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:text-primary transition-all duration-300 shadow-sm border border-neutral-200 dark:border-white/5 group/bell"
+                    aria-label="Notifications"
+                >
+                    <svg className="w-5 h-5 transition-transform group-hover/bell:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                    </svg>
+                    {count > 0 && (
+                        <motion.span 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="absolute top-1 right-1 w-3 h-3 bg-primary rounded-full border-2 border-white dark:border-neutral-800 shadow-sm"
+                        >
+                            <span className="absolute inset-0 animate-ping rounded-full bg-primary opacity-40" />
+                        </motion.span>
+                    )}
+                </button>
+            </div>
 
             {/* Notification Panel */}
             <AnimatePresence>
@@ -145,41 +153,57 @@ export const Navbar: React.FC<NavbarProps> = ({
     };
 
     return (
-        <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50" data-testid="app-navbar">
-            <div className="h-14 px-4 flex items-center justify-between max-w-7xl mx-auto">
+        <header className="sticky top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/20 dark:border-slate-800/50 transition-all duration-300" data-testid="app-navbar">
+            {/* Subtle Top Accent Line */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+            
+            <div className="h-16 px-6 flex items-center justify-between max-w-7xl mx-auto">
                 {/* Left */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                     {showBackButton ? (
                         <button
                             onClick={onBackClick}
-                            className="p-2 -ml-2 rounded-xl hover:bg-primary/5 transition-colors group"
+                            className="p-2 -ml-2 rounded-2xl bg-neutral-100/50 dark:bg-white/5 hover:bg-primary hover:text-white transition-all duration-300 group shadow-sm hover:shadow-primary/20"
                             aria-label="Go back"
                         >
-                            <svg className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            <svg className="w-5 h-5 transition-transform duration-300 group-active:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
                     ) : (
-                        <Link href={getLogoHref()} className="flex items-center gap-2 group">
+                        <Link href={getLogoHref()} className="flex items-center gap-2 group relative">
                             <PlyazLogo />
+                            <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-500 rounded-full" />
                         </Link>
                     )}
                 </div>
 
                 {/* Center — page title when back button is shown */}
                 {showBackButton && (
-                    <h1 className="absolute left-1/2 -translate-x-1/2 text-[10px] font-black tracking-[0.25em] uppercase text-neutral-900 dark:text-white">
+                    <motion.h1 
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute left-1/2 -translate-x-1/2 text-[11px] font-black tracking-[0.3em] uppercase text-neutral-900 dark:text-white pointer-events-none"
+                    >
                         {title}
-                    </h1>
+                    </motion.h1>
                 )}
 
                 {/* Right */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                     <NotificationBell onSearchOpen={onSearchOpen} />
+                    {rightAction && (
+                        <div className="h-8 w-[1px] bg-neutral-200 dark:bg-white/10 mx-2 hidden md:block" />
+                    )}
                     {rightAction}
-                    <UserMenu />
+                    <div className="ml-1 pl-1 border-l border-neutral-100 dark:border-white/5">
+                        <UserMenu />
+                    </div>
                 </div>
             </div>
+            
+            {/* Bottom Glow Line */}
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-neutral-100 dark:via-white/5 to-transparent" />
         </header>
     );
 };
