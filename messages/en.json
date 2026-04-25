@@ -1,0 +1,110 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "playerCard": "Player Card",
+    "matchday": "Matchday",
+    "myTeam": "My Team",
+    "discovery": "Discovery",
+    "profileSettings": "Profile Settings",
+    "matches": "Matches",
+    "standings": "Standings",
+    "teams": "Teams",
+    "competitions": "Competitions",
+    "registration": "Registration"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "required": "Required",
+    "optional": "Optional",
+    "yes": "Yes",
+    "no": "No",
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm",
+    "close": "Close",
+    "search": "Search",
+    "noData": "No data available",
+    "error": "Something went wrong",
+    "retry": "Try again"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signUp": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?"
+  },
+  "player": {
+    "dashboard": {
+      "title": "Player Hub",
+      "welcome": "Welcome back",
+      "nextGame": "Next Game",
+      "noFixtures": "No fixtures yet",
+      "noTeam": "Join a squad first",
+      "noTeamDesc": "Once you're on a team, your fixtures appear here automatically.",
+      "findTeam": "Find a team",
+      "theSquad": "The Squad",
+      "noSquad": "No squad yet",
+      "noSquadDesc": "When you join a team, your teammates will appear here.",
+      "viewInvites": "View team invites",
+      "performance": "Performance Breakdown",
+      "playFirstMatch": "Play your first match to unlock rating trends and career stats.",
+      "completeProfile": "Complete profile settings →",
+      "ratingPending": "Rating Pending",
+      "activePlayer": "Active Player",
+      "gettingStarted": "Getting Started"
+    },
+    "registration": {
+      "title": "Competition Registration",
+      "available": "Available Competitions",
+      "registerNow": "Register Now",
+      "notRegistered": "Not Registered",
+      "reApply": "Re-apply",
+      "freeEntry": "Free Entry",
+      "guardianSection": "Parent / Guardian Consent",
+      "guardianNote": "This player is under 18. A parent or guardian must provide consent before registration is complete.",
+      "guardianName": "Guardian Full Name",
+      "guardianEmail": "Guardian Email",
+      "guardianPhone": "Guardian Phone (optional)",
+      "guardianRelation": "Relationship to Player",
+      "imageRights": "I confirm the parent/guardian grants image and video rights for this player to appear in official match coverage.",
+      "dataConsent": "I confirm the parent/guardian consents to this player's personal data being processed for league administration purposes.",
+      "minorBadge": "Under 18 — Awaiting guardian consent",
+      "consentPending": "Guardian consent pending",
+      "consentGranted": "Guardian consent granted"
+    }
+  },
+  "consent": {
+    "title": "Parental Consent Required",
+    "intro": "You have been asked to provide parental or guardian consent for the following player registration.",
+    "playerName": "Player Name",
+    "competition": "Competition",
+    "organisation": "Organisation",
+    "imageRightsLabel": "Image & Video Rights",
+    "imageRightsDesc": "I grant permission for photos and videos of this player to be used in official match coverage, social media, and league publications.",
+    "dataConsentLabel": "Data Processing",
+    "dataConsentDesc": "I consent to this player's personal data (name, date of birth, contact information) being processed by the league for administration purposes in accordance with GDPR.",
+    "submit": "Grant Consent",
+    "success": "Consent granted. The player's registration is now complete.",
+    "alreadyGranted": "Consent has already been granted for this registration.",
+    "expired": "This consent link has expired or is invalid.",
+    "guardianName": "Your Full Name",
+    "guardianRelation": "Your Relationship to Player"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "pt": "Português",
+    "es": "Español",
+    "fr": "Français"
+  }
+}

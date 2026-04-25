@@ -1,0 +1,110 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "playerCard": "Carte Joueur",
+    "matchday": "Jour de Match",
+    "myTeam": "Mon Équipe",
+    "discovery": "Découverte",
+    "profileSettings": "Paramètres du Profil",
+    "matches": "Matchs",
+    "standings": "Classement",
+    "teams": "Équipes",
+    "competitions": "Compétitions",
+    "registration": "Inscription"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "submit": "Soumettre",
+    "loading": "Chargement...",
+    "required": "Requis",
+    "optional": "Optionnel",
+    "yes": "Oui",
+    "no": "Non",
+    "back": "Retour",
+    "next": "Suivant",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "noData": "Aucune donnée disponible",
+    "error": "Une erreur s'est produite",
+    "retry": "Réessayer"
+  },
+  "auth": {
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter",
+    "signUp": "S'inscrire",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?"
+  },
+  "player": {
+    "dashboard": {
+      "title": "Hub Joueur",
+      "welcome": "Bon retour",
+      "nextGame": "Prochain Match",
+      "noFixtures": "Aucun match prévu",
+      "noTeam": "Rejoignez d'abord une équipe",
+      "noTeamDesc": "Une fois dans une équipe, vos matchs apparaîtront ici automatiquement.",
+      "findTeam": "Trouver une équipe",
+      "theSquad": "L'Équipe",
+      "noSquad": "Pas encore d'équipe",
+      "noSquadDesc": "Quand vous rejoignez une équipe, vos coéquipiers apparaîtront ici.",
+      "viewInvites": "Voir les invitations",
+      "performance": "Analyse des Performances",
+      "playFirstMatch": "Jouez votre premier match pour débloquer les tendances de notation et les statistiques.",
+      "completeProfile": "Compléter les paramètres du profil →",
+      "ratingPending": "Note en Attente",
+      "activePlayer": "Joueur Actif",
+      "gettingStarted": "Démarrage"
+    },
+    "registration": {
+      "title": "Inscription à la Compétition",
+      "available": "Compétitions Disponibles",
+      "registerNow": "S'inscrire",
+      "notRegistered": "Non Inscrit",
+      "reApply": "Se réinscrire",
+      "freeEntry": "Entrée Gratuite",
+      "guardianSection": "Consentement du Tuteur",
+      "guardianNote": "Ce joueur a moins de 18 ans. Un parent ou tuteur doit donner son consentement avant la finalisation de l'inscription.",
+      "guardianName": "Nom Complet du Tuteur",
+      "guardianEmail": "E-mail du Tuteur",
+      "guardianPhone": "Téléphone du Tuteur (optionnel)",
+      "guardianRelation": "Relation avec le Joueur",
+      "imageRights": "Je confirme que le tuteur autorise l'utilisation de l'image et des vidéos de ce joueur dans les couvertures officielles.",
+      "dataConsent": "Je confirme que le tuteur consent au traitement des données personnelles de ce joueur à des fins administratives de la ligue.",
+      "minorBadge": "Moins de 18 ans — En attente du consentement",
+      "consentPending": "Consentement du tuteur en attente",
+      "consentGranted": "Consentement du tuteur accordé"
+    }
+  },
+  "consent": {
+    "title": "Consentement Parental Requis",
+    "intro": "Vous avez été invité à fournir un consentement parental ou de tuteur pour l'inscription suivante.",
+    "playerName": "Nom du Joueur",
+    "competition": "Compétition",
+    "organisation": "Organisation",
+    "imageRightsLabel": "Droits d'Image et Vidéo",
+    "imageRightsDesc": "J'autorise l'utilisation de photos et vidéos de ce joueur dans les couvertures officielles, les réseaux sociaux et les publications de la ligue.",
+    "dataConsentLabel": "Traitement des Données",
+    "dataConsentDesc": "Je consens au traitement des données personnelles de ce joueur (nom, date de naissance, coordonnées) par la ligue à des fins administratives conformément au RGPD.",
+    "submit": "Accorder le Consentement",
+    "success": "Consentement accordé. L'inscription du joueur est maintenant complète.",
+    "alreadyGranted": "Le consentement a déjà été accordé pour cette inscription.",
+    "expired": "Ce lien de consentement a expiré ou est invalide.",
+    "guardianName": "Votre Nom Complet",
+    "guardianRelation": "Votre Relation avec le Joueur"
+  },
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "language": {
+    "label": "Langue",
+    "en": "English",
+    "pt": "Português",
+    "es": "Español",
+    "fr": "Français"
+  }
+}

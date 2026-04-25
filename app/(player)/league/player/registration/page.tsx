@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { ShieldCheck, Camera, Database, AlertTriangle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     PageLayout,
@@ -70,8 +71,22 @@ export default function PlayerRegistration() {
         date_of_birth: '',
         jersey_number: '',
         position: '',
-        custom_fields: {} as Record<string, string | number>
+        custom_fields: {} as Record<string, string | number>,
+        // KYC / minor fields
+        guardian_name: '',
+        guardian_email: '',
+        guardian_phone: '',
+        guardian_relation: '',
+        image_rights_confirmed: false,
+        data_consent_confirmed: false,
     });
+
+    const isMinor = useMemo(() => {
+        if (!formData.date_of_birth) return false;
+        const dob = new Date(formData.date_of_birth);
+        const age = Math.floor((Date.now() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+        return age < 18;
+    }, [formData.date_of_birth]);
 
     // 1. Fetch available competitions
     const { data: competitions, isLoading: isLoadingComps } = useCompetitions();
@@ -127,7 +142,9 @@ export default function PlayerRegistration() {
             setIsModalOpen(false);
             setFormData({
                 team_id: '', player_id: '', id_document_type: 'passport', id_document_number: '',
-                full_name: profile?.full_name || '', date_of_birth: '', jersey_number: '', position: '', custom_fields: {}
+                full_name: profile?.full_name || '', date_of_birth: '', jersey_number: '', position: '', custom_fields: {},
+                guardian_name: '', guardian_email: '', guardian_phone: '', guardian_relation: '',
+                image_rights_confirmed: false, data_consent_confirmed: false,
             });
         }
     });
@@ -167,9 +184,19 @@ export default function PlayerRegistration() {
         const comp = selectedComp;
         if (!comp) return;
 
+        if (isMinor && (!formData.guardian_email || !formData.guardian_name || !formData.guardian_relation)) {
+            toast.error('Please complete all guardian details for this under-18 player.');
+            return;
+        }
+        if (isMinor && (!formData.image_rights_confirmed || !formData.data_consent_confirmed)) {
+            toast.error('Both consent boxes must be ticked for under-18 registrations.');
+            return;
+        }
+
         const payload = {
             ...formData,
-            jersey_number: formData.jersey_number ? parseInt(formData.jersey_number) : null
+            jersey_number: formData.jersey_number ? parseInt(formData.jersey_number) : null,
+            is_minor: isMinor,
         };
 
         // If paid competition, redirect to Stripe
@@ -366,6 +393,103 @@ export default function PlayerRegistration() {
                                     onChange={(e) => setFormData({ ...formData, jersey_number: e.target.value })}
                                 />
                             </div>
+
+                            {/* KYC / Minor Section — shown automatically when DOB indicates under-18 */}
+                            {isMinor && (
+                                <div className="pt-4 border-t-2 border-orange-200 space-y-5">
+                                    <div className="flex items-start gap-3 bg-orange-50 rounded-2xl p-4">
+                                        <AlertTriangle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-sm font-bold text-orange-900">Under-18 Player</p>
+                                            <p className="text-xs text-orange-700 mt-0.5">
+                                                A parent or guardian must provide consent. We will send them an email with a consent link after you submit.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <ShieldCheck className="w-4 h-4 text-orange-500" />
+                                        <h4 className="text-sm font-bold text-gray-900">Parent / Guardian Details</h4>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <Input
+                                            label="Guardian Full Name"
+                                            required
+                                            value={formData.guardian_name}
+                                            onChange={(e) => setFormData({ ...formData, guardian_name: e.target.value })}
+                                        />
+                                        <Input
+                                            label="Guardian Email"
+                                            type="email"
+                                            required
+                                            value={formData.guardian_email}
+                                            onChange={(e) => setFormData({ ...formData, guardian_email: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <Input
+                                            label="Guardian Phone (optional)"
+                                            type="tel"
+                                            value={formData.guardian_phone}
+                                            onChange={(e) => setFormData({ ...formData, guardian_phone: e.target.value })}
+                                        />
+                                        <Select
+                                            label="Relationship to Player"
+                                            required
+                                            value={formData.guardian_relation}
+                                            onChange={(e) => setFormData({ ...formData, guardian_relation: e.target.value })}
+                                            options={[
+                                                { value: '', label: 'Select...' },
+                                                { value: 'parent', label: 'Parent' },
+                                                { value: 'legal_guardian', label: 'Legal Guardian' },
+                                                { value: 'grandparent', label: 'Grandparent' },
+                                                { value: 'other', label: 'Other (please specify in notes)' },
+                                            ]}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-3 pt-2">
+                                        <label className={`flex items-start gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-colors ${formData.image_rights_confirmed ? 'border-orange-400 bg-orange-50' : 'border-gray-100 bg-gray-50'}`}>
+                                            <input
+                                                type="checkbox"
+                                                required
+                                                checked={formData.image_rights_confirmed}
+                                                onChange={(e) => setFormData({ ...formData, image_rights_confirmed: e.target.checked })}
+                                                className="mt-0.5 w-4 h-4 accent-orange-600 flex-shrink-0"
+                                            />
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <Camera className="w-3.5 h-3.5 text-orange-500" />
+                                                    <p className="text-xs font-bold text-gray-900">Image & Video Rights</p>
+                                                </div>
+                                                <p className="text-xs text-gray-500">
+                                                    I confirm the parent/guardian grants image and video rights for this player to appear in official match coverage, social media, and league publications.
+                                                </p>
+                                            </div>
+                                        </label>
+
+                                        <label className={`flex items-start gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-colors ${formData.data_consent_confirmed ? 'border-orange-400 bg-orange-50' : 'border-gray-100 bg-gray-50'}`}>
+                                            <input
+                                                type="checkbox"
+                                                required
+                                                checked={formData.data_consent_confirmed}
+                                                onChange={(e) => setFormData({ ...formData, data_consent_confirmed: e.target.checked })}
+                                                className="mt-0.5 w-4 h-4 accent-orange-600 flex-shrink-0"
+                                            />
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <Database className="w-3.5 h-3.5 text-orange-500" />
+                                                    <p className="text-xs font-bold text-gray-900">Data Processing Consent</p>
+                                                </div>
+                                                <p className="text-xs text-gray-500">
+                                                    I confirm the parent/guardian consents to this player's personal data being processed for league administration purposes in accordance with GDPR and the UK Data Protection Act 2018.
+                                                </p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Custom Fields */}
                             {customFields && customFields.length > 0 && (

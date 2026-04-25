@@ -98,6 +98,16 @@ export type Player = {
         twitter?: string;
         linkedin?: string;
     };
+    // KYC / safeguarding fields
+    is_minor: boolean;
+    guardian_name: string | null;
+    guardian_email: string | null;
+    guardian_phone: string | null;
+    guardian_relation: string | null;
+    guardian_token: string | null;
+    guardian_consented_at: string | null;
+    image_rights_granted: boolean | null;
+    data_consent_granted: boolean | null;
     created_at: string;
     updated_at: string;
 };

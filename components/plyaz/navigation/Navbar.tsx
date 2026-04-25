@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlyazLogo } from './PlyazLogo';
-import { ThemeToggle } from '../ThemeToggle';
 import { LiveTicker } from './LiveTicker';
+import { UserMenu } from './UserMenu';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 
 interface NavbarProps {
@@ -181,9 +181,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                 {/* Right */}
                 <div className="flex items-center gap-1">
-                    <ThemeToggle />
                     <NotificationBell onSearchOpen={onSearchOpen} />
                     {rightAction}
+                    <UserMenu />
                 </div>
             </div>
         </header>

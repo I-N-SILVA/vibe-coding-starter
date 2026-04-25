@@ -9,7 +9,7 @@ import { colors } from '@/data/config/colors.js';
 import './globals.css';
 import { SearchProvider } from '@/components/app/SearchProvider';
 import { AnalyticsWrapper } from '@/components/app/Analytics';
-import { QueryProvider, ToastProvider } from '@/components/providers';
+import { QueryProvider, ToastProvider, LanguageProvider } from '@/components/providers';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ClientShortcuts } from '@/components/app/ClientShortcuts';
 import { PWARegistration } from '@/components/app/PWARegistration';
@@ -104,6 +104,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-surface-elevated text-secondary-main antialiased selection:bg-accent-lighter/30">
         <ThemeProviders>
           <QueryProvider>
+            <LanguageProvider>
             <ToastProvider>
               <ErrorBoundary>
                 <AnalyticsWrapper />
@@ -125,6 +126,7 @@ export default function RootLayout({
                 </SearchProvider>
               </ErrorBoundary>
             </ToastProvider>
+            </LanguageProvider>
           </QueryProvider>
         </ThemeProviders>
       </body>

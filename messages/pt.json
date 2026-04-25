@@ -1,0 +1,110 @@
+{
+  "nav": {
+    "dashboard": "Painel",
+    "playerCard": "Cartão do Jogador",
+    "matchday": "Dia do Jogo",
+    "myTeam": "Meu Time",
+    "discovery": "Descoberta",
+    "profileSettings": "Configurações do Perfil",
+    "matches": "Jogos",
+    "standings": "Classificação",
+    "teams": "Times",
+    "competitions": "Competições",
+    "registration": "Inscrição"
+  },
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "submit": "Enviar",
+    "loading": "Carregando...",
+    "required": "Obrigatório",
+    "optional": "Opcional",
+    "yes": "Sim",
+    "no": "Não",
+    "back": "Voltar",
+    "next": "Próximo",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "search": "Buscar",
+    "noData": "Sem dados disponíveis",
+    "error": "Algo deu errado",
+    "retry": "Tentar novamente"
+  },
+  "auth": {
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "signUp": "Cadastrar",
+    "email": "E-mail",
+    "password": "Senha",
+    "forgotPassword": "Esqueceu a senha?"
+  },
+  "player": {
+    "dashboard": {
+      "title": "Hub do Jogador",
+      "welcome": "Bem-vindo de volta",
+      "nextGame": "Próximo Jogo",
+      "noFixtures": "Sem jogos agendados",
+      "noTeam": "Entre em um time primeiro",
+      "noTeamDesc": "Depois de entrar em um time, seus jogos aparecerão aqui automaticamente.",
+      "findTeam": "Encontrar um time",
+      "theSquad": "O Elenco",
+      "noSquad": "Sem elenco ainda",
+      "noSquadDesc": "Quando você entrar em um time, seus companheiros aparecerão aqui.",
+      "viewInvites": "Ver convites de times",
+      "performance": "Desempenho Detalhado",
+      "playFirstMatch": "Jogue sua primeira partida para desbloquear tendências de avaliação e estatísticas.",
+      "completeProfile": "Completar configurações do perfil →",
+      "ratingPending": "Avaliação Pendente",
+      "activePlayer": "Jogador Ativo",
+      "gettingStarted": "Começando"
+    },
+    "registration": {
+      "title": "Inscrição na Competição",
+      "available": "Competições Disponíveis",
+      "registerNow": "Inscrever-se",
+      "notRegistered": "Não Inscrito",
+      "reApply": "Reinscrever-se",
+      "freeEntry": "Entrada Gratuita",
+      "guardianSection": "Consentimento do Responsável",
+      "guardianNote": "Este jogador tem menos de 18 anos. Um pai ou responsável deve fornecer consentimento antes de concluir a inscrição.",
+      "guardianName": "Nome Completo do Responsável",
+      "guardianEmail": "E-mail do Responsável",
+      "guardianPhone": "Telefone do Responsável (opcional)",
+      "guardianRelation": "Relação com o Jogador",
+      "imageRights": "Confirmo que o responsável autoriza o uso de imagem e vídeo deste jogador em coberturas oficiais.",
+      "dataConsent": "Confirmo que o responsável consente com o processamento dos dados pessoais deste jogador para fins administrativos da liga.",
+      "minorBadge": "Menor de 18 anos — Aguardando consentimento",
+      "consentPending": "Consentimento do responsável pendente",
+      "consentGranted": "Consentimento do responsável concedido"
+    }
+  },
+  "consent": {
+    "title": "Consentimento Parental Necessário",
+    "intro": "Foi solicitado que você forneça consentimento parental ou de responsável para a seguinte inscrição de jogador.",
+    "playerName": "Nome do Jogador",
+    "competition": "Competição",
+    "organisation": "Organização",
+    "imageRightsLabel": "Direitos de Imagem e Vídeo",
+    "imageRightsDesc": "Autorizo o uso de fotos e vídeos deste jogador em coberturas oficiais, redes sociais e publicações da liga.",
+    "dataConsentLabel": "Processamento de Dados",
+    "dataConsentDesc": "Consinto com o processamento dos dados pessoais deste jogador (nome, data de nascimento, informações de contato) pela liga para fins administrativos, em conformidade com a LGPD/GDPR.",
+    "submit": "Conceder Consentimento",
+    "success": "Consentimento concedido. A inscrição do jogador está completa.",
+    "alreadyGranted": "O consentimento já foi concedido para esta inscrição.",
+    "expired": "Este link de consentimento expirou ou é inválido.",
+    "guardianName": "Seu Nome Completo",
+    "guardianRelation": "Sua Relação com o Jogador"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema"
+  },
+  "language": {
+    "label": "Idioma",
+    "en": "English",
+    "pt": "Português",
+    "es": "Español",
+    "fr": "Français"
+  }
+}
