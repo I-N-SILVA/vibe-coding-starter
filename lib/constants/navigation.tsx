@@ -1,22 +1,50 @@
 import React from 'react';
 import { NavIcons } from '@/components/plyaz/navigation/NavIcons';
-import type { NavItem } from '@/components/plyaz/navigation/types';
+import type { NavItem, NavGroup } from '@/components/plyaz/navigation/types';
 
-export const adminNavItems: NavItem[] = [
-    { label: 'Dashboard', href: '/league', icon: <NavIcons.Dashboard /> },
-    { label: 'Matches', href: '/league/matches', icon: <NavIcons.Matches /> },
-    { label: 'Teams', href: '/league/teams', icon: <NavIcons.Teams /> },
-    { label: 'Players', href: '/league/players', icon: <NavIcons.Statistics /> },
-    { label: 'Standings', href: '/league/standings', icon: <NavIcons.Standings /> },
-    { label: 'Fixtures', href: '/league/fixtures', icon: <NavIcons.Calendar /> },
-    { label: 'Venues', href: '/league/venues', icon: <NavIcons.Public /> },
-    { label: 'Categories', href: '/league/categories', icon: <NavIcons.Trophy /> },
-    { label: 'Invites', href: '/league/invites', icon: <NavIcons.Public /> },
-    { label: 'Analytics', href: '/league/analytics', icon: <NavIcons.Analytics /> },
-    { label: 'Referee', href: '/league/referee', icon: <NavIcons.Whistle /> },
-    { label: 'Discovery', href: '/discover', icon: <NavIcons.Public /> },
-    { label: 'Settings', href: '/league/settings', icon: <NavIcons.Settings /> },
+export const adminNavGroups: NavGroup[] = [
+    {
+        label: 'Competition',
+        items: [
+            { label: 'Dashboard', href: '/league', icon: <NavIcons.Dashboard /> },
+            { label: 'Fixtures', href: '/league/fixtures', icon: <NavIcons.Calendar /> },
+            { label: 'Standings', href: '/league/standings', icon: <NavIcons.Standings /> },
+        ],
+    },
+    {
+        label: 'People',
+        items: [
+            { label: 'Teams', href: '/league/teams', icon: <NavIcons.Teams /> },
+            { label: 'Players', href: '/league/players', icon: <NavIcons.Statistics /> },
+            { label: 'Invites', href: '/league/invites', icon: <NavIcons.Public /> },
+        ],
+    },
+    {
+        label: 'Operations',
+        items: [
+            { label: 'Matches', href: '/league/matches', icon: <NavIcons.Matches /> },
+            { label: 'Venues', href: '/league/venues', icon: <NavIcons.Public /> },
+            { label: 'Referee', href: '/league/referee', icon: <NavIcons.Whistle /> },
+        ],
+    },
+    {
+        label: 'Growth',
+        items: [
+            { label: 'Analytics', href: '/league/analytics', icon: <NavIcons.Analytics /> },
+            { label: 'Discovery', href: '/discover', icon: <NavIcons.Public /> },
+        ],
+    },
+    {
+        label: 'Config',
+        items: [
+            { label: 'Categories', href: '/league/categories', icon: <NavIcons.Trophy /> },
+            { label: 'Settings', href: '/league/settings', icon: <NavIcons.Settings /> },
+        ],
+    },
 ];
+
+// Flat list derived from groups — backward-compatible for pages that only need navItems
+export const adminNavItems: NavItem[] = adminNavGroups.flatMap((g) => g.items);
 
 export const publicNavItems: NavItem[] = [
     { label: 'Scoreboard', href: '/league/public/scoreboard', icon: <NavIcons.Matches /> },

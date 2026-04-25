@@ -48,7 +48,7 @@ export {
 // Navigation (Modular)
 import { Navbar, MobileNav, Sidebar, PageLayout, NavIcons, PlyazLogo } from './navigation';
 import { ThemeToggle } from './ThemeToggle';
-export type { NavItem } from './navigation';
+export type { NavItem, NavGroup } from './navigation';
 
 export {
     Navbar,

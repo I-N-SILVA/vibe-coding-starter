@@ -10,3 +10,5 @@ export { useCurrentPlayer, usePlayers } from './use-players';
 export { useTeams } from './use-teams';
 export { useCompetitions } from './use-competitions';
 export * from './useQueries';
+export { useSetupChecklist } from './use-setup-checklist';
+export { useNotifications } from './use-notifications';
