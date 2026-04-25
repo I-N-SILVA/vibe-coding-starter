@@ -23,13 +23,13 @@ export async function POST(request: Request) {
     const { token } = parsed.data;
     const { user } = auth; // Get the authenticated user's profile and id
 
-    // 1. Fetch and validate the invite
+    // 1. Fetch and validate the invite, joining organization name for the welcome message
     const { data: invite, error: inviteError } = await supabase
         .from('invites')
-        .select('*')
+        .select('*, organizations(name)')
         .eq('token', token)
         .eq('status', 'pending')
-        .gte('expires_at', new Date().toISOString()) // Filter for non-expired invites
+        .gte('expires_at', new Date().toISOString())
         .maybeSingle();
 
     if (inviteError) {
@@ -94,5 +94,11 @@ export async function POST(request: Request) {
         // Do not block the user if audit log fails, but log the error
     }
 
-    return NextResponse.json({ message: 'Invitation accepted successfully.', profile: user }, { status: 200 });
+    const org = Array.isArray(invite.organizations) ? invite.organizations[0] : invite.organizations;
+
+    return NextResponse.json({
+        message: 'Invitation accepted successfully.',
+        profile: user,
+        organization_name: org?.name ?? null,
+    }, { status: 200 });
 }

@@ -1,126 +1,90 @@
 "use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, useEffect, use } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, Loader2, ArrowLeft, Shield } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, ArrowLeft, Users } from 'lucide-react';
 
-type InviteState =
+type PageState =
     | { phase: 'loading' }
-    | { phase: 'preview'; role: string; orgName: string | null; orgLogo: string | null; token: string }
-    | { phase: 'accepting' }
-    | { phase: 'success'; orgName: string | null }
+    | { phase: 'preview'; orgId: string; orgName: string; orgLogo: string | null; slug: string }
+    | { phase: 'joining' }
+    | { phase: 'success'; orgName: string }
     | { phase: 'error'; title: string; message: string };
 
-function AcceptInvite() {
-    const searchParams = useSearchParams();
+export default function JoinByCodePage({ params }: { params: Promise<{ code: string }> }) {
+    const { code } = use(params);
     const router = useRouter();
     const queryClient = useQueryClient();
     const { isAuthenticated, isLoading: authLoading } = useAuth();
-    const [state, setState] = useState<InviteState>({ phase: 'loading' });
+    const [state, setState] = useState<PageState>({ phase: 'loading' });
 
     useEffect(() => {
-        const token = searchParams.get('token');
-
         if (authLoading) return;
 
         if (!isAuthenticated) {
-            router.push(`/login?invite_token=${token}`);
+            router.push(`/login?redirect=/join/${code}`);
             return;
         }
 
-        if (!token) {
-            setState({
-                phase: 'error',
-                title: 'Invalid Link',
-                message: 'No invitation token was found in this link. Please request a new invitation.',
-            });
-            return;
-        }
-
-        const verify = async () => {
+        const lookup = async () => {
             try {
-                const res = await fetch('/api/league/invites/verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token }),
-                });
+                const res = await fetch(`/api/league/invites/join?code=${encodeURIComponent(code)}`);
                 const data = await res.json();
 
                 if (!res.ok) {
-                    const isExpired = res.status === 400 || (data.error as string)?.toLowerCase().includes('expired');
-                    setState({
-                        phase: 'error',
-                        title: isExpired ? 'Link Expired' : 'Invalid Invitation',
-                        message: isExpired
-                            ? 'This invitation link has expired. Ask the organization to send a new one.'
-                            : data.error || 'This invitation link is no longer valid.',
-                    });
+                    setState({ phase: 'error', title: 'Not found', message: data.error || 'No organisation matches this join code.' });
                     return;
                 }
 
                 setState({
                     phase: 'preview',
-                    role: data.invited_role || 'member',
-                    orgName: data.organization_name,
-                    orgLogo: data.organization_logo,
-                    token,
+                    orgId: data.id,
+                    orgName: data.name,
+                    orgLogo: data.logo_url,
+                    slug: data.slug,
                 });
             } catch {
-                setState({
-                    phase: 'error',
-                    title: 'Something went wrong',
-                    message: 'We could not verify your invitation. Please try again.',
-                });
+                setState({ phase: 'error', title: 'Something went wrong', message: 'Could not load this join link. Please try again.' });
             }
         };
 
-        verify();
-    }, [searchParams, router, isAuthenticated, authLoading]);
+        lookup();
+    }, [code, router, isAuthenticated, authLoading]);
 
-    const handleAccept = async () => {
+    const handleJoin = async () => {
         if (state.phase !== 'preview') return;
-        const { token } = state;
-        setState({ phase: 'accepting' });
+        const { orgName } = state;
+        setState({ phase: 'joining' });
 
         try {
-            const res = await fetch('/api/league/invites/accept', {
+            const res = await fetch('/api/league/invites/join', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token }),
+                body: JSON.stringify({ code }),
             });
             const data = await res.json();
 
             if (!res.ok) {
-                setState({
-                    phase: 'error',
-                    title: 'Could not accept invite',
-                    message: data.error || 'Something went wrong. Please try again.',
-                });
+                setState({ phase: 'error', title: 'Could not join', message: data.error || 'Something went wrong.' });
                 return;
             }
 
             queryClient.invalidateQueries({ queryKey: ['organization'] });
             router.refresh();
-            setState({ phase: 'success', orgName: data.organization_name });
-
+            setState({ phase: 'success', orgName: data.organization_name ?? orgName });
             setTimeout(() => router.push('/league'), 2500);
         } catch {
-            setState({
-                phase: 'error',
-                title: 'Something went wrong',
-                message: 'We could not accept your invitation. Please try again.',
-            });
+            setState({ phase: 'error', title: 'Something went wrong', message: 'Please try again.' });
         }
     };
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
             <AnimatePresence mode="wait">
-                {/* Loading / Verifying */}
-                {(state.phase === 'loading' || state.phase === 'accepting') && (
+                {(state.phase === 'loading' || state.phase === 'joining') && (
                     <motion.div
                         key="loading"
                         initial={{ opacity: 0, y: 8 }}
@@ -133,14 +97,13 @@ function AcceptInvite() {
                         </div>
                         <div>
                             <p className="font-bold text-gray-900 dark:text-white">
-                                {state.phase === 'accepting' ? 'Joining organisation...' : 'Verifying invitation...'}
+                                {state.phase === 'joining' ? 'Sending join request...' : 'Loading organisation...'}
                             </p>
                             <p className="text-sm text-gray-400 mt-1">Just a moment</p>
                         </div>
                     </motion.div>
                 )}
 
-                {/* Preview — two-step confirm */}
                 {state.phase === 'preview' && (
                     <motion.div
                         key="preview"
@@ -150,60 +113,51 @@ function AcceptInvite() {
                         className="w-full max-w-md"
                     >
                         <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
-                            {/* Header band */}
                             <div className="bg-gray-900 dark:bg-gray-950 px-8 py-8 text-center">
                                 {state.orgLogo ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img
                                         src={state.orgLogo}
-                                        alt={state.orgName ?? 'Organisation'}
+                                        alt={state.orgName}
                                         className="w-16 h-16 rounded-2xl object-cover mx-auto mb-4 shadow-lg"
                                     />
                                 ) : (
                                     <div className="w-16 h-16 rounded-2xl bg-orange-600 flex items-center justify-center mx-auto mb-4 text-2xl font-black text-white shadow-lg">
-                                        {state.orgName?.charAt(0).toUpperCase() ?? 'P'}
+                                        {state.orgName.charAt(0).toUpperCase()}
                                     </div>
                                 )}
-                                <p className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-1">You&apos;re invited</p>
-                                <h2 className="text-xl font-black text-white leading-tight">
-                                    {state.orgName ? `Join ${state.orgName}` : 'Join this organisation'}
-                                </h2>
+                                <p className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-1">Open Join Link</p>
+                                <h2 className="text-xl font-black text-white leading-tight">Join {state.orgName}</h2>
                             </div>
 
-                            {/* Body */}
                             <div className="px-8 py-8">
-                                <div className="flex items-start gap-3 bg-orange-50 dark:bg-orange-900/10 rounded-2xl p-4 mb-6">
-                                    <Shield className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                                <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-900/10 rounded-2xl p-4 mb-6">
+                                    <Users className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                                            Role: <span className="capitalize">{state.role}</span>
-                                        </p>
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">Permanent join link</p>
                                         <p className="text-xs text-gray-500 mt-0.5">
-                                            {state.orgName
-                                                ? `You'll join ${state.orgName} as a ${state.role}.`
-                                                : `You'll be added as a ${state.role}.`}
+                                            Your request will be sent to {state.orgName} for approval. This link never expires.
                                         </p>
                                     </div>
                                 </div>
 
                                 <button
-                                    onClick={handleAccept}
+                                    onClick={handleJoin}
                                     className="w-full bg-orange-600 hover:bg-orange-700 active:scale-[0.98] transition-all text-white font-bold py-4 rounded-2xl text-sm tracking-wide"
                                 >
-                                    Accept Invitation
+                                    Request to Join
                                 </button>
                                 <button
                                     onClick={() => router.push('/')}
                                     className="w-full mt-3 text-xs font-semibold text-gray-400 hover:text-gray-600 py-2 transition-colors"
                                 >
-                                    Decline
+                                    Cancel
                                 </button>
                             </div>
                         </div>
                     </motion.div>
                 )}
 
-                {/* Success */}
                 {state.phase === 'success' && (
                     <motion.div
                         key="success"
@@ -216,15 +170,14 @@ function AcceptInvite() {
                             <CheckCircle className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black text-gray-900 dark:text-white">
-                                {state.orgName ? `Welcome to ${state.orgName}!` : 'You\'re in!'}
-                            </h2>
-                            <p className="text-sm text-gray-400 mt-1">Taking you to the dashboard...</p>
+                            <h2 className="text-xl font-black text-gray-900 dark:text-white">Request sent!</h2>
+                            <p className="text-sm text-gray-400 mt-1">
+                                {state.orgName} will review your request. Taking you to the dashboard...
+                            </p>
                         </div>
                     </motion.div>
                 )}
 
-                {/* Error */}
                 {state.phase === 'error' && (
                     <motion.div
                         key="error"
@@ -255,17 +208,5 @@ function AcceptInvite() {
                 )}
             </AnimatePresence>
         </div>
-    );
-}
-
-export default function AcceptInvitePage() {
-    return (
-        <Suspense fallback={
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 text-orange-500 animate-spin" />
-            </div>
-        }>
-            <AcceptInvite />
-        </Suspense>
     );
 }
