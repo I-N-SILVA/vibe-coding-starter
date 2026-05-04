@@ -1,0 +1,50 @@
+name: Supabase Keep-Alive
+
+# Pings the /api/health endpoint every 4 days to prevent Supabase free tier pause.
+# Supabase free tier pauses projects after 7 days of inactivity.
+#
+# Setup:
+#   1. In your GitHub repo → Settings → Secrets and variables → Actions
+#   2. Add secret: SITE_URL = https://your-vercel-deployment.vercel.app
+#      (or your custom domain, e.g. https://app.plyaz.com)
+#
+# Manual trigger: Actions tab → "Supabase Keep-Alive" → Run workflow
+
+on:
+  schedule:
+    # Every 4 days at 08:00 UTC (well within the 7-day window)
+    - cron: '0 8 */4 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping health endpoint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping /api/health
+        run: |
+          SITE_URL="${{ secrets.SITE_URL }}"
+          if [ -z "$SITE_URL" ]; then
+            echo "⚠️  SITE_URL secret not set — skipping ping"
+            exit 0
+          fi
+
+          echo "🏓  Pinging ${SITE_URL}/api/health ..."
+          RESPONSE=$(curl -sf --max-time 30 "${SITE_URL}/api/health" || echo '{"status":"error"}')
+          STATUS=$(echo "$RESPONSE" | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+          echo "Response: $RESPONSE"
+
+          if [ "$STATUS" = "ok" ] || [ "$STATUS" = "degraded" ]; then
+            echo "✅  Health check passed (status: $STATUS)"
+          else
+            echo "❌  Health check failed (status: $STATUS)"
+            exit 1
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::warning::Supabase keep-alive ping failed. Check if the deployment is up."
