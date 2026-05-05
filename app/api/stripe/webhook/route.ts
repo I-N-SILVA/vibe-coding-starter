@@ -29,7 +29,7 @@ export async function POST(request: Request) {
         event = stripe.webhooks.constructEvent(body, sig, STRIPE_WEBHOOK_SECRET);
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error';
-        log.error('Webhook Error: <val>');
+        log.error('Stripe webhook signature error', { message });
         return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     if (!orgId && event.type !== 'customer.subscription.deleted') {
         // Some events might not have orgId in metadata if not initiated by us,
         // but for our core flow we expect it.
-        log.warn('No organization_id in metadata for event: ${event.type}');
+        log.warn('No organization_id in metadata for event', { eventType: event.type });
     }
 
     try {
@@ -113,7 +113,7 @@ export async function POST(request: Request) {
             }
 
             case 'invoice.payment_failed': {
-                log.warn('Payment failed for organization: ${orgId}');
+                log.warn('Payment failed for organization', { orgId });
                 // Could send email or trigger notification here
                 break;
             }
