@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
+import { log } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
 
-export async function PATCH(
-    request: Request,
-    { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const supabase = await createClient();
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const {
+            data: { user },
+            error: authError,
+        } = await supabase.auth.getUser();
 
         if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -43,7 +44,7 @@ export async function PATCH(
             .single();
 
         if (updateError) {
-            console.error('Error updating application:', updateError);
+            log.error('Error updating application', { error: updateError });
             return NextResponse.json({ error: updateError.message }, { status: 500 });
         }
 
@@ -51,29 +52,30 @@ export async function PATCH(
         if (status === 'accepted') {
             if (application.target_type === 'team' && application.applicant_role === 'player') {
                 // Add player to team
-                const { error: insertError } = await supabase
-                    .from('players')
-                    .insert({
-                        team_id: application.target_id,
-                        profile_id: application.applicant_id,
-                        // Note: In a real app we'd fetch the player's profile data to populate name, etc.
-                        // For this MVP, we might just assume the player creates their profile first
-                        status: 'active'
-                    });
+                const { error: insertError } = await supabase.from('players').insert({
+                    team_id: application.target_id,
+                    profile_id: application.applicant_id,
+                    // Note: In a real app we'd fetch the player's profile data to populate name, etc.
+                    // For this MVP, we might just assume the player creates their profile first
+                    status: 'active',
+                });
 
                 if (insertError) {
-                    console.error('Error adding player to team:', insertError);
+                    log.error('Error adding player to team', { error: insertError });
                     // We don't fail the request here, but log it. Ideally we handle this gracefully
                 }
-            } else if (application.target_type === 'competition' && application.applicant_role === 'referee') {
-                // The easiest way for now is to just rely on the 'applications' table or 
+            } else if (
+                application.target_type === 'competition' &&
+                application.applicant_role === 'referee'
+            ) {
+                // The easiest way for now is to just rely on the 'applications' table or
                 // you could do something else here depending on how referees are linked to competitions
             }
         }
 
         return NextResponse.json({ data: updatedApp });
     } catch (err) {
-        console.error('Error in PATCH /api/applications/[id]:', err);
+        log.error('Error in PATCH /api/applications/[id]', { error: err });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

@@ -12,7 +12,13 @@ import type { Match, MatchEvent } from '@/types';
  * Callers are responsible for mapping to UI types if needed.
  */
 
-const supabase = createClient();
+// Lazy singleton — avoids calling createClient() at module evaluation time,
+// which would throw in SSR contexts where window is undefined.
+let _client: ReturnType<typeof createClient> | null = null;
+function getClient() {
+    if (!_client) _client = createClient();
+    return _client;
+}
 
 interface RealtimeConfig {
     onMatchUpdate?: (match: Partial<Match>) => void;
@@ -25,11 +31,8 @@ interface RealtimeConfig {
  * @param config Callback functions for updates
  * @returns Supabase RealtimeChannel
  */
-export const subscribeToMatch = (
-    matchId: string,
-    config: RealtimeConfig
-): RealtimeChannel => {
-    const channel = supabase
+export const subscribeToMatch = (matchId: string, config: RealtimeConfig): RealtimeChannel => {
+    const channel = getClient()
         .channel(`match-${matchId}`)
         .on(
             'postgres_changes',
@@ -44,7 +47,7 @@ export const subscribeToMatch = (
                 if (config.onMatchUpdate) {
                     config.onMatchUpdate(payload.new as Partial<Match>);
                 }
-            }
+            },
         )
         .on(
             'postgres_changes',
@@ -59,7 +62,7 @@ export const subscribeToMatch = (
                 if (config.onEventNew) {
                     config.onEventNew(payload.new as MatchEvent);
                 }
-            }
+            },
         )
         .subscribe();
 
@@ -71,9 +74,9 @@ export const subscribeToMatch = (
  * @param onUpdate Callback for any match update
  */
 export const subscribeToAllLiveMatches = (
-    onUpdate: (match: Partial<Match>) => void
+    onUpdate: (match: Partial<Match>) => void,
 ): RealtimeChannel => {
-    const channel = supabase
+    const channel = getClient()
         .channel('live-matches')
         .on(
             'postgres_changes',
@@ -86,7 +89,7 @@ export const subscribeToAllLiveMatches = (
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (payload: any) => {
                 onUpdate(payload.new as Partial<Match>);
-            }
+            },
         )
         .subscribe();
 
@@ -104,5 +107,5 @@ export const subscribeToAllLiveMatches = (
  * }, [id]);
  */
 export const unsubscribe = (channel: RealtimeChannel): void => {
-    supabase.removeChannel(channel);
+    getClient().removeChannel(channel);
 };

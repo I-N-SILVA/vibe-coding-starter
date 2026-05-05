@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
+import { log } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
 
 // Create a new application
 export async function POST(request: Request) {
     try {
         const supabase = await createClient();
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const {
+            data: { user },
+            error: authError,
+        } = await supabase.auth.getUser();
 
         if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -38,9 +42,13 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'You have already applied' }, { status: 400 });
         }
 
-        if (existingError && existingError.code !== 'PGRST116') { // PGRST116 is "No rows found"
-            console.error('Error checking existing application:', existingError);
-            return NextResponse.json({ error: 'Failed to verify application status' }, { status: 500 });
+        if (existingError && existingError.code !== 'PGRST116') {
+            // PGRST116 is "No rows found"
+            log.error('Error checking existing application', { error: existingError });
+            return NextResponse.json(
+                { error: 'Failed to verify application status' },
+                { status: 500 },
+            );
         }
 
         // Create the application
@@ -52,19 +60,19 @@ export async function POST(request: Request) {
                 target_id: targetId,
                 target_type: targetType,
                 message: message || null,
-                status: 'pending'
+                status: 'pending',
             })
             .select()
             .single();
 
         if (error) {
-            console.error('Error creating application:', error);
+            log.error('Error creating application', { error: error });
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
         return NextResponse.json({ data: application }, { status: 201 });
     } catch (err) {
-        console.error('Error in POST /api/applications:', err);
+        log.error('Error in POST /api/applications', { error: err });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
@@ -73,7 +81,10 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
     try {
         const supabase = await createClient();
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const {
+            data: { user },
+            error: authError,
+        } = await supabase.auth.getUser();
 
         if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -86,16 +97,18 @@ export async function GET(request: Request) {
             // Get applications sent by the current user
             const { data: applications, error } = await supabase
                 .from('applications')
-                .select(`
+                .select(
+                    `
                     *,
                     team:target_id(id, name, logo_url),
                     competition:target_id(id, name)
-                `)
+                `,
+                )
                 .eq('applicant_id', user.id)
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('Error fetching sent applications:', error);
+                log.error('Error fetching sent applications', { error: error });
                 return NextResponse.json({ error: error.message }, { status: 500 });
             }
 
@@ -110,10 +123,12 @@ export async function GET(request: Request) {
 
             let query = supabase
                 .from('applications')
-                .select(`
+                .select(
+                    `
                     *,
                     applicant:profiles(id, full_name, avatar_url, role)
-                `)
+                `,
+                )
                 .neq('applicant_id', user.id) // Filter out their own sent applications
                 .order('created_at', { ascending: false });
 
@@ -124,16 +139,19 @@ export async function GET(request: Request) {
             const { data: applications, error } = await query;
 
             if (error) {
-                console.error('Error fetching received applications:', error);
+                log.error('Error fetching received applications', { error: error });
                 return NextResponse.json({ error: error.message }, { status: 500 });
             }
 
             return NextResponse.json({ data: applications });
         } else {
-            return NextResponse.json({ error: 'Invalid type parameter. Must be "sent" or "received"' }, { status: 400 });
+            return NextResponse.json(
+                { error: 'Invalid type parameter. Must be "sent" or "received"' },
+                { status: 400 },
+            );
         }
     } catch (err) {
-        console.error('Error in GET /api/applications:', err);
+        log.error('Error in GET /api/applications', { error: err });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

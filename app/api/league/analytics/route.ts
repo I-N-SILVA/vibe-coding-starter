@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { log } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { getUserOrgId, apiError } from '@/lib/api/helpers';
 
@@ -31,7 +32,10 @@ export async function GET(request: Request) {
         if (matchesError) throw matchesError;
 
         const totalMatches = (matches || []).length;
-        const totalGoals = (matches || []).reduce((acc, m) => acc + (m.home_score || 0) + (m.away_score || 0), 0);
+        const totalGoals = (matches || []).reduce(
+            (acc, m) => acc + (m.home_score || 0) + (m.away_score || 0),
+            0,
+        );
         const avgGoalsPerMatch = totalMatches > 0 ? (totalGoals / totalMatches).toFixed(1) : '0';
 
         // 2. Fetch Clean Sheets
@@ -43,29 +47,38 @@ export async function GET(request: Request) {
         }, 0);
 
         // 3. Goals Trend (grouped by matchday or week)
-        const goalsTrend = (matches || []).reduce((acc: TrendItem[], m) => {
-            const label = m.matchday ? `R${m.matchday}` : (m.scheduled_at ? new Date(m.scheduled_at).toLocaleDateString() : 'TBD');
-            const existing = acc.find(item => item.label === label);
-            const goals = (m.home_score || 0) + (m.away_score || 0);
-            
-            if (existing) {
-                existing.goals += goals;
-            } else {
-                acc.push({ label, goals });
-            }
-            return acc;
-        }, []).sort((a, b) => a.label.localeCompare(b.label)).slice(-10);
+        const goalsTrend = (matches || [])
+            .reduce((acc: TrendItem[], m) => {
+                const label = m.matchday
+                    ? `R${m.matchday}`
+                    : m.scheduled_at
+                      ? new Date(m.scheduled_at).toLocaleDateString()
+                      : 'TBD';
+                const existing = acc.find((item) => item.label === label);
+                const goals = (m.home_score || 0) + (m.away_score || 0);
+
+                if (existing) {
+                    existing.goals += goals;
+                } else {
+                    acc.push({ label, goals });
+                }
+                return acc;
+            }, [])
+            .sort((a, b) => a.label.localeCompare(b.label))
+            .slice(-10);
 
         // 4. Team Comparison (Top 5 teams by goals)
         let teamsQuery = supabase
             .from('teams')
-            .select(`
+            .select(
+                `
                 id,
                 name,
                 standings:standings(goals_for, goals_against)
-            `)
+            `,
+            )
             .eq('organization_id', auth.orgId);
-        
+
         if (competitionId) {
             teamsQuery = teamsQuery.eq('competition_id', competitionId);
         }
@@ -73,28 +86,31 @@ export async function GET(request: Request) {
         const { data: teamsData, error: teamsError } = await teamsQuery;
         if (teamsError) throw teamsError;
 
-        const teamComparison = (teamsData || []).map(t => {
-            // @ts-ignore - Supabase join type can be complex
-            const s = t.standings?.[0] || { goals_for: 0, goals_against: 0 };
-            return {
-                name: t.name,
-                goals: s.goals_for || 0,
-                conceded: s.goals_against || 0
-            };
-        }).sort((a, b) => b.goals - a.goals).slice(0, 5);
+        const teamComparison = (teamsData || [])
+            .map((t) => {
+                // @ts-ignore - Supabase join type can be complex
+                const s = t.standings?.[0] || { goals_for: 0, goals_against: 0 };
+                return {
+                    name: t.name,
+                    goals: s.goals_for || 0,
+                    conceded: s.goals_against || 0,
+                };
+            })
+            .sort((a, b) => b.goals - a.goals)
+            .slice(0, 5);
 
         return NextResponse.json({
             stats: {
                 totalGoals,
                 avgGoalsPerMatch,
                 cleanSheets,
-                totalMatches
+                totalMatches,
             },
             goalsTrend,
-            teamComparison
+            teamComparison,
         });
     } catch (err: unknown) {
-        console.error('Analytics API Error:', err);
+        log.error('Analytics API Error', { error: err });
         return apiError(err instanceof Error ? err.message : 'Failed to fetch analytics', 500);
     }
 }

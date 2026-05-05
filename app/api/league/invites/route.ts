@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { log } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
 import { createInviteApiSchema } from '@/lib/api/validation';
@@ -37,13 +38,15 @@ export async function POST(request: Request) {
     const { role, ...inviteData } = parsed.data; // Extract 'role' to map to invited_role
     const { data, error } = await supabase
         .from('invites')
-        .insert([{
-            ...inviteData, // Spread the rest of the data (including 'type', 'competition_id', 'team_id', 'email')
-            invited_role: role, // Use the extracted 'role' for 'invited_role'
-            organization_id: auth.orgId,
-            status: 'pending',
-            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        }])
+        .insert([
+            {
+                ...inviteData, // Spread the rest of the data (including 'type', 'competition_id', 'team_id', 'email')
+                invited_role: role, // Use the extracted 'role' for 'invited_role'
+                organization_id: auth.orgId,
+                status: 'pending',
+                expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            },
+        ])
         .select()
         .single();
 
@@ -52,28 +55,30 @@ export async function POST(request: Request) {
     }
 
     // Record audit log for sending an invite
-    const { error: auditLogError } = await supabase
-        .from('audit_logs')
-        .insert({
+    const { error: auditLogError } = await supabase.from('audit_logs').insert({
+        organization_id: auth.orgId,
+        user_id: auth.userId, // User who sent the invite (admin)
+        target_user_id: null, // Target user is not yet known/authenticated
+        action: 'invite_sent',
+        details: {
+            invite_id: data.id,
+            invited_email: data.email,
+            invited_role: data.invited_role,
             organization_id: auth.orgId,
-            user_id: auth.userId, // User who sent the invite (admin)
-            target_user_id: null, // Target user is not yet known/authenticated
-            action: 'invite_sent',
-            details: {
-                invite_id: data.id,
-                invited_email: data.email,
-                invited_role: data.invited_role,
-                organization_id: auth.orgId,
-            },
-        });
+        },
+    });
 
     if (auditLogError) {
-        console.error('Failed to write audit log for invite sent:', auditLogError);
+        log.error('Failed to write audit log for invite sent', { error: auditLogError });
     }
 
     // Send invitation email
     if (data.email) {
-        const { data: org } = await supabase.from('organizations').select('name').eq('id', auth.orgId).single();
+        const { data: org } = await supabase
+            .from('organizations')
+            .select('name')
+            .eq('id', auth.orgId)
+            .single();
         const emailHtml = getInvitationEmailTemplate(data.token, org?.name || 'PLYAZ');
         await sendEmail({
             to: data.email,
@@ -84,4 +89,3 @@ export async function POST(request: Request) {
 
     return NextResponse.json(data, { status: 201 });
 }
-

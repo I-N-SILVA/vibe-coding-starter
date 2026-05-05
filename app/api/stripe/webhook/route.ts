@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { log } from '@/lib/logger';
 import { getStripe } from '@/lib/billing/stripe';
 import { createAdminClient } from '@/lib/supabase/server';
 import { STRIPE_WEBHOOK_SECRET } from '@/lib/billing/config';
@@ -7,8 +8,11 @@ import Stripe from 'stripe';
 export const runtime = 'nodejs';
 
 function getPlanFromPriceId(priceId: string): 'pro' | 'elite' | 'free' {
-    if (priceId === process.env.STRIPE_PRICE_PRO_MONTHLY ||
-        priceId === process.env.STRIPE_PRICE_PRO_YEARLY) return 'pro';
+    if (
+        priceId === process.env.STRIPE_PRICE_PRO_MONTHLY ||
+        priceId === process.env.STRIPE_PRICE_PRO_YEARLY
+    )
+        return 'pro';
     if (priceId === process.env.STRIPE_PRICE_ELITE_YEARLY) return 'elite';
     return 'free';
 }
@@ -25,7 +29,7 @@ export async function POST(request: Request) {
         event = stripe.webhooks.constructEvent(body, sig, STRIPE_WEBHOOK_SECRET);
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error';
-        console.error(`Webhook Error: ${message}`);
+        log.error('Webhook Error: <val>');
         return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
@@ -33,9 +37,9 @@ export async function POST(request: Request) {
     const orgId = session.metadata?.organization_id;
 
     if (!orgId && event.type !== 'customer.subscription.deleted') {
-        // Some events might not have orgId in metadata if not initiated by us, 
+        // Some events might not have orgId in metadata if not initiated by us,
         // but for our core flow we expect it.
-        console.warn(`No organization_id in metadata for event: ${event.type}`);
+        log.warn('No organization_id in metadata for event: ${event.type}');
     }
 
     try {
@@ -51,7 +55,7 @@ export async function POST(request: Request) {
                     .update({
                         plan: plan,
                         stripe_subscription_id: subscriptionId,
-                        stripe_customer_id: session.customer as string
+                        stripe_customer_id: session.customer as string,
                     })
                     .eq('id', orgId);
                 break;
@@ -79,9 +83,9 @@ export async function POST(request: Request) {
                 const subscription = event.data.object as Stripe.Subscription;
                 await supabase
                     .from('organizations')
-                    .update({ 
+                    .update({
                         plan: 'free',
-                        stripe_subscription_id: null 
+                        stripe_subscription_id: null,
                     })
                     .eq('stripe_subscription_id', subscription.id);
                 break;
@@ -94,8 +98,9 @@ export async function POST(request: Request) {
                     subscription?: string | null;
                     parent?: { subscription_details?: { subscription?: string | null } };
                 };
-                const subscriptionId = invoiceRaw.subscription
-                    ?? invoiceRaw.parent?.subscription_details?.subscription;
+                const subscriptionId =
+                    invoiceRaw.subscription ??
+                    invoiceRaw.parent?.subscription_details?.subscription;
                 if (subscriptionId) {
                     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
                     const plan = getPlanFromPriceId(subscription.items.data[0].price.id);
@@ -108,7 +113,7 @@ export async function POST(request: Request) {
             }
 
             case 'invoice.payment_failed': {
-                console.warn(`Payment failed for organization: ${orgId}`);
+                log.warn('Payment failed for organization: ${orgId}');
                 // Could send email or trigger notification here
                 break;
             }
@@ -116,7 +121,9 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ received: true });
     } catch (err) {
-        console.error('Webhook processing error:', err instanceof Error ? err.message : err);
+        log.error('Webhook processing error', {
+            error: err instanceof Error ? err.message : String(err),
+        });
         // Always return 200 to Stripe to avoid retries on logic errors
         return NextResponse.json({ received: true });
     }

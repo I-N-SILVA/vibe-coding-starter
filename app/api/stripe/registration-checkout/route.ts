@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { log } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser, apiError } from '@/lib/api/helpers';
 import { getStripe } from '@/lib/billing/stripe';
@@ -30,11 +31,13 @@ export async function POST(req: Request) {
 
         // 2. Determine platform fee (PLYAZ cut)
         // Free: 0 (shouldn't reach here), Pro: 5%, Elite: 3%
-        const orgPlan = (competition as { organization?: { plan: string } }).organization?.plan || 'free';
+        const orgPlan =
+            (competition as { organization?: { plan: string } }).organization?.plan || 'free';
         const { PLAN_LIMITS } = await import('@/lib/billing/config');
-        const platformFeePercent = PLAN_LIMITS[orgPlan as keyof typeof PLAN_LIMITS]?.platformFeePercent ?? 5;
-        
-        // Stripe Application fee (if using Connect) is one way, 
+        const platformFeePercent =
+            PLAN_LIMITS[orgPlan as keyof typeof PLAN_LIMITS]?.platformFeePercent ?? 5;
+
+        // Stripe Application fee (if using Connect) is one way,
         // but for now we just collect the full amount and will settle manually or via platform fee field in DB.
         // Actually, the prompt says "PLYAZ takes 5% platform cut".
         // Since we aren't using Connect yet, PLYAZ collects the full amount.
@@ -68,13 +71,13 @@ export async function POST(req: Request) {
                 user_id: user.id,
                 organization_id: competition.organization_id,
                 platform_fee_percent: platformFeePercent.toString(),
-                ...metadata 
+                ...metadata,
             },
         });
 
         return NextResponse.json({ url: session.url });
     } catch (err) {
-        console.error('Registration Checkout Error:', err);
+        log.error('Registration Checkout Error', { error: err });
         return apiError(err instanceof Error ? err.message : 'Internal Server Error', 500);
     }
 }

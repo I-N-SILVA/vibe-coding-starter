@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { log } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
 import { updateUserRoleApiSchema } from '@/lib/api/validation';
@@ -6,7 +7,7 @@ import { rateLimit } from '@/lib/api/rate-limit';
 
 export async function POST(
     request: Request,
-    { params }: { params: Promise<{ organizationId: string, userId: string }> }
+    { params }: { params: Promise<{ organizationId: string; userId: string }> },
 ) {
     const limited = await rateLimit(request, 10, 60_000);
     if (limited) return limited;
@@ -52,22 +53,20 @@ export async function POST(
     }
 
     // Record audit log
-    const { error: auditLogError } = await supabase
-        .from('audit_logs')
-        .insert({
+    const { error: auditLogError } = await supabase.from('audit_logs').insert({
+        organization_id: organizationId,
+        user_id: auth.userId, // Admin who performed the action
+        target_user_id: userId, // User whose role was updated
+        action: 'role_changed',
+        details: {
+            old_role: targetProfile.role,
+            new_role: newRole,
             organization_id: organizationId,
-            user_id: auth.userId, // Admin who performed the action
-            target_user_id: userId, // User whose role was updated
-            action: 'role_changed',
-            details: {
-                old_role: targetProfile.role,
-                new_role: newRole,
-                organization_id: organizationId,
-            },
-        });
+        },
+    });
 
     if (auditLogError) {
-        console.error('Failed to write audit log for role change:', auditLogError);
+        log.error('Failed to write audit log for role change', { error: auditLogError });
     }
 
     return NextResponse.json(data, { status: 200 });

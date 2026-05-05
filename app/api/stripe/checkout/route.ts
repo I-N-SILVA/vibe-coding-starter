@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { log } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
 import { getUserOrgId, apiError } from '@/lib/api/helpers';
 import { getStripe } from '@/lib/billing/stripe';
@@ -6,7 +7,7 @@ import { getStripe } from '@/lib/billing/stripe';
 export async function POST(request: Request) {
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);
-    
+
     if (auth.error) return auth.error;
     const { orgId, user } = auth;
 
@@ -31,10 +32,10 @@ export async function POST(request: Request) {
             const customer = await stripe.customers.create({
                 email: user.email!,
                 name: org.name,
-                metadata: { organization_id: orgId }
+                metadata: { organization_id: orgId },
             });
             customerId = customer.id;
-            
+
             // Save customer ID
             await supabase
                 .from('organizations')
@@ -42,24 +43,27 @@ export async function POST(request: Request) {
                 .eq('id', orgId);
         }
 
-        const session = await stripe.checkout.sessions.create({
-            mode: 'subscription',
-            customer: customerId,
-            line_items: [{ price: priceId, quantity: 1 }],
-            success_url: `${process.env.NEXT_PUBLIC_APP_URL}/league?upgraded=true`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
-            metadata: { organization_id: orgId },
-            subscription_data: { 
-                metadata: { organization_id: orgId } 
+        const session = await stripe.checkout.sessions.create(
+            {
+                mode: 'subscription',
+                customer: customerId,
+                line_items: [{ price: priceId, quantity: 1 }],
+                success_url: `${process.env.NEXT_PUBLIC_APP_URL}/league?upgraded=true`,
+                cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+                metadata: { organization_id: orgId },
+                subscription_data: {
+                    metadata: { organization_id: orgId },
+                },
+                allow_promotion_codes: true,
             },
-            allow_promotion_codes: true,
-        }, {
-            idempotencyKey: `checkout_${orgId}_${Date.now()}`
-        });
+            {
+                idempotencyKey: `checkout_${orgId}_${Date.now()}`,
+            },
+        );
 
         return NextResponse.json({ url: session.url });
     } catch (err) {
-        console.error('Stripe Checkout Error:', err);
+        log.error('Stripe Checkout Error', { error: err });
         return apiError(err instanceof Error ? err.message : 'Internal Server Error', 500);
     }
 }

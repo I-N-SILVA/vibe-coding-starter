@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { log } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import { getUserOrgId, apiError, parseBody } from '@/lib/api/helpers';
 import { acceptInviteApiSchema } from '@/lib/api/validation';
@@ -51,7 +52,13 @@ export async function POST(request: Request) {
         .from('profiles')
         .update({
             organization_id: invite.organization_id,
-            role: (invite.invited_role || 'player') as 'admin' | 'organizer' | 'referee' | 'manager' | 'player' | 'fan',
+            role: (invite.invited_role || 'player') as
+                | 'admin'
+                | 'organizer'
+                | 'referee'
+                | 'manager'
+                | 'player'
+                | 'fan',
             approval_status: 'approved', // Automatically approve upon invite acceptance
         })
         .eq('id', user.id);
@@ -75,30 +82,33 @@ export async function POST(request: Request) {
     }
 
     // 4. Record audit log
-    const { error: auditLogError } = await supabase
-        .from('audit_logs')
-        .insert({
+    const { error: auditLogError } = await supabase.from('audit_logs').insert({
+        organization_id: invite.organization_id,
+        user_id: user.id, // User who accepted the invite
+        target_user_id: user.id, // Target is the same user
+        action: 'invite_accepted',
+        details: {
+            invite_id: invite.id,
+            invited_role: invite.invited_role,
             organization_id: invite.organization_id,
-            user_id: user.id, // User who accepted the invite
-            target_user_id: user.id, // Target is the same user
-            action: 'invite_accepted',
-            details: {
-                invite_id: invite.id,
-                invited_role: invite.invited_role,
-                organization_id: invite.organization_id,
-            },
-        });
+        },
+    });
 
     if (auditLogError) {
-        console.error('Failed to write audit log for invite acceptance:', auditLogError);
+        log.error('Failed to write audit log for invite acceptance', { error: auditLogError });
         // Do not block the user if audit log fails, but log the error
     }
 
-    const org = Array.isArray(invite.organizations) ? invite.organizations[0] : invite.organizations;
+    const org = Array.isArray(invite.organizations)
+        ? invite.organizations[0]
+        : invite.organizations;
 
-    return NextResponse.json({
-        message: 'Invitation accepted successfully.',
-        profile: user,
-        organization_name: org?.name ?? null,
-    }, { status: 200 });
+    return NextResponse.json(
+        {
+            message: 'Invitation accepted successfully.',
+            profile: user,
+            organization_name: org?.name ?? null,
+        },
+        { status: 200 },
+    );
 }

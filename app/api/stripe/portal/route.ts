@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { log } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
 import { getUserOrgId, apiError } from '@/lib/api/helpers';
 import { getStripe } from '@/lib/billing/stripe';
@@ -6,7 +7,7 @@ import { getStripe } from '@/lib/billing/stripe';
 export async function POST() {
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);
-    
+
     if (auth.error) return auth.error;
     const { orgId } = auth;
 
@@ -29,7 +30,7 @@ export async function POST() {
 
         return NextResponse.json({ url: session.url });
     } catch (err) {
-        console.error('Stripe Portal Error:', err);
+        log.error('Stripe Portal Error', { error: err });
         return apiError(err instanceof Error ? err.message : 'Internal Server Error', 500);
     }
 }
