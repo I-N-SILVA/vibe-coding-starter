@@ -2,14 +2,12 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-    PageLayout,
-    PageHeader,
-    Badge,
-} from '@/components/plyaz';
+import { PageLayout, PageHeader, Badge } from '@/components/plyaz';
 import { stagger, fadeUp } from '@/lib/animations';
-import { useAllPlayers } from '@/lib/hooks';
+import { useTeams, useAllPlayers } from '@/lib/hooks';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import type { Player } from '@/lib/supabase/types';
+import type { Team } from '@/lib/supabase/types';
 
 // The DB uses detailed positions; we bucket them into display groups
 type DisplayPosition = 'GK' | 'DF' | 'MF' | 'FW';
@@ -66,7 +64,19 @@ export default function CoachRosterPage() {
     const [filter, setFilter] = useState<DisplayPosition | 'all'>('all');
     const [search, setSearch] = useState('');
 
-    const { data: players = [], isLoading } = useAllPlayers();
+    const { profile } = useAuth();
+    const { data: teams = [] } = useTeams();
+
+    // Find the team managed by this coach (matching manager_id to profile id, fallback to first team)
+    const managedTeam =
+        (teams as Team[]).find((t) => t.manager_id === profile?.id) ??
+        (teams[0] as Team | undefined);
+
+    // Fetch all org players then filter to the managed team if one is found
+    const { data: allPlayers = [], isLoading } = useAllPlayers();
+    const players: Player[] = managedTeam
+        ? allPlayers.filter((p) => p.team_id === managedTeam.id)
+        : allPlayers;
 
     const filteredPlayers = players.filter((p) => {
         const displayPos = toDisplayPosition(p.position);
@@ -89,17 +99,9 @@ export default function CoachRosterPage() {
 
     return (
         <PageLayout title="SQUAD">
-            <PageHeader
-                label="Team Management"
-                title="Full Roster"
-            />
+            <PageHeader label="Team Management" title="Full Roster" />
 
-            <motion.div
-                variants={stagger}
-                initial="hidden"
-                animate="show"
-                className="space-y-8"
-            >
+            <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-8">
                 {/* Summary Stats */}
                 <motion.section variants={fadeUp} className="grid grid-cols-4 gap-3">
                     {[
@@ -108,31 +110,39 @@ export default function CoachRosterPage() {
                         { label: 'Injured', value: injuredCount, color: 'text-red-600' },
                         { label: 'Suspended', value: suspendedCount, color: 'text-orange-600' },
                     ].map((stat) => (
-                        <div key={stat.label} className="bg-white border-2 border-gray-100 rounded-2xl p-4 text-center">
-                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-1">{stat.label}</p>
-                            <p className={`text-2xl font-black tracking-tight ${stat.color}`}>{stat.value}</p>
+                        <div
+                            key={stat.label}
+                            className="rounded-2xl border-2 border-gray-100 bg-white p-4 text-center"
+                        >
+                            <p className="mb-1 text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400">
+                                {stat.label}
+                            </p>
+                            <p className={`text-2xl font-black tracking-tight ${stat.color}`}>
+                                {stat.value}
+                            </p>
                         </div>
                     ))}
                 </motion.section>
 
                 {/* Search & Filter */}
-                <motion.section variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
+                <motion.section variants={fadeUp} className="flex flex-col gap-3 sm:flex-row">
                     <input
                         type="text"
                         placeholder="Search players..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="flex-1 px-4 py-3 border-2 border-gray-100 rounded-xl text-sm font-medium focus:outline-none focus:border-gray-900 transition-colors"
+                        className="flex-1 rounded-xl border-2 border-gray-100 px-4 py-3 text-sm font-medium transition-colors focus:border-gray-900 focus:outline-none"
                     />
                     <div className="flex gap-2">
                         {(['all', ...positionOrder] as const).map((pos) => (
                             <button
                                 key={pos}
                                 onClick={() => setFilter(pos)}
-                                className={`px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === pos
-                                    ? 'bg-gray-900 text-white'
-                                    : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
-                                    }`}
+                                className={`rounded-xl px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${
+                                    filter === pos
+                                        ? 'bg-gray-900 text-white'
+                                        : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
+                                }`}
                             >
                                 {pos === 'all' ? 'All' : pos}
                             </button>
@@ -143,67 +153,78 @@ export default function CoachRosterPage() {
                 {/* Loading state */}
                 {isLoading && (
                     <motion.section variants={fadeUp} className="py-16 text-center">
-                        <p className="text-sm text-gray-400 font-medium">Loading roster…</p>
+                        <p className="text-sm font-medium text-gray-400">Loading roster…</p>
                     </motion.section>
                 )}
 
                 {/* Empty state */}
                 {!isLoading && players.length === 0 && (
                     <motion.section variants={fadeUp} className="py-16 text-center">
-                        <p className="text-sm text-gray-400 font-medium">No players found for this team.</p>
+                        <p className="text-sm font-medium text-gray-400">
+                            No players found for this team.
+                        </p>
                     </motion.section>
                 )}
 
                 {/* Player Groups */}
-                {!isLoading && grouped.map((group) => (
-                    <motion.section key={group.position} variants={fadeUp}>
-                        <h2 className="text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 mb-4 flex items-center gap-3">
-                            {group.label} ({group.players.length})
-                            <div className="h-px flex-1 bg-gray-100" />
-                        </h2>
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {group.players.map((player) => {
-                                const displayPos = toDisplayPosition(player.position);
-                                const displayStatus = toDisplayStatus(player.status);
-                                const age = calcAge(player.date_of_birth);
-                                const goals = (player.stats as { goals?: number })?.goals ?? 0;
-                                const appearances = (player.stats as { appearances?: number })?.appearances ?? 0;
-                                return (
-                                    <div
-                                        key={player.id}
-                                        className="flex items-center gap-4 p-4 bg-white border-2 border-gray-100 rounded-2xl hover:border-gray-200 transition-colors"
-                                    >
-                                        <div className="w-12 h-12 rounded-xl bg-gray-900 text-white flex items-center justify-center font-black text-base">
-                                            {player.jersey_number ?? '—'}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-bold text-sm tracking-tight text-gray-900 truncate">{player.name}</p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${positionColors[displayPos]}`}>
-                                                    {displayPos}
-                                                </span>
-                                                {age !== null && (
-                                                    <span className="text-[10px] text-gray-400 font-medium">Age {age}</span>
-                                                )}
+                {!isLoading &&
+                    grouped.map((group) => (
+                        <motion.section key={group.position} variants={fadeUp}>
+                            <h2 className="mb-4 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">
+                                {group.label} ({group.players.length})
+                                <div className="h-px flex-1 bg-gray-100" />
+                            </h2>
+                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                {group.players.map((player) => {
+                                    const displayPos = toDisplayPosition(player.position);
+                                    const displayStatus = toDisplayStatus(player.status);
+                                    const age = calcAge(player.date_of_birth);
+                                    const goals = (player.stats as { goals?: number })?.goals ?? 0;
+                                    const appearances =
+                                        (player.stats as { appearances?: number })?.appearances ??
+                                        0;
+                                    return (
+                                        <div
+                                            key={player.id}
+                                            className="flex items-center gap-4 rounded-2xl border-2 border-gray-100 bg-white p-4 transition-colors hover:border-gray-200"
+                                        >
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-900 text-base font-black text-white">
+                                                {player.jersey_number ?? '—'}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-sm font-bold tracking-tight text-gray-900">
+                                                    {player.name}
+                                                </p>
+                                                <div className="mt-1 flex items-center gap-2">
+                                                    <span
+                                                        className={`rounded-md px-2 py-0.5 text-[9px] font-black ${positionColors[displayPos]}`}
+                                                    >
+                                                        {displayPos}
+                                                    </span>
+                                                    {age !== null && (
+                                                        <span className="text-[10px] font-medium text-gray-400">
+                                                            Age {age}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <Badge
+                                                    variant="secondary"
+                                                    className={`text-[8px] ${statusConfig[displayStatus].color} border`}
+                                                >
+                                                    {statusConfig[displayStatus].label}
+                                                </Badge>
+                                                <p className="mt-1 text-[9px] font-medium text-gray-400">
+                                                    {appearances} apps · {goals} gls
+                                                </p>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <Badge
-                                                variant="secondary"
-                                                className={`text-[8px] ${statusConfig[displayStatus].color} border`}
-                                            >
-                                                {statusConfig[displayStatus].label}
-                                            </Badge>
-                                            <p className="text-[9px] text-gray-400 mt-1 font-medium">
-                                                {appearances} apps · {goals} gls
-                                            </p>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </motion.section>
-                ))}
+                                    );
+                                })}
+                            </div>
+                        </motion.section>
+                    ))}
             </motion.div>
         </PageLayout>
     );
