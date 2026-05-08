@@ -97,5 +97,17 @@ export async function POST(request: Request, { params }: RouteParams) {
         baseUrl,
     );
 
+    // Recalculate standings in the background (non-blocking) for this competition
+    fetch(`${baseUrl}/api/league/standings/recalculate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ competitionId: data.competition_id }),
+    }).catch((err: unknown) => {
+        log.warn('[Standings] Background recalculation failed', {
+            error: err instanceof Error ? err.message : String(err),
+            matchId: id,
+        });
+    });
+
     return NextResponse.json(data);
 }

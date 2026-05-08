@@ -11,26 +11,62 @@ import {
 } from '@/components/plyaz';
 import { cn } from '@/lib/utils';
 import { Trophy, LayoutGrid, List } from 'lucide-react';
-import { MOCK_STANDINGS, MOCK_BRACKET } from '@/lib/mock/fixtures';
+import { MOCK_BRACKET } from '@/lib/mock/fixtures';
+
+type StandingsRow = {
+    id: string;
+    team_id: string;
+    played: number;
+    won: number;
+    drawn: number;
+    lost: number;
+    goals_for: number;
+    goals_against: number;
+    goal_difference: number;
+    points: number;
+    form: string[];
+    team: {
+        id: string;
+        name: string;
+        short_name: string | null;
+        logo_url: string | null;
+        primary_color: string | null;
+    } | null;
+};
 
 export default function PublicStandings() {
     const searchParams = useSearchParams();
     const competitionId = searchParams.get('competitionId');
     const [format, setFormat] = useState<'league' | 'knockout'>('league');
+    const [standings, setStandings] = useState<StandingsRow[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
+    // Determine competition format
     useEffect(() => {
         if (!competitionId) { setFormat('league'); return; }
         async function fetchCompetition() {
             try {
-                const res = await fetch(`/api/league/competitions?id=${competitionId}`);
+                const res = await fetch(`/api/league/public/competitions`);
                 if (res.ok) {
-                    const data = await res.json();
-                    if (data?.type === 'knockout' || data?.type === 'group_knockout') setFormat('knockout');
+                    const data: Array<{ id: string; type: string }> = await res.json();
+                    const comp = data.find((c) => c.id === competitionId);
+                    if (comp?.type === 'knockout' || comp?.type === 'group_knockout') setFormat('knockout');
                     else setFormat('league');
                 }
             } catch (err) { console.error('Failed to fetch format', err); }
         }
         fetchCompetition();
+    }, [competitionId]);
+
+    // Fetch real standings from the public standings API
+    useEffect(() => {
+        if (!competitionId) { setStandings([]); return; }
+        setIsLoading(true);
+        fetch(`/api/league/public/standings?competitionId=${competitionId}`)
+            .then((res) => (res.ok ? res.json() : []))
+            .then((data: StandingsRow[]) => setStandings(Array.isArray(data) ? data : []))
+            .catch(() => setStandings([]))
+            .finally(() => setIsLoading(false));
     }, [competitionId]);
 
     return (
@@ -78,71 +114,87 @@ export default function PublicStandings() {
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.3 }}
                     >
-                        <Card className="!p-0 overflow-hidden border-neutral-100 dark:border-neutral-700/50" data-testid="standings-table">
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="border-b border-neutral-50 dark:border-neutral-700/50 bg-neutral-50/30 dark:bg-neutral-800/30">
-                                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500 w-12 text-center">#</th>
-                                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500">Team</th>
-                                            <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500 text-center">P</th>
-                                            <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500 text-center">W</th>
-                                            <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-900 dark:text-white text-center bg-orange-50/50 dark:bg-orange-500/5">Pts</th>
-                                            <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500 text-center hidden lg:table-cell">Form</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {MOCK_STANDINGS.map((row, idx) => (
-                                            <motion.tr
-                                                key={row.team}
-                                                initial={{ opacity: 0, x: -8 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: idx * 0.04, duration: 0.3 }}
-                                                data-testid={`standings-row-${idx}`}
-                                                className={cn(
-                                                    'border-b border-neutral-50 dark:border-neutral-800/50 last:border-0 hover:bg-orange-50/10 dark:hover:bg-orange-500/5 transition-colors group',
-                                                    row.rank <= 2 && 'border-l-2 border-l-orange-500'
-                                                )}
-                                            >
-                                                <td className="px-6 py-5 text-center">
-                                                    <span className="text-sm font-black text-neutral-900 dark:text-white tabular-nums">{row.rank}</span>
-                                                </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-2xl bg-neutral-50 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-black text-neutral-400 dark:text-neutral-500 group-hover:bg-white dark:group-hover:bg-neutral-700 border border-transparent group-hover:border-neutral-100 dark:group-hover:border-neutral-600 transition-all">
-                                                            {row.shortName}
-                                                        </div>
-                                                        <span className="text-sm font-black text-neutral-900 dark:text-white tracking-tight uppercase">{row.team}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-5 text-sm text-center text-neutral-500 dark:text-neutral-400 font-bold tabular-nums">{row.played}</td>
-                                                <td className="px-4 py-5 text-sm text-center text-neutral-500 dark:text-neutral-400 font-bold tabular-nums">{row.won}</td>
-                                                <td className="px-4 py-5 text-sm font-black text-center text-neutral-900 dark:text-white tabular-nums bg-orange-50/20 dark:bg-orange-500/5">
-                                                    {row.points}
-                                                </td>
-                                                <td className="px-6 py-5 hidden lg:table-cell">
-                                                    <div className="flex items-center justify-center gap-2">
-                                                        {row.form.map((res: string, i: number) => (
-                                                            <span
-                                                                key={i}
-                                                                className={cn(
-                                                                    'w-6 h-6 rounded-lg flex items-center justify-center text-[9px] font-black border-2 transition-all',
-                                                                    res === 'W' ? 'bg-neutral-900 dark:bg-white border-neutral-900 dark:border-white text-white dark:text-neutral-900' :
-                                                                    res === 'D' ? 'bg-neutral-100 dark:bg-neutral-700 border-neutral-100 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300' :
-                                                                    'bg-white dark:bg-neutral-800 border-neutral-100 dark:border-neutral-700 text-neutral-300 dark:text-neutral-600'
-                                                                )}
-                                                            >
-                                                                {res}
+                        {isLoading ? (
+                            <Card className="!p-0 overflow-hidden border-neutral-100 dark:border-neutral-700/50">
+                                <div className="p-12 text-center text-neutral-400 dark:text-neutral-500 text-sm">
+                                    Loading standings…
+                                </div>
+                            </Card>
+                        ) : standings.length === 0 ? (
+                            <Card className="!p-0 overflow-hidden border-neutral-100 dark:border-neutral-700/50">
+                                <div className="p-12 text-center text-neutral-400 dark:text-neutral-500 text-sm">
+                                    {competitionId ? 'No standings yet — matches are in progress.' : 'Select a competition to view standings.'}
+                                </div>
+                            </Card>
+                        ) : (
+                            <Card className="!p-0 overflow-hidden border-neutral-100 dark:border-neutral-700/50" data-testid="standings-table">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-neutral-50 dark:border-neutral-700/50 bg-neutral-50/30 dark:bg-neutral-800/30">
+                                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500 w-12 text-center">#</th>
+                                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500">Team</th>
+                                                <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500 text-center">P</th>
+                                                <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500 text-center">W</th>
+                                                <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-900 dark:text-white text-center bg-orange-50/50 dark:bg-orange-500/5">Pts</th>
+                                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500 text-center hidden lg:table-cell">Form</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {standings.map((row, idx) => (
+                                                <motion.tr
+                                                    key={row.team_id}
+                                                    initial={{ opacity: 0, x: -8 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: idx * 0.04, duration: 0.3 }}
+                                                    data-testid={`standings-row-${idx}`}
+                                                    className={cn(
+                                                        'border-b border-neutral-50 dark:border-neutral-800/50 last:border-0 hover:bg-orange-50/10 dark:hover:bg-orange-500/5 transition-colors group',
+                                                        idx < 2 && 'border-l-2 border-l-orange-500'
+                                                    )}
+                                                >
+                                                    <td className="px-6 py-5 text-center">
+                                                        <span className="text-sm font-black text-neutral-900 dark:text-white tabular-nums">{idx + 1}</span>
+                                                    </td>
+                                                    <td className="px-6 py-5">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-10 h-10 rounded-2xl bg-neutral-50 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-black text-neutral-400 dark:text-neutral-500 group-hover:bg-white dark:group-hover:bg-neutral-700 border border-transparent group-hover:border-neutral-100 dark:group-hover:border-neutral-600 transition-all">
+                                                                {row.team?.short_name ?? '?'}
+                                                            </div>
+                                                            <span className="text-sm font-black text-neutral-900 dark:text-white tracking-tight uppercase">
+                                                                {row.team?.name ?? 'Unknown'}
                                                             </span>
-                                                        ))}
-                                                    </div>
-                                                </td>
-                                            </motion.tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </Card>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-5 text-sm text-center text-neutral-500 dark:text-neutral-400 font-bold tabular-nums">{row.played}</td>
+                                                    <td className="px-4 py-5 text-sm text-center text-neutral-500 dark:text-neutral-400 font-bold tabular-nums">{row.won}</td>
+                                                    <td className="px-4 py-5 text-sm font-black text-center text-neutral-900 dark:text-white tabular-nums bg-orange-50/20 dark:bg-orange-500/5">
+                                                        {row.points}
+                                                    </td>
+                                                    <td className="px-6 py-5 hidden lg:table-cell">
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            {(row.form ?? []).map((res: string, i: number) => (
+                                                                <span
+                                                                    key={i}
+                                                                    className={cn(
+                                                                        'w-6 h-6 rounded-lg flex items-center justify-center text-[9px] font-black border-2 transition-all',
+                                                                        res === 'W' ? 'bg-neutral-900 dark:bg-white border-neutral-900 dark:border-white text-white dark:text-neutral-900' :
+                                                                        res === 'D' ? 'bg-neutral-100 dark:bg-neutral-700 border-neutral-100 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300' :
+                                                                        'bg-white dark:bg-neutral-800 border-neutral-100 dark:border-neutral-700 text-neutral-300 dark:text-neutral-600'
+                                                                    )}
+                                                                >
+                                                                    {res}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                </motion.tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Card>
+                        )}
                     </motion.div>
                 ) : (
                     <motion.div
