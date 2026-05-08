@@ -78,13 +78,21 @@ export function DiscoveryBoard({ type, userRole }: DiscoveryBoardProps) {
                     <CardContent className="p-8 text-center text-secondary-main/50">
                         <p className="mb-1 font-bold">
                             {type === 'team'
-                                ? 'No teams are currently recruiting.'
-                                : 'No tournaments are currently looking for referees.'}
+                                ? userRole === 'player'
+                                    ? 'No teams are currently accepting applications.'
+                                    : 'No teams have enabled recruiting yet.'
+                                : userRole === 'referee'
+                                  ? 'No tournaments are currently looking for referees.'
+                                  : 'No tournaments have enabled referee recruitment yet.'}
                         </p>
                         <p className="mt-2 text-xs">
                             {type === 'team'
-                                ? 'Coaches can enable recruiting from their dashboard to appear here.'
-                                : 'Organizers can enable referee recruitment from their competition settings.'}
+                                ? userRole === 'player'
+                                    ? 'Check back soon — coaches enable recruiting from their team dashboard.'
+                                    : 'Go to your Team Dashboard and enable recruiting to appear here.'
+                                : userRole === 'referee'
+                                  ? 'Check back soon — organizers enable recruitment from competition settings.'
+                                  : 'Organizers can enable referee recruitment from their competition settings.'}
                         </p>
                     </CardContent>
                 </Card>
