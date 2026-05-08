@@ -53,6 +53,37 @@ Guidelines for continuously improving rules based on emerging code patterns, inc
 - Add and commit automatically whenever an entire task is finished
 - Use descriptive commit messages that capture the full scope of changes
 
+## Critical Architecture Rules
+
+### Public vs Authenticated API routes
+
+Public fan pages (`/league/public/*`) MUST call `/api/league/public/*` endpoints — NOT `/api/league/*`.
+The authenticated routes require an org session and return 401 for unauthenticated visitors.
+The pattern: `app/api/league/public/[resource]/route.ts` uses `createAdminClient()` (no auth).
+
+### i18n — already exists, do not rebuild
+
+Full PT/EN/ES/FR system is at `lib/i18n/translations.ts` + `lib/i18n/useLanguage.tsx`.
+Translation files: `messages/en.json` + `messages/pt.json`.
+Language toggle is already in the Sidebar and UserMenu. Check these files before touching any language feature.
+
+### Repository pattern
+
+`lib/repositories/` — Supabase and Mock implementations for every entity.
+Toggle: `localStorage.getItem('plyaz_simulation_enabled') === 'true'` (client) or `NEXT_PUBLIC_USE_MOCK_REPOS=true` (server).
+Mock store uses localStorage — starts empty on fresh sessions.
+
+### Coach roster scoping
+
+Coach roster filters players by `team.manager_id === profile.id` to find the managed team.
+Teams table has: `manager_id`, `is_recruiting_players`, `invite_code` fields.
+
+### Seeding data
+
+No local `.env.local` — credentials are in Vercel only.
+To seed: `curl -X POST "https://vibe-coding-starter-black.vercel.app/api/seed?token=seed-plyaz-demo-2026"`
+Demo accounts (password Demo1234!): manager@plyaz.demo, referee@plyaz.demo, player1@plyaz.demo, player2@plyaz.demo
+
 ## Retrieving library documentation by using Context 7
 
 When the user requests code examples, setup or configuration steps, or library/API documentation, use the context7 mcp server to get the information.
@@ -67,8 +98,9 @@ Check for console errors and ensure the implemented functionality is working as 
 **ALWAYS follow these instructions before completing a task.**
 
 Automatically use the IDE's built-in diagnostics tool to check for linting and type errors:
-   - Run `mcp__ide__getDiagnostics` to check all files for diagnostics
-   - Fix any linting or type errors before considering the task complete
-   - Do this for *each* file you create or edit
+
+- Run `mcp__ide__getDiagnostics` to check all files for diagnostics
+- Fix any linting or type errors before considering the task complete
+- Do this for _each_ file you create or edit
 
 This is a CRITICAL step that must NEVER be skipped when working on any code-related task.
