@@ -4,7 +4,8 @@ import { apiError } from '@/lib/api/helpers';
 
 /**
  * Public endpoint — no auth required.
- * Returns matches visible to the general public (live, scheduled, completed).
+ * Returns matches that belong to active competitions only.
+ * Optionally filtered by status and/or competitionId.
  */
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -18,21 +19,41 @@ export async function GET(request: Request) {
         return apiError('Server configuration error', 503);
     }
 
-    let query = supabase.from('matches').select(`
+    // First: resolve which competitions are active
+    let compQuery = supabase.from('competitions').select('id').eq('status', 'active');
+
+    if (competitionId) {
+        compQuery = compQuery.eq('id', competitionId);
+    }
+
+    const { data: activeComps, error: compError } = await compQuery;
+
+    if (compError) {
+        return apiError(compError.message, 500);
+    }
+
+    const activeCompetitionIds = (activeComps ?? []).map((c: { id: string }) => c.id);
+
+    if (activeCompetitionIds.length === 0) {
+        return NextResponse.json([]);
+    }
+
+    let query = supabase
+        .from('matches')
+        .select(
+            `
         *,
         home_team:teams!home_team_id(id, name, short_name, logo_url),
         away_team:teams!away_team_id(id, name, short_name, logo_url)
-    `);
+    `,
+        )
+        .in('competition_id', activeCompetitionIds);
 
     if (status) {
         query = query.eq('status', status);
     } else {
         // Default: only show non-cancelled/non-postponed matches
         query = query.not('status', 'in', '("cancelled","postponed")');
-    }
-
-    if (competitionId) {
-        query = query.eq('competition_id', competitionId);
     }
 
     const { data, error } = await query.order('scheduled_at', { ascending: true });

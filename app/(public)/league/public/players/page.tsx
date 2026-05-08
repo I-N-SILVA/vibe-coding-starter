@@ -69,7 +69,7 @@ export default function PublicPlayersPage() {
     useEffect(() => {
         async function fetchPlayers() {
             try {
-                const res = await fetch('/api/league/players');
+                const res = await fetch('/api/league/public/players');
                 if (res.ok) {
                     const data = await res.json();
                     setPlayers(Array.isArray(data) ? data : []);
