@@ -57,3 +57,4 @@ playwright-report/
 test-results/
 blob-report/
 .env
+.claude/worktrees/
