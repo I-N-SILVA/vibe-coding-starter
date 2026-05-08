@@ -9,7 +9,7 @@ import { useToast } from '@/components/providers/ToastProvider';
 interface DiscoveryItem {
     id: string;
     name: string;
-    organization: { name: string, logo_url: string | null };
+    organization: { name: string; logo_url: string | null } | null;
     recruitment_message: string | null;
     needed_positions?: string[]; // Teams only
 }
@@ -33,7 +33,7 @@ export function DiscoveryBoard({ type, userRole }: DiscoveryBoardProps) {
             if (!res.ok) throw new Error('Failed to fetch discovery items');
             const data = await res.json();
             return data.data as DiscoveryItem[];
-        }
+        },
     });
 
     const applyMutation = useMutation({
@@ -45,8 +45,8 @@ export function DiscoveryBoard({ type, userRole }: DiscoveryBoardProps) {
                     targetId: selectedItem!.id,
                     targetType: type,
                     role: userRole,
-                    message: message.trim()
-                })
+                    message: message.trim(),
+                }),
             });
             if (!res.ok) {
                 const error = await res.json();
@@ -62,10 +62,10 @@ export function DiscoveryBoard({ type, userRole }: DiscoveryBoardProps) {
         },
         onError: (err: Error) => {
             toast.error(err.message);
-        }
+        },
     });
 
-    if (isLoading) return <div className="animate-pulse h-32 bg-secondary-main/5 rounded-2xl" />;
+    if (isLoading) return <div className="h-32 animate-pulse rounded-2xl bg-secondary-main/5" />;
 
     return (
         <div className="space-y-4">
@@ -74,25 +74,41 @@ export function DiscoveryBoard({ type, userRole }: DiscoveryBoardProps) {
             </h2>
 
             {!items?.length ? (
-                <Card className="bg-secondary-main/5 border-dashed">
+                <Card className="border-dashed bg-secondary-main/5">
                     <CardContent className="p-8 text-center text-secondary-main/50">
-                        No {type}s are currently recruiting. Check back later!
+                        <p className="mb-1 font-bold">
+                            {type === 'team'
+                                ? 'No teams are currently recruiting.'
+                                : 'No tournaments are currently looking for referees.'}
+                        </p>
+                        <p className="mt-2 text-xs">
+                            {type === 'team'
+                                ? 'Coaches can enable recruiting from their dashboard to appear here.'
+                                : 'Organizers can enable referee recruitment from their competition settings.'}
+                        </p>
                     </CardContent>
                 </Card>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {items.map((item) => (
-                        <Card key={item.id} className="hover:border-primary-main/20 transition-colors">
+                        <Card
+                            key={item.id}
+                            className="transition-colors hover:border-primary-main/20"
+                        >
                             <CardContent className="p-6">
-                                <div className="flex items-start justify-between mb-4">
+                                <div className="mb-4 flex items-start justify-between">
                                     <div>
-                                        <h3 className="font-bold text-lg leading-tight">{item.name}</h3>
-                                        <p className="text-xs text-secondary-main/60">{item.organization.name}</p>
+                                        <h3 className="text-lg font-bold leading-tight">
+                                            {item.name}
+                                        </h3>
+                                        <p className="text-xs text-secondary-main/60">
+                                            {item.organization?.name ?? ''}
+                                        </p>
                                     </div>
-                                    {item.organization.logo_url && (
-                                        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-secondary-main/5">
-                                            <Image 
-                                                src={item.organization.logo_url} 
+                                    {item.organization?.logo_url && (
+                                        <div className="relative h-10 w-10 overflow-hidden rounded-full bg-secondary-main/5">
+                                            <Image
+                                                src={item.organization.logo_url}
                                                 alt={`${item.organization.name} logo`}
                                                 fill
                                                 className="object-cover"
@@ -104,7 +120,10 @@ export function DiscoveryBoard({ type, userRole }: DiscoveryBoardProps) {
                                 {item.needed_positions && item.needed_positions.length > 0 && (
                                     <div className="mb-4 flex flex-wrap gap-1">
                                         {item.needed_positions.map((pos) => (
-                                            <span key={pos} className="px-2 py-0.5 rounded uppercase tracking-wider text-[10px] font-bold bg-primary-main/10 text-primary-main">
+                                            <span
+                                                key={pos}
+                                                className="rounded bg-primary-main/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-main"
+                                            >
                                                 {pos}
                                             </span>
                                         ))}
@@ -112,16 +131,12 @@ export function DiscoveryBoard({ type, userRole }: DiscoveryBoardProps) {
                                 )}
 
                                 {item.recruitment_message && (
-                                    <p className="text-sm text-secondary-main/80 mb-6 italic line-clamp-3">
+                                    <p className="mb-6 line-clamp-3 text-sm italic text-secondary-main/80">
                                         &quot;{item.recruitment_message}&quot;
                                     </p>
                                 )}
 
-                                <Button
-                                    fullWidth
-                                    size="sm"
-                                    onClick={() => setSelectedItem(item)}
-                                >
+                                <Button fullWidth size="sm" onClick={() => setSelectedItem(item)}>
                                     Apply to Join
                                 </Button>
                             </CardContent>
@@ -132,11 +147,13 @@ export function DiscoveryBoard({ type, userRole }: DiscoveryBoardProps) {
 
             {/* Application Modal Overlay - Using simple conditional rendering for MVP */}
             {selectedItem && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <Card className="w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <Card className="w-full max-w-md shadow-2xl duration-200 animate-in fade-in zoom-in">
                         <CardContent className="p-6">
-                            <h3 className="text-lg font-black mb-1">Apply to {selectedItem.name}</h3>
-                            <p className="text-sm text-secondary-main/60 mb-6">
+                            <h3 className="mb-1 text-lg font-black">
+                                Apply to {selectedItem.name}
+                            </h3>
+                            <p className="mb-6 text-sm text-secondary-main/60">
                                 Sending an application to this {type}.
                             </p>
 
