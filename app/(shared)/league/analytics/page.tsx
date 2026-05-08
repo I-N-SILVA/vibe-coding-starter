@@ -40,7 +40,7 @@ const DynamicCartesianGrid = CartesianGrid;
 import { fadeUp, stagger } from '@/lib/animations';
 
 export default function AnalyticsDashboard() {
-    const { profile } = useAuth();
+    useAuth();
     const [selectedComp, setSelectedComp] = useState<string>('all');
     const { data: competitions = [] } = useCompetitions();
 
