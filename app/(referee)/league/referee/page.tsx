@@ -19,7 +19,7 @@ import { useMatches } from '@/lib/hooks';
 import type { Match } from '@/lib/supabase/types';
 import { triggerHaptic } from '@/lib/utils';
 
-const STATUS_VARIANT: Record<string, 'success' | 'warning' | 'secondary' | 'danger'> = {
+const STATUS_VARIANT: Record<string, 'success' | 'warning' | 'secondary' | 'error'> = {
     live: 'success',
     upcoming: 'warning',
     scheduled: 'warning',

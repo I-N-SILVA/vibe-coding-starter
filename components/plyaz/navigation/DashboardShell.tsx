@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { NavItem, NavGroup } from './types';
 import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
@@ -15,11 +14,7 @@ interface DashboardShellProps {
     navGroups?: NavGroup[];
 }
 
-export function DashboardShell({
-    children,
-    navItems,
-    navGroups,
-}: DashboardShellProps) {
+export function DashboardShell({ children, navItems, navGroups }: DashboardShellProps) {
     const [cmdOpen, setCmdOpen] = useState(false);
 
     // Wire global ⌘K / Ctrl+K
@@ -38,24 +33,16 @@ export function DashboardShell({
 
     return (
         <div className="min-h-screen bg-white dark:bg-neutral-950">
-            <Navbar
-                onSearchOpen={() => setCmdOpen(true)}
-            />
+            <Navbar onSearchOpen={() => setCmdOpen(true)} />
 
             <Sidebar items={navItems} navGroups={navGroups} />
 
-            <div className="md:ml-56">
-                {children}
-            </div>
+            <div className="md:ml-56">{children}</div>
 
             <MobileNav items={navItems} navGroups={navGroups} />
             <SimulationBanner />
 
-            <CommandPalette
-                open={cmdOpen}
-                onClose={() => setCmdOpen(false)}
-                items={allNavItems}
-            />
+            <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} items={allNavItems} />
         </div>
     );
 }
