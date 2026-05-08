@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
@@ -19,48 +19,117 @@ import { useMatches } from '@/lib/hooks';
 import type { Match } from '@/lib/supabase/types';
 import { triggerHaptic } from '@/lib/utils';
 
-const statusVariant: Record<string, 'success' | 'warning' | 'secondary'> = {
+const STATUS_VARIANT: Record<string, 'success' | 'warning' | 'secondary' | 'danger'> = {
     live: 'success',
     upcoming: 'warning',
     scheduled: 'warning',
+    completed: 'secondary',
 };
 
-function MatchRow({ match, onOpen }: { match: Match; onOpen: () => void }) {
+function isToday(dateStr: string | null | undefined): boolean {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    const now = new Date();
+    return (
+        d.getFullYear() === now.getFullYear() &&
+        d.getMonth() === now.getMonth() &&
+        d.getDate() === now.getDate()
+    );
+}
+
+function isPast(dateStr: string | null | undefined, status: string): boolean {
+    if (status === 'completed' || status === 'finished') return true;
+    if (!dateStr) return false;
+    return new Date(dateStr) < new Date();
+}
+
+function formatMatchDate(dateStr: string | null | undefined): string {
+    if (!dateStr) return 'TBD';
+    const d = new Date(dateStr);
+    if (isToday(dateStr)) {
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    return d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+interface MatchCardProps {
+    match: Match;
+    showStartButton?: boolean;
+    onOpen: () => void;
+    onStartScoring: () => void;
+}
+
+function MatchCard({ match, showStartButton, onOpen, onStartScoring }: MatchCardProps) {
     const homeName = match.home_team?.short_name ?? match.home_team?.name ?? 'Home';
     const awayName = match.away_team?.short_name ?? match.away_team?.name ?? 'Away';
-    const date = match.scheduled_at
-        ? new Date(match.scheduled_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })
-        : 'TBD';
+    const dateStr = formatMatchDate(match.scheduled_at);
+    const isLive = match.status === 'live';
 
     return (
-        <Card hoverable onClick={onOpen} className="cursor-pointer">
+        <Card hoverable onClick={onOpen} className="cursor-pointer overflow-hidden">
+            {isLive && (
+                <div className="h-1 animate-pulse bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
+            )}
             <CardContent className="p-5">
-                <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                        <div className="text-center w-20 shrink-0">
-                            <p className="font-black text-base uppercase truncate">{homeName}</p>
+                <div className="flex items-center gap-4">
+                    {/* Teams + score */}
+                    <div className="flex min-w-0 flex-1 items-center gap-4">
+                        <div className="w-20 shrink-0 text-center">
+                            <p className="truncate text-sm font-black uppercase">{homeName}</p>
+                            <p className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-gray-400">
+                                HOME
+                            </p>
                         </div>
                         <div className="flex-1 text-center">
-                            {match.status === 'live' ? (
+                            {isLive || match.status === 'completed' ? (
                                 <p className="text-2xl font-black tabular-nums">
-                                    {match.home_score} — {match.away_score}
+                                    {match.home_score ?? 0} — {match.away_score ?? 0}
                                 </p>
                             ) : (
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">vs</p>
+                                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                                    vs
+                                </p>
                             )}
-                            <p className="text-[10px] text-gray-400 mt-1">{date}</p>
+                            <p className="mt-1 text-[10px] text-gray-400">{dateStr}</p>
                         </div>
-                        <div className="text-center w-20 shrink-0">
-                            <p className="font-black text-base uppercase truncate">{awayName}</p>
+                        <div className="w-20 shrink-0 text-center">
+                            <p className="truncate text-sm font-black uppercase">{awayName}</p>
+                            <p className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-gray-400">
+                                AWAY
+                            </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                        <Badge variant={statusVariant[match.status] ?? 'secondary'} size="sm">
-                            {match.status === 'live' ? '● LIVE' : match.status.toUpperCase()}
+
+                    {/* Actions */}
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                        <Badge variant={STATUS_VARIANT[match.status] ?? 'secondary'} size="sm">
+                            {isLive ? '● LIVE' : match.status.toUpperCase()}
                         </Badge>
-                        <Button size="sm" onClick={(e) => { e.stopPropagation(); triggerHaptic('light'); onOpen(); }}>
-                            Open
-                        </Button>
+                        {showStartButton ? (
+                            <Button
+                                size="sm"
+                                className="h-9 bg-orange-500 px-4 text-[10px] font-black uppercase tracking-widest text-white hover:bg-orange-600"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    triggerHaptic('medium');
+                                    onStartScoring();
+                                }}
+                            >
+                                {isLive ? '▶ RESUME' : '▶ START'}
+                            </Button>
+                        ) : (
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    triggerHaptic('light');
+                                    onOpen();
+                                }}
+                            >
+                                View
+                            </Button>
+                        )}
                     </div>
                 </div>
             </CardContent>
@@ -70,11 +139,51 @@ function MatchRow({ match, onOpen }: { match: Match; onOpen: () => void }) {
 
 export default function RefereeDashboard() {
     const router = useRouter();
-    const { data: liveMatches = [], isLoading: liveLoading } = useMatches({ status: 'live' });
-    const { data: upcomingMatches = [], isLoading: upcomingLoading } = useMatches({ status: 'scheduled' });
-    const { data: completedMatches = [] } = useMatches({ status: 'completed' });
 
-    const isLoading = liveLoading || upcomingLoading;
+    // Fetch all relevant match statuses
+    const { data: liveMatches = [], isLoading: liveLoading } = useMatches({ status: 'live' });
+    const { data: scheduledMatches = [], isLoading: scheduledLoading } = useMatches({
+        status: 'scheduled',
+    });
+    const { data: upcomingMatches = [], isLoading: upcomingLoading } = useMatches({
+        status: 'upcoming',
+    });
+    const { data: completedMatches = [], isLoading: completedLoading } = useMatches({
+        status: 'completed',
+    });
+
+    const isLoading = liveLoading || scheduledLoading || upcomingLoading || completedLoading;
+
+    // Group matches
+    const { todayMatches, futureMatches, pastMatches } = useMemo(() => {
+        const allScheduled = [...scheduledMatches, ...upcomingMatches];
+
+        const todayScheduled = allScheduled.filter((m) => isToday(m.scheduled_at));
+        const future = allScheduled.filter(
+            (m) => !isToday(m.scheduled_at) && !isPast(m.scheduled_at, m.status),
+        );
+        const pastScheduled = allScheduled.filter(
+            (m) => isPast(m.scheduled_at, m.status) && !isToday(m.scheduled_at),
+        );
+
+        return {
+            todayMatches: [...liveMatches, ...todayScheduled],
+            futureMatches: future,
+            pastMatches: [...completedMatches, ...pastScheduled],
+        };
+    }, [liveMatches, scheduledMatches, upcomingMatches, completedMatches]);
+
+    const handleStartScoring = (matchId: string) => {
+        router.push(`/league/referee/live/${matchId}`);
+    };
+
+    const handleOpenMatch = (matchId: string, isLiveOrToday: boolean) => {
+        if (isLiveOrToday) {
+            router.push(`/league/referee/live/${matchId}`);
+        } else {
+            router.push(`/league/referee/${matchId}`);
+        }
+    };
 
     return (
         <PageLayout title="REFEREE">
@@ -84,30 +193,35 @@ export default function RefereeDashboard() {
                 description="Monitor your matches, log events live, and manage your earnings."
             />
 
-            {/* Earnings Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <StatCard 
-                    title="Total Matches" 
-                    value={completedMatches.length.toString()} 
-                    icon={<NavIcons.Whistle />} 
+            {/* Quick Stats */}
+            <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+                <StatCard
+                    title="Total Matches"
+                    value={completedMatches.length.toString()}
+                    icon={<NavIcons.Whistle />}
                 />
-                <StatCard 
-                    title="Pending Fees" 
-                    value={`$${completedMatches.length * 45}`} 
+                <StatCard
+                    title="Pending Fees"
+                    value={`$${completedMatches.length * 45}`}
                     icon={<NavIcons.Dashboard />}
                     trend={{ value: completedMatches.length > 0 ? 100 : 0, isPositive: true }}
                 />
-                <StatCard 
-                    title="Next Payout" 
-                    value="Aug 15" 
-                    icon={<NavIcons.Calendar />} 
+                <StatCard
+                    title="Today"
+                    value={todayMatches.length.toString()}
+                    icon={<NavIcons.Calendar />}
                 />
-                <Card className="bg-orange-500 text-white cursor-pointer hover:bg-orange-600 transition-colors" onClick={() => router.push('/league/referee/payouts')}>
+                <Card
+                    className="cursor-pointer bg-orange-500 text-white transition-colors hover:bg-orange-600"
+                    onClick={() => router.push('/league/referee/payouts')}
+                >
                     <CardContent className="p-4">
-                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Payments</p>
-                        <p className="text-2xl font-black mt-1">View All</p>
-                        <div className="flex justify-end mt-2">
-                            <NavIcons.Public className="w-5 h-5 opacity-40" />
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-60">
+                            Payments
+                        </p>
+                        <p className="mt-1 text-2xl font-black">View All</p>
+                        <div className="mt-2 flex justify-end">
+                            <NavIcons.Public className="h-5 w-5 opacity-40" />
                         </div>
                     </CardContent>
                 </Card>
@@ -115,31 +229,33 @@ export default function RefereeDashboard() {
 
             {/* Find Tournaments */}
             <div className="mb-10">
-                <h2 className="text-[10px] font-black tracking-[0.25em] uppercase text-secondary-main/40 mb-4">
+                <h2 className="mb-4 text-[10px] font-black uppercase tracking-[0.25em] text-secondary-main/40">
                     Opportunities
                 </h2>
                 <DiscoveryBoard type="competition" userRole="referee" />
             </div>
 
-            {/* Live Matches */}
-            {(liveMatches.length > 0 || liveLoading) && (
+            {/* TODAY — Live + today's matches */}
+            {(todayMatches.length > 0 || isLoading) && (
                 <section className="mb-10">
-                    <h2 className="text-[10px] font-black tracking-[0.25em] uppercase text-secondary-main/40 mb-4">
-                        Live Now
+                    <h2 className="mb-4 text-[10px] font-black uppercase tracking-[0.25em] text-secondary-main/40">
+                        Today
                     </h2>
                     {isLoading ? (
-                        <div className="h-20 bg-gray-50 rounded-2xl animate-pulse" />
+                        <div className="h-24 animate-pulse rounded-2xl bg-gray-50" />
                     ) : (
                         <div className="space-y-3">
-                            {liveMatches.map((match) => (
+                            {todayMatches.map((match) => (
                                 <motion.div
                                     key={match.id}
                                     initial={{ opacity: 0, y: 8 }}
                                     animate={{ opacity: 1, y: 0 }}
                                 >
-                                    <MatchRow
+                                    <MatchCard
                                         match={match}
-                                        onOpen={() => router.push(`/league/referee/live/${match.id}`)}
+                                        showStartButton
+                                        onOpen={() => handleOpenMatch(match.id, true)}
+                                        onStartScoring={() => handleStartScoring(match.id)}
                                     />
                                 </motion.div>
                             ))}
@@ -148,28 +264,30 @@ export default function RefereeDashboard() {
                 </section>
             )}
 
-            {/* Upcoming / Scheduled Matches */}
+            {/* UPCOMING */}
             <section className="mb-10">
-                <h2 className="text-[10px] font-black tracking-[0.25em] uppercase text-secondary-main/40 mb-4">
+                <h2 className="mb-4 text-[10px] font-black uppercase tracking-[0.25em] text-secondary-main/40">
                     Upcoming Assignments
                 </h2>
                 {isLoading ? (
                     <div className="space-y-3">
                         {[0, 1, 2].map((i) => (
-                            <div key={i} className="h-20 bg-gray-50 rounded-2xl animate-pulse" />
+                            <div key={i} className="h-20 animate-pulse rounded-2xl bg-gray-50" />
                         ))}
                     </div>
-                ) : upcomingMatches.length > 0 ? (
+                ) : futureMatches.length > 0 ? (
                     <div className="space-y-3">
-                        {upcomingMatches.map((match) => (
+                        {futureMatches.map((match) => (
                             <motion.div
                                 key={match.id}
                                 initial={{ opacity: 0, y: 8 }}
                                 animate={{ opacity: 1, y: 0 }}
                             >
-                                <MatchRow
+                                <MatchCard
                                     match={match}
-                                    onOpen={() => router.push(`/league/referee/${match.id}`)}
+                                    showStartButton={false}
+                                    onOpen={() => handleOpenMatch(match.id, false)}
+                                    onStartScoring={() => handleStartScoring(match.id)}
                                 />
                             </motion.div>
                         ))}
@@ -182,6 +300,31 @@ export default function RefereeDashboard() {
                     />
                 )}
             </section>
+
+            {/* PAST */}
+            {pastMatches.length > 0 && (
+                <section className="mb-10">
+                    <h2 className="mb-4 text-[10px] font-black uppercase tracking-[0.25em] text-secondary-main/40">
+                        Past Matches
+                    </h2>
+                    <div className="space-y-3 opacity-70">
+                        {pastMatches.slice(0, 5).map((match) => (
+                            <motion.div
+                                key={match.id}
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                            >
+                                <MatchCard
+                                    match={match}
+                                    showStartButton={false}
+                                    onOpen={() => handleOpenMatch(match.id, false)}
+                                    onStartScoring={() => handleStartScoring(match.id)}
+                                />
+                            </motion.div>
+                        ))}
+                    </div>
+                </section>
+            )}
         </PageLayout>
     );
 }
