@@ -26,17 +26,6 @@ import {
     Bar,
 } from 'recharts';
 
-// Use components directly from recharts
-const DynamicLineChart = LineChart;
-const DynamicBarChart = BarChart;
-const DynamicResponsiveContainer = ResponsiveContainer;
-const DynamicXAxis = XAxis;
-const DynamicYAxis = YAxis;
-const DynamicTooltip = Tooltip;
-const DynamicLine = Line;
-const DynamicBar = Bar;
-const DynamicCartesianGrid = CartesianGrid;
-
 import { fadeUp, stagger } from '@/lib/animations';
 
 export default function AnalyticsDashboard() {
@@ -125,25 +114,25 @@ export default function AnalyticsDashboard() {
                         {isLoading ? (
                             <div className="h-full w-full animate-pulse rounded-xl bg-gray-50" />
                         ) : (
-                            <DynamicResponsiveContainer width="100%" height="100%">
-                                <DynamicLineChart data={analytics?.goalsTrend || []}>
-                                    <DynamicCartesianGrid
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={analytics?.goalsTrend || []}>
+                                    <CartesianGrid
                                         strokeDasharray="3 3"
                                         vertical={false}
                                         stroke="#F3F4F6"
                                     />
-                                    <DynamicXAxis
+                                    <XAxis
                                         dataKey="label"
                                         tick={{ fontSize: 10, fill: '#9CA3AF' }}
                                         axisLine={false}
                                         tickLine={false}
                                     />
-                                    <DynamicYAxis
+                                    <YAxis
                                         tick={{ fontSize: 10, fill: '#9CA3AF' }}
                                         axisLine={false}
                                         tickLine={false}
                                     />
-                                    <DynamicTooltip
+                                    <Tooltip
                                         contentStyle={{
                                             borderRadius: '12px',
                                             border: 'none',
@@ -152,7 +141,7 @@ export default function AnalyticsDashboard() {
                                             fontWeight: 'bold',
                                         }}
                                     />
-                                    <DynamicLine
+                                    <Line
                                         type="monotone"
                                         dataKey="goals"
                                         stroke="#F97316"
@@ -165,8 +154,8 @@ export default function AnalyticsDashboard() {
                                         }}
                                         activeDot={{ r: 6, strokeWidth: 0 }}
                                     />
-                                </DynamicLineChart>
-                            </DynamicResponsiveContainer>
+                                </LineChart>
+                            </ResponsiveContainer>
                         )}
                     </div>
                 </Card>
@@ -185,20 +174,20 @@ export default function AnalyticsDashboard() {
                         {isLoading ? (
                             <div className="h-full w-full animate-pulse rounded-xl bg-gray-50" />
                         ) : (
-                            <DynamicResponsiveContainer width="100%" height="100%">
-                                <DynamicBarChart data={analytics?.teamComparison || []}>
-                                    <DynamicCartesianGrid
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={analytics?.teamComparison || []}>
+                                    <CartesianGrid
                                         strokeDasharray="3 3"
                                         vertical={false}
                                         stroke="#F3F4F6"
                                     />
-                                    <DynamicXAxis
+                                    <XAxis
                                         dataKey="name"
                                         tick={{ fontSize: 10, fill: '#9CA3AF' }}
                                         axisLine={false}
                                         tickLine={false}
                                     />
-                                    <DynamicTooltip
+                                    <Tooltip
                                         cursor={{ fill: '#F9FAFB' }}
                                         contentStyle={{
                                             borderRadius: '12px',
@@ -208,20 +197,20 @@ export default function AnalyticsDashboard() {
                                             fontWeight: 'bold',
                                         }}
                                     />
-                                    <DynamicBar
+                                    <Bar
                                         dataKey="goals"
                                         fill="#000000"
                                         radius={[4, 4, 0, 0]}
                                         barSize={24}
                                     />
-                                    <DynamicBar
+                                    <Bar
                                         dataKey="conceded"
                                         fill="#F97316"
                                         radius={[4, 4, 0, 0]}
                                         barSize={24}
                                     />
-                                </DynamicBarChart>
-                            </DynamicResponsiveContainer>
+                                </BarChart>
+                            </ResponsiveContainer>
                         )}
                     </div>
                     <div className="mt-6 flex justify-center gap-6">
