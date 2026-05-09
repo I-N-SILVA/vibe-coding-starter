@@ -6,13 +6,14 @@
 export const queryKeys = {
     competitions: ['competitions'] as const,
     competition: (id: string) => ['competition', id] as const,
-    matches: (params?: { status?: string; competitionId?: string }) =>
+    matches: (params?: { status?: string; competitionId?: string; refereeId?: string }) =>
         ['matches', params] as const,
     match: (id: string) => ['match', id] as const,
     matchEvents: (matchId: string) => ['matchEvents', matchId] as const,
     teams: (competitionId?: string) => ['teams', competitionId] as const,
     team: (id: string) => ['team', id] as const,
-    players: (teamId?: string) => (teamId ? ['players', teamId] : ['players']) as readonly (string | undefined)[],
+    players: (teamId?: string) =>
+        (teamId ? ['players', teamId] : ['players']) as readonly (string | undefined)[],
     allPlayers: () => ['players'] as const,
     player: (teamId: string, playerId: string) => ['player', teamId, playerId] as const,
     standings: (competitionId: string) => ['standings', competitionId] as const,

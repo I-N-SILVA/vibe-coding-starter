@@ -16,6 +16,7 @@ import {
 } from '@/components/plyaz';
 import { DiscoveryBoard } from '@/components/plyaz/DiscoveryBoard';
 import { useMatches } from '@/lib/hooks';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import type { Match } from '@/lib/supabase/types';
 import { triggerHaptic } from '@/lib/utils';
 
@@ -139,17 +140,25 @@ function MatchCard({ match, showStartButton, onOpen, onStartScoring }: MatchCard
 
 export default function RefereeDashboard() {
     const router = useRouter();
+    const { profile } = useAuth();
+    const refereeId = profile?.id;
 
-    // Fetch all relevant match statuses
-    const { data: liveMatches = [], isLoading: liveLoading } = useMatches({ status: 'live' });
+    // Fetch only matches assigned to this referee
+    const { data: liveMatches = [], isLoading: liveLoading } = useMatches({
+        status: 'live',
+        refereeId,
+    });
     const { data: scheduledMatches = [], isLoading: scheduledLoading } = useMatches({
         status: 'scheduled',
+        refereeId,
     });
     const { data: upcomingMatches = [], isLoading: upcomingLoading } = useMatches({
         status: 'upcoming',
+        refereeId,
     });
     const { data: completedMatches = [], isLoading: completedLoading } = useMatches({
         status: 'completed',
+        refereeId,
     });
 
     const isLoading = liveLoading || scheduledLoading || upcomingLoading || completedLoading;

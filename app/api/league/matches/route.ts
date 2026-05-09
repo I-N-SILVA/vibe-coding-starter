@@ -8,6 +8,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const competitionId = searchParams.get('competitionId');
     const status = searchParams.get('status');
+    const refereeId = searchParams.get('refereeId');
 
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);
@@ -26,7 +27,14 @@ export async function GET(request: Request) {
     }
 
     if (status) {
-        query = query.eq('status', status as 'completed' | 'upcoming' | 'live' | 'postponed' | 'cancelled');
+        query = query.eq(
+            'status',
+            status as 'completed' | 'upcoming' | 'live' | 'postponed' | 'cancelled',
+        );
+    }
+
+    if (refereeId) {
+        query = query.eq('referee_id', refereeId);
     }
 
     const { data, error } = await query.order('scheduled_at', { ascending: true });
@@ -75,7 +83,9 @@ export async function PATCH(request: Request) {
 
     const parsed = updateMatchApiSchema.safeParse(raw);
     if (!parsed.success) {
-        const messages = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+        const messages = parsed.error.issues
+            .map((i) => `${i.path.join('.')}: ${i.message}`)
+            .join('; ');
         return apiError(messages, 400);
     }
 

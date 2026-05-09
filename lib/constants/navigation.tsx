@@ -24,7 +24,7 @@ export const adminNavGroups: NavGroup[] = [
         items: [
             { label: 'Matches', href: '/league/matches', icon: <NavIcons.Matches /> },
             { label: 'Venues', href: '/league/venues', icon: <NavIcons.Public /> },
-            { label: 'Referee', href: '/league/referee', icon: <NavIcons.Whistle /> },
+            { label: 'Statistics', href: '/league/statistics', icon: <NavIcons.Statistics /> },
         ],
     },
     {

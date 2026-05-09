@@ -11,13 +11,18 @@ import type { Match, MatchEvent, UpdateScoreDto } from '@/types';
 // MATCH HOOKS
 // ============================================
 
-export function useMatches(params?: { status?: string; competitionId?: string }) {
+export function useMatches(params?: {
+    status?: string;
+    competitionId?: string;
+    refereeId?: string;
+}) {
     return useQuery({
         queryKey: queryKeys.matches(params),
         queryFn: () => {
             const search = new URLSearchParams();
             if (params?.status) search.set('status', params.status);
             if (params?.competitionId) search.set('competitionId', params.competitionId);
+            if (params?.refereeId) search.set('refereeId', params.refereeId);
             const qs = search.toString();
             return apiClient.get<Match[]>(`/api/league/matches${qs ? `?${qs}` : ''}`);
         },
@@ -47,8 +52,13 @@ export function useCreateMatch() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: { competition_id: string; home_team_id: string; away_team_id: string; scheduled_at?: string; venue_id?: string }) =>
-            apiClient.post<Match>('/api/league/matches', data),
+        mutationFn: (data: {
+            competition_id: string;
+            home_team_id: string;
+            away_team_id: string;
+            scheduled_at?: string;
+            venue_id?: string;
+        }) => apiClient.post<Match>('/api/league/matches', data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.matches() });
         },
@@ -69,7 +79,7 @@ export function useUpdateScore() {
             await queryClient.cancelQueries({ queryKey: queryKeys.match(data.matchId) });
             const previous = queryClient.getQueryData<Match>(queryKeys.match(data.matchId));
             queryClient.setQueryData<Match>(queryKeys.match(data.matchId), (old) =>
-                old ? { ...old, home_score: data.homeScore, away_score: data.awayScore } : old
+                old ? { ...old, home_score: data.homeScore, away_score: data.awayScore } : old,
             );
             return { previous };
         },
@@ -125,7 +135,13 @@ export function useAddMatchEvent() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: { matchId: string; playerId?: string; type: MatchEvent['type']; minute?: number; details?: Record<string, unknown> }) =>
+        mutationFn: (data: {
+            matchId: string;
+            playerId?: string;
+            type: MatchEvent['type'];
+            minute?: number;
+            details?: Record<string, unknown>;
+        }) =>
             apiClient.post<MatchEvent>(`/api/league/matches/${data.matchId}/events`, {
                 type: data.type,
                 player_id: data.playerId,
