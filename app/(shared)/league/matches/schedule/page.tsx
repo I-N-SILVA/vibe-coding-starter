@@ -69,7 +69,6 @@ export default function FixtureScheduler() {
                 setExistingMatches(allMatches);
                 setReferees(Array.isArray(refs) ? refs : []);
             } catch (err) {
-                console.error('Failed to fetch data:', err);
                 showError('Could not load required management data.');
             } finally {
                 setIsLoadingData(false);
@@ -135,7 +134,6 @@ export default function FixtureScheduler() {
             success('Match scheduled successfully!');
             router.push('/league');
         } catch (err) {
-            console.error('Failed to schedule match:', err);
             showError(err instanceof Error ? err.message : 'Failed to schedule match.');
         }
     };
