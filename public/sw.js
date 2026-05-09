@@ -2,34 +2,27 @@
 const CACHE_NAME = 'plyaz-v1';
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
+    self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(clients.claim());
+    event.waitUntil(clients.claim());
 });
 
-// Handle Push Notifications
 self.addEventListener('push', (event) => {
-  const data = event.data?.json() ?? {};
-  const title = data.title || 'PLYAZ GOAL ALERT';
-  const options = {
-    body: data.body || 'A new event has been recorded in your league.',
-    icon: '/static/branding/logo-circle.png',
-    badge: '/static/branding/logo-circle.png',
-    vibrate: [200, 100, 200],
-    data: {
-      url: data.url || '/'
-    }
-  };
-
-  event.waitUntil(self.registration.showNotification(title, options));
+    const data = event.data?.json() ?? {};
+    event.waitUntil(
+        self.registration.showNotification(data.title ?? 'PLYAZ', {
+            body: data.body ?? '',
+            icon: '/icons/icon-192x192.png',
+            badge: '/icons/icon-72x72.png',
+            tag: data.tag ?? 'plyaz-notification',
+            data: { url: data.url ?? '/' },
+        }),
+    );
 });
 
-// Handle Notification Click
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow(event.notification.data.url)
-  );
+    event.notification.close();
+    event.waitUntil(clients.openWindow(event.notification.data?.url ?? '/'));
 });

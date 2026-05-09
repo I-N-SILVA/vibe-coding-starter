@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageLayout, PageHeader, Card, KnockoutBracket } from '@/components/plyaz';
 import { cn } from '@/lib/utils';
-import { Trophy, LayoutGrid, List } from 'lucide-react';
+import { Trophy, LayoutGrid, List, Code2, Check } from 'lucide-react';
 
 type StandingsRow = {
     id: string;
@@ -273,6 +273,56 @@ export default function PublicStandings() {
                     </div>
                 </div>
             </div>
+
+            <EmbedScoreboardSnippet />
         </PageLayout>
+    );
+}
+
+function EmbedScoreboardSnippet() {
+    const [copied, setCopied] = useState(false);
+    const origin =
+        typeof window !== 'undefined' ? window.location.origin : 'https://your-app.vercel.app';
+    const snippet = `<iframe src="${origin}/league/public/embed/scoreboard" width="400" height="300" frameborder="0"></iframe>`;
+
+    const handleCopy = useCallback(() => {
+        void navigator.clipboard.writeText(snippet).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    }, [snippet]);
+
+    return (
+        <div className="mt-8">
+            <div className="rounded-2xl border border-neutral-100 bg-white p-6 dark:border-neutral-700/50 dark:bg-neutral-800/50">
+                <div className="mb-3 flex items-center gap-2">
+                    <Code2 className="h-4 w-4 text-neutral-400" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400">
+                        Embed Scoreboard
+                    </span>
+                </div>
+                <p className="mb-4 text-sm text-neutral-500 dark:text-neutral-400">
+                    Paste this snippet on any website to display a live scoreboard widget.
+                </p>
+                <div className="flex items-start gap-2">
+                    <pre className="flex-1 overflow-x-auto rounded-xl bg-neutral-50 p-4 text-[11px] leading-relaxed text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+                        {snippet}
+                    </pre>
+                    <button
+                        onClick={handleCopy}
+                        className="flex shrink-0 items-center gap-1.5 rounded-xl bg-neutral-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-neutral-700 dark:bg-neutral-700 dark:hover:bg-neutral-600"
+                    >
+                        {copied ? (
+                            <>
+                                <Check className="h-3 w-3" />
+                                Copied
+                            </>
+                        ) : (
+                            'Copy'
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 }

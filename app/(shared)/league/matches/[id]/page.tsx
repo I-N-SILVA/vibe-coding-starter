@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     PageLayout,
@@ -17,7 +17,10 @@ import {
 import { stagger, fadeUp } from '@/lib/animations';
 import { subscribeToMatch } from '@/lib/supabase/realtime';
 import type { Match, MatchEvent, Player, Team } from '@/lib/supabase/types';
-import { MapPin, Clock, Calendar, Users } from 'lucide-react';
+import { uploadImage } from '@/lib/supabase/storage';
+import { MapPin, Clock, Calendar, Users, Star, Camera, Upload } from 'lucide-react';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { useToast } from '@/components/providers/ToastProvider';
 
 // ─────────────────────────────────────────────
 // Types
@@ -26,6 +29,15 @@ import { MapPin, Clock, Calendar, Users } from 'lucide-react';
 type MatchWithTeams = Match & {
     home_team: Team | null;
     away_team: Team | null;
+};
+
+type MatchPhoto = {
+    id: string;
+    match_id: string;
+    photo_url: string;
+    caption: string | null;
+    uploaded_by: string | null;
+    created_at: string;
 };
 
 // ─────────────────────────────────────────────
@@ -378,6 +390,130 @@ const LineupColumn: React.FC<LineupColumnProps> = ({ teamName, players, side }) 
 );
 
 // ─────────────────────────────────────────────
+// Match Photos Section
+// ─────────────────────────────────────────────
+
+interface MatchPhotosSectionProps {
+    matchId: string;
+    canUpload: boolean;
+}
+
+const MatchPhotosSection: React.FC<MatchPhotosSectionProps> = ({ matchId, canUpload }) => {
+    const [photos, setPhotos] = useState<MatchPhoto[]>([]);
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const toast = useToast();
+
+    const loadPhotos = useCallback(async () => {
+        try {
+            const res = await fetch(`/api/league/matches/${matchId}/photos`);
+            if (res.ok) {
+                const data: MatchPhoto[] = await res.json();
+                setPhotos(Array.isArray(data) ? data : []);
+            }
+        } catch {
+            // silently fail
+        }
+    }, [matchId]);
+
+    useEffect(() => {
+        void loadPhotos();
+    }, [loadPhotos]);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+            const photoUrl = await uploadImage(
+                file,
+                'match-photos',
+                `matches/${matchId}/${filename}`,
+            );
+            const res = await fetch(`/api/league/matches/${matchId}/photos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ photo_url: photoUrl }),
+            });
+            if (res.ok) {
+                toast.success('Photo uploaded');
+                await loadPhotos();
+            } else {
+                const body = (await res.json().catch(() => ({}))) as { error?: string };
+                toast.error(body.error ?? 'Upload failed');
+            }
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Upload failed');
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    return (
+        <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            animate="show"
+            transition={{ delay: 0.4 }}
+            className="mt-6"
+        >
+            <Card padding="md">
+                <div className="mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Camera className="h-4 w-4 text-neutral-400" />
+                        <CardTitle>Match Photos</CardTitle>
+                    </div>
+                    {canUpload && (
+                        <>
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploading}
+                                className="flex items-center gap-1.5 rounded-xl bg-neutral-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white transition-colors hover:bg-neutral-700 disabled:opacity-50 dark:bg-neutral-700 dark:hover:bg-neutral-600"
+                            >
+                                <Upload className="h-3 w-3" />
+                                {uploading ? 'Uploading…' : 'Upload'}
+                            </button>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
+                        </>
+                    )}
+                </div>
+                <CardContent>
+                    {photos.length === 0 ? (
+                        <p className="py-6 text-center text-sm text-neutral-400">No photos yet</p>
+                    ) : (
+                        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                            {photos.map((photo) => (
+                                <a
+                                    key={photo.id}
+                                    href={photo.photo_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block overflow-hidden rounded-xl"
+                                >
+                                    <img
+                                        src={photo.photo_url}
+                                        alt={photo.caption ?? 'Match photo'}
+                                        className="aspect-video w-full object-cover transition-transform hover:scale-105"
+                                    />
+                                </a>
+                            ))}
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        </motion.div>
+    );
+};
+
+// ─────────────────────────────────────────────
 // Match Tabs
 // ─────────────────────────────────────────────
 
@@ -422,6 +558,11 @@ const MatchTabs: React.FC<MatchTabsProps> = ({ id }) => {
 export default function MatchDetailPage() {
     const params = useParams();
     const id = params?.id as string;
+    const { profile } = useAuth();
+    const toast = useToast();
+    const queryClient = useQueryClient();
+    const [submittingRating, setSubmittingRating] = useState(false);
+    const [hoveredStar, setHoveredStar] = useState<number | null>(null);
 
     // ── Fetch match ──────────────────────────────
     const { data: match, isLoading: matchLoading } = useQuery<MatchWithTeams>({
@@ -530,6 +671,38 @@ export default function MatchDetailPage() {
     const homeTeamName = match.home_team?.name ?? 'Home Team';
     const awayTeamName = match.away_team?.name ?? 'Away Team';
 
+    const canRateReferee =
+        match.status === 'completed' &&
+        !!match.referee_id &&
+        (profile?.role === 'manager' || profile?.role === 'admin');
+
+    const canUploadPhotos =
+        match.status === 'completed' &&
+        !!profile &&
+        ['manager', 'coach', 'referee'].includes(profile.role);
+
+    const handleRateReferee = async (rating: number) => {
+        setSubmittingRating(true);
+        try {
+            const res = await fetch(`/api/league/matches/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ referee_rating: rating }),
+            });
+            if (!res.ok) {
+                const err = (await res.json()) as { error?: string };
+                toast.error(err.error ?? 'Failed to submit rating');
+                return;
+            }
+            toast.success('Referee rated successfully');
+            await queryClient.invalidateQueries({ queryKey: ['match', id] });
+        } catch {
+            toast.error('Failed to submit rating');
+        } finally {
+            setSubmittingRating(false);
+        }
+    };
+
     return (
         <PageLayout>
             <PageHeader
@@ -593,6 +766,71 @@ export default function MatchDetailPage() {
                     </Card>
                 </motion.div>
             </div>
+
+            {/* Rate Referee */}
+            {canRateReferee && (
+                <motion.div
+                    variants={fadeUp}
+                    initial="hidden"
+                    animate="show"
+                    transition={{ delay: 0.3 }}
+                    className="mt-6"
+                >
+                    <Card padding="md">
+                        <div className="mb-4 flex items-center gap-2">
+                            <Star className="h-4 w-4 text-neutral-400" />
+                            <CardTitle>Rate Referee</CardTitle>
+                        </div>
+                        <CardContent>
+                            {match.referee && (
+                                <p className="mb-3 text-sm text-neutral-500">
+                                    {match.referee.full_name ?? 'Referee'}
+                                </p>
+                            )}
+                            {match.referee_rating ? (
+                                <div className="flex items-center gap-1">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star
+                                            key={star}
+                                            className={`h-6 w-6 ${star <= match.referee_rating! ? 'fill-orange-500 text-orange-500' : 'text-neutral-300'}`}
+                                        />
+                                    ))}
+                                    <span className="ml-2 text-sm font-bold text-neutral-600">
+                                        {match.referee_rating}/5 submitted
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            disabled={submittingRating}
+                                            onMouseEnter={() => setHoveredStar(star)}
+                                            onMouseLeave={() => setHoveredStar(null)}
+                                            onClick={() => handleRateReferee(star)}
+                                            className="transition-transform hover:scale-110 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            <Star
+                                                className={`h-7 w-7 transition-colors ${star <= (hoveredStar ?? 0) ? 'fill-orange-500 text-orange-500' : 'text-neutral-300'}`}
+                                            />
+                                        </button>
+                                    ))}
+                                    {submittingRating && (
+                                        <span className="ml-2 text-xs text-neutral-400">
+                                            Saving...
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )}
+
+            {/* Match Photos */}
+            {match.status === 'completed' && (
+                <MatchPhotosSection matchId={id} canUpload={canUploadPhotos} />
+            )}
         </PageLayout>
     );
 }

@@ -1,5 +1,5 @@
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
+    enabled: process.env.ANALYZE === 'true',
 });
 
 // unsafe-eval is restricted to development only (needed for hot-reload tooling).
@@ -16,102 +16,108 @@ const ContentSecurityPolicy = `
   font-src 'self' data: https://fonts.gstatic.com https://cdn.fontshare.com https://api.fontshare.com https://r2cdn.perplexity.ai https://vercel.live;
   frame-src 'self' https://vercel.live https://vercel.live/ https://*.vercel.com;
 `
-  .replace(/\s{2,}/g, ' ')
-  .trim();
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 
 const securityHeaders = [
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
-  {
-    key: 'Content-Security-Policy',
-    value: ContentSecurityPolicy,
-  },
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
-  {
-    key: 'Referrer-Policy',
-    value: 'strict-origin-when-cross-origin',
-  },
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
-  {
-    key: 'X-Frame-Options',
-    value: 'DENY',
-  },
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
-  {
-    key: 'X-Content-Type-Options',
-    value: 'nosniff',
-  },
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-DNS-Prefetch-Control
-  {
-    key: 'X-DNS-Prefetch-Control',
-    value: 'on',
-  },
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
-  {
-    key: 'Strict-Transport-Security',
-    value: 'max-age=31536000; includeSubDomains',
-  },
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
-  {
-    key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=()',
-  },
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+    {
+        key: 'Content-Security-Policy',
+        value: ContentSecurityPolicy,
+    },
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
+    {
+        key: 'Referrer-Policy',
+        value: 'strict-origin-when-cross-origin',
+    },
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+    {
+        key: 'X-Frame-Options',
+        value: 'DENY',
+    },
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+    {
+        key: 'X-Content-Type-Options',
+        value: 'nosniff',
+    },
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-DNS-Prefetch-Control
+    {
+        key: 'X-DNS-Prefetch-Control',
+        value: 'on',
+    },
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+    {
+        key: 'Strict-Transport-Security',
+        value: 'max-age=31536000; includeSubDomains',
+    },
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
+    {
+        key: 'Permissions-Policy',
+        value: 'camera=(), microphone=(), geolocation=()',
+    },
 ];
 
 /**
  * @type {import('next/dist/next-server/server/config').NextConfig}
  **/
 module.exports = () => {
-  const plugins = [withBundleAnalyzer];
-  return plugins.reduce((acc, next) => next(acc), {
-    reactStrictMode: true,
-    outputFileTracingRoot: require('path').join(__dirname),
-    pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-    eslint: {
-      dirs: ['app', 'components', 'layouts', 'scripts'],
-    },
-    images: {
-      remotePatterns: [
-        {
-          protocol: 'https',
-          hostname: 'picsum.photos',
-          port: '',
-          pathname: '**/*',
+    const plugins = [withBundleAnalyzer];
+    return plugins.reduce((acc, next) => next(acc), {
+        reactStrictMode: true,
+        outputFileTracingRoot: require('path').join(__dirname),
+        pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
+        eslint: {
+            dirs: ['app', 'components', 'layouts', 'scripts'],
         },
-        {
-          protocol: 'https',
-          hostname: 'images.unsplash.com',
-          port: '',
-          pathname: '**/*',
+        images: {
+            remotePatterns: [
+                {
+                    protocol: 'https',
+                    hostname: 'picsum.photos',
+                    port: '',
+                    pathname: '**/*',
+                },
+                {
+                    protocol: 'https',
+                    hostname: 'images.unsplash.com',
+                    port: '',
+                    pathname: '**/*',
+                },
+                {
+                    protocol: 'https',
+                    hostname: 'shipixen.com',
+                    port: '',
+                    pathname: '**/*',
+                },
+                {
+                    protocol: 'https',
+                    hostname: '*.supabase.co',
+                    port: '',
+                    pathname: '/storage/v1/object/public/**',
+                },
+                {
+                    protocol: 'https',
+                    hostname: '*.supabase.in',
+                    port: '',
+                    pathname: '/storage/v1/object/public/**',
+                },
+            ],
         },
-        {
-          protocol: 'https',
-          hostname: 'shipixen.com',
-          port: '',
-          pathname: '**/*',
+        async headers() {
+            return [
+                {
+                    source: '/(.*)',
+                    headers: securityHeaders,
+                },
+            ];
         },
-        {
-          protocol: 'https',
-          hostname: '*.supabase.co',
-          port: '',
-          pathname: '/storage/v1/object/public/**',
-        },
-      ],
-    },
-    async headers() {
-      return [
-        {
-          source: '/(.*)',
-          headers: securityHeaders,
-        },
-      ];
-    },
-    webpack: (config, _options) => {
-      config.module.rules.push({
-        test: /\.svg$/,
-        use: ['@svgr/webpack'],
-      });
+        webpack: (config, _options) => {
+            config.module.rules.push({
+                test: /\.svg$/,
+                use: ['@svgr/webpack'],
+            });
 
-      return config;
-    },
-  });
+            return config;
+        },
+    });
 };

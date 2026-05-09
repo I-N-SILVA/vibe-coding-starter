@@ -33,6 +33,7 @@ export type Profile = {
     position: string | null;
     jersey_number: number | null;
     nationality: string | null;
+    scouting_status: 'open' | 'hidden' | null;
     created_at: string;
     updated_at: string;
 };
@@ -155,6 +156,7 @@ export type Match = {
     started_at: string | null;
     ended_at: string | null;
     notes: string | null;
+    referee_rating: number | null;
     created_at: string;
     updated_at: string;
     // Joined relations (snake_case — from Supabase select with joins)

@@ -10,6 +10,7 @@ import {
     Input,
     Select,
     Badge,
+    Toggle,
 } from '@/components/plyaz';
 import { useToast } from '@/components/providers/ToastProvider';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -50,6 +51,7 @@ export default function PlayerProfilePage() {
         nationality: profile?.nationality || '',
         avatar_url: profile?.avatar_url || '',
         phone: profile?.phone || '',
+        scouting_status: (profile?.scouting_status || 'hidden') as 'open' | 'hidden',
     });
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,6 +90,7 @@ export default function PlayerProfilePage() {
                 bio: formData.bio,
                 nationality: formData.nationality,
                 phone: formData.phone || null,
+                scouting_status: formData.scouting_status,
             });
 
             if (error) {
@@ -253,20 +256,29 @@ export default function PlayerProfilePage() {
                     </CardContent>
                 </Card>
 
-                <div className="flex items-center justify-between rounded-2xl bg-gray-900 p-6 text-white">
-                    <div>
-                        <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-orange-500">
-                            {t('profile.scoutingStatus')}
-                        </p>
-                        <p className="text-sm font-bold">{t('profile.publicProfile')}</p>
+                <div className="space-y-3">
+                    <div className="text-xs font-black uppercase tracking-widest text-neutral-500">
+                        {t('profile.scoutingStatus')}
                     </div>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        className="border-0 bg-white/10 hover:bg-white/20"
-                    >
-                        {t('profile.managePrivacy')}
-                    </Button>
+                    <div className="flex items-center justify-between rounded-2xl border border-neutral-100 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-900">
+                        <div>
+                            <div className="text-sm font-bold text-neutral-900 dark:text-white">
+                                {t('profile.publicProfile')}
+                            </div>
+                            <div className="mt-0.5 text-xs text-neutral-500">
+                                Allow scouts to discover your profile on the public player directory
+                            </div>
+                        </div>
+                        <Toggle
+                            checked={formData.scouting_status === 'open'}
+                            onChange={(val) =>
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    scouting_status: val ? 'open' : 'hidden',
+                                }))
+                            }
+                        />
+                    </div>
                 </div>
             </div>
         </PageLayout>

@@ -257,6 +257,15 @@ export default function PlayerCardPage() {
     const handleShareCard = async () => {
         if (!player?.id) return;
         const url = `${window.location.origin}/league/public/players/${player.id}`;
+        if (typeof navigator !== 'undefined' && navigator.share) {
+            try {
+                await navigator.share({ title: 'My PLYAZ Player Card', url });
+                toast.success('Shared!');
+                return;
+            } catch {
+                // User cancelled or share failed, fall through to clipboard
+            }
+        }
         try {
             await navigator.clipboard.writeText(url);
             toast.success('Link copied!');
@@ -472,12 +481,13 @@ export default function PlayerCardPage() {
                         {/* Actions */}
                         <div className="mt-8 flex gap-3">
                             <Button
+                                variant="secondary"
                                 fullWidth
-                                className="h-14 rounded-2xl bg-black text-white"
+                                className="h-14 rounded-2xl border-gray-200"
                                 onClick={handleShareCard}
                                 disabled={!player?.id}
                             >
-                                <Share2 className="mr-2 h-4 w-4" /> Share Card
+                                <Share2 className="mr-2 h-4 w-4" /> Share My Card
                             </Button>
                             <Button
                                 variant="secondary"
