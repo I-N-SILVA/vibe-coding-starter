@@ -24,7 +24,12 @@ export default function FixtureScheduler() {
     const router = useRouter();
     const { success, error: showError, warning } = useToast();
     const [competitions, setCompetitions] = useState<Array<{ id: string; name: string }>>([]);
-    const [teams, setTeams] = useState<Array<{ id: string; name: string; competition_id?: string | null }>>([]);
+    const [teams, setTeams] = useState<
+        Array<{ id: string; name: string; competition_id?: string | null }>
+    >([]);
+    const [referees, setReferees] = useState<
+        Array<{ id: string; full_name: string | null; email: string | null }>
+    >([]);
     const [existingMatches, setExistingMatches] = useState<MatchUI[]>([]);
     const [isLoadingData, setIsLoadingData] = useState(true);
 
@@ -42,6 +47,7 @@ export default function FixtureScheduler() {
             away_team_id: '',
             venue: '',
             scheduled_at: '',
+            referee_id: undefined,
         },
     });
 
@@ -50,14 +56,18 @@ export default function FixtureScheduler() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const [comps, allTeams, allMatches] = await Promise.all([
+                const [comps, allTeams, allMatches, refs] = await Promise.all([
                     leagueApi.getCompetitions(),
                     teamsApi.getTeams(),
-                    leagueApi.getMatches()
+                    leagueApi.getMatches(),
+                    fetch('/api/league/referees')
+                        .then((r) => r.json())
+                        .catch(() => []),
                 ]);
                 setCompetitions(comps);
                 setTeams(allTeams);
                 setExistingMatches(allMatches);
+                setReferees(Array.isArray(refs) ? refs : []);
             } catch (err) {
                 console.error('Failed to fetch data:', err);
                 showError('Could not load required management data.');
@@ -70,42 +80,56 @@ export default function FixtureScheduler() {
 
     // Conflict Detector
     useEffect(() => {
-        if (!formValues.scheduled_at || !formValues.home_team_id || !formValues.away_team_id) return;
+        if (!formValues.scheduled_at || !formValues.home_team_id || !formValues.away_team_id)
+            return;
 
         const newTime = new Date(formValues.scheduled_at).getTime();
         const BUFFER_MS = 2 * 60 * 60 * 1000; // 2 hours
 
-        const conflict = existingMatches.find(m => {
+        const conflict = existingMatches.find((m) => {
             const matchTime = new Date(m.scheduledAt || '').getTime();
             const timeDiff = Math.abs(newTime - matchTime);
-            
+
             if (timeDiff < BUFFER_MS) {
-                const isTeamConflict = 
-                    m.homeTeam?.id === formValues.home_team_id || 
+                const isTeamConflict =
+                    m.homeTeam?.id === formValues.home_team_id ||
                     m.awayTeam?.id === formValues.home_team_id ||
-                    m.homeTeam?.id === formValues.away_team_id || 
+                    m.homeTeam?.id === formValues.away_team_id ||
                     m.awayTeam?.id === formValues.away_team_id;
-                
-                const isVenueConflict = m.venue && formValues.venue && m.venue.toLowerCase() === formValues.venue.toLowerCase();
-                
+
+                const isVenueConflict =
+                    m.venue &&
+                    formValues.venue &&
+                    m.venue.toLowerCase() === formValues.venue.toLowerCase();
+
                 return isTeamConflict || isVenueConflict;
             }
             return false;
         });
 
         if (conflict) {
-            warning('Conflict detected: Selected teams or venue are booked within a 2-hour window of this time.');
+            warning(
+                'Conflict detected: Selected teams or venue are booked within a 2-hour window of this time.',
+            );
         }
-    }, [formValues.scheduled_at, formValues.home_team_id, formValues.away_team_id, formValues.venue, existingMatches, warning]);
+    }, [
+        formValues.scheduled_at,
+        formValues.home_team_id,
+        formValues.away_team_id,
+        formValues.venue,
+        existingMatches,
+        warning,
+    ]);
 
     const onSubmit = async (data: ScheduleMatchAtFormData) => {
         try {
             await leagueApi.createMatch({
-                competitionId: data.competition_id,
-                homeTeamId: data.home_team_id,
-                awayTeamId: data.away_team_id,
+                competition_id: data.competition_id,
+                home_team_id: data.home_team_id,
+                away_team_id: data.away_team_id,
                 venue: data.venue,
-                scheduledDate: new Date(data.scheduled_at),
+                scheduled_at: data.scheduled_at,
+                ...(data.referee_id ? { referee_id: data.referee_id } : {}),
             });
 
             success('Match scheduled successfully!');
@@ -118,12 +142,12 @@ export default function FixtureScheduler() {
 
     const selectedCompetitionId = formValues.competition_id;
     const filteredTeams = selectedCompetitionId
-        ? teams.filter(t => t.competition_id === selectedCompetitionId)
+        ? teams.filter((t) => t.competition_id === selectedCompetitionId)
         : teams;
 
     return (
         <PageLayout title="FIXTURES">
-            <div className="max-w-2xl mx-auto">
+            <div className="mx-auto max-w-2xl">
                 <PageHeader label="Scheduler" title="New Match Fixture" />
 
                 <motion.div
@@ -137,7 +161,10 @@ export default function FixtureScheduler() {
                                 <Select
                                     label="Competition"
                                     placeholder="Select league"
-                                    options={competitions.map(c => ({ value: c.id, label: c.name }))}
+                                    options={competitions.map((c) => ({
+                                        value: c.id,
+                                        label: c.name,
+                                    }))}
                                     error={errors.competition_id?.message}
                                     {...register('competition_id')}
                                     onChange={(e) => {
@@ -153,7 +180,10 @@ export default function FixtureScheduler() {
                                     <Select
                                         label="Home Team"
                                         placeholder="Select team"
-                                        options={filteredTeams.map(t => ({ value: t.id, label: t.name }))}
+                                        options={filteredTeams.map((t) => ({
+                                            value: t.id,
+                                            label: t.name,
+                                        }))}
                                         error={errors.home_team_id?.message}
                                         {...register('home_team_id')}
                                         disabled={isLoadingData || !selectedCompetitionId}
@@ -162,7 +192,10 @@ export default function FixtureScheduler() {
                                     <Select
                                         label="Away Team"
                                         placeholder="Select team"
-                                        options={filteredTeams.map(t => ({ value: t.id, label: t.name }))}
+                                        options={filteredTeams.map((t) => ({
+                                            value: t.id,
+                                            label: t.name,
+                                        }))}
                                         error={errors.away_team_id?.message}
                                         {...register('away_team_id')}
                                         disabled={isLoadingData || !selectedCompetitionId}
@@ -177,6 +210,18 @@ export default function FixtureScheduler() {
                                     {...register('venue')}
                                 />
 
+                                <Select
+                                    label="Referee (optional)"
+                                    placeholder="Select referee"
+                                    options={referees.map((r) => ({
+                                        value: r.id,
+                                        label: r.full_name || r.email || r.id,
+                                    }))}
+                                    error={errors.referee_id?.message}
+                                    {...register('referee_id')}
+                                    disabled={isLoadingData}
+                                />
+
                                 <Input
                                     label="Date & Time"
                                     type="datetime-local"
@@ -185,7 +230,7 @@ export default function FixtureScheduler() {
                                     required
                                 />
 
-                                <div className="flex justify-end gap-3 pt-6 border-t border-secondary-main/5">
+                                <div className="flex justify-end gap-3 border-t border-secondary-main/5 pt-6">
                                     <Button
                                         type="button"
                                         variant="secondary"
@@ -199,7 +244,7 @@ export default function FixtureScheduler() {
                                         type="submit"
                                         variant="primary"
                                         isLoading={isSubmitting}
-                                        className="bg-accent-main hover:bg-accent-dark border-none shadow-lg shadow-accent-main/10"
+                                        className="border-none bg-accent-main shadow-lg shadow-accent-main/10 hover:bg-accent-dark"
                                     >
                                         Schedule Match
                                     </Button>

@@ -15,9 +15,8 @@ import { useToast } from '@/components/providers/ToastProvider';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useLanguage } from '@/components/providers';
 import { uploadImage } from '@/lib/supabase/storage';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Smartphone } from 'lucide-react';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/client';
 
 const POSITIONS = [
     { value: 'GK', label: 'Goalkeeper' },
@@ -41,7 +40,6 @@ export default function PlayerProfilePage() {
     const toast = useToast();
     const [isLoading, setIsLoading] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
-    const [whatsappOptedIn, setWhatsappOptedIn] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [formData, setFormData] = useState({
@@ -53,24 +51,6 @@ export default function PlayerProfilePage() {
         avatar_url: profile?.avatar_url || '',
         phone: profile?.phone || '',
     });
-
-    // Load whatsapp_opted_in from user_metadata on mount
-    useEffect(() => {
-        const loadMeta = async () => {
-            try {
-                const supabase = createClient();
-                const {
-                    data: { user },
-                } = await supabase.auth.getUser();
-                if (user?.user_metadata?.whatsapp_opted_in) {
-                    setWhatsappOptedIn(true);
-                }
-            } catch {
-                // ignore
-            }
-        };
-        loadMeta();
-    }, []);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -115,16 +95,6 @@ export default function PlayerProfilePage() {
                     typeof error === 'string' ? error : (error as { message?: string }).message;
                 toast.error(message || 'Failed to update profile');
                 return;
-            }
-
-            // Save whatsapp_opted_in to user_metadata
-            try {
-                const supabase = createClient();
-                await supabase.auth.updateUser({
-                    data: { whatsapp_opted_in: whatsappOptedIn },
-                });
-            } catch {
-                // Non-critical: don't fail the whole save if metadata update fails
             }
 
             toast.success('Profile updated successfully! ✨');
@@ -246,79 +216,27 @@ export default function PlayerProfilePage() {
                                 />
                             </div>
 
-                            {/* WhatsApp section */}
-                            <div className="mt-2 border-t border-gray-100 pt-6">
-                                <div className="mb-4 flex items-center gap-2">
-                                    <span className="text-lg">💬</span>
-                                    <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                                        {t('profile.whatsappSection')}
-                                    </h3>
-                                </div>
-
-                                <div className="space-y-4">
+                            {/* WhatsApp Alerts — Coming Soon */}
+                            <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-6 dark:border-neutral-700 dark:bg-neutral-900">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
+                                        <Smartphone className="h-5 w-5" />
+                                    </div>
                                     <div>
-                                        <Input
-                                            label={t('profile.whatsappNumber')}
-                                            type="tel"
-                                            value={formData.phone}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, phone: e.target.value })
-                                            }
-                                            placeholder={t('profile.whatsappPh')}
-                                        />
-                                        <p className="mt-1.5 text-[11px] text-gray-400">
-                                            {t('profile.whatsappHint')}
+                                        <div className="mb-1 flex items-center gap-2">
+                                            <span className="text-sm font-black uppercase tracking-widest text-neutral-900 dark:text-white">
+                                                {t('profile.whatsappSection')}
+                                            </span>
+                                            <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+                                                Coming Soon
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                            Get notified when your match starts, goals are scored,
+                                            and at the final whistle. WhatsApp alerts will be
+                                            available in the next update.
                                         </p>
                                     </div>
-
-                                    <label className="group flex cursor-pointer items-start gap-3">
-                                        <div className="relative mt-0.5 flex-shrink-0">
-                                            <input
-                                                type="checkbox"
-                                                checked={whatsappOptedIn}
-                                                onChange={(e) =>
-                                                    setWhatsappOptedIn(e.target.checked)
-                                                }
-                                                className="sr-only"
-                                                disabled={!formData.phone}
-                                            />
-                                            <div
-                                                onClick={() => {
-                                                    if (formData.phone)
-                                                        setWhatsappOptedIn((v) => !v);
-                                                }}
-                                                className={`flex h-5 w-5 cursor-pointer items-center justify-center rounded border-2 transition-all ${
-                                                    whatsappOptedIn && formData.phone
-                                                        ? 'border-green-500 bg-green-500'
-                                                        : 'border-gray-300 bg-white group-hover:border-green-400'
-                                                } ${!formData.phone ? 'cursor-not-allowed opacity-40' : ''}`}
-                                            >
-                                                {whatsappOptedIn && formData.phone && (
-                                                    <svg
-                                                        className="h-3 w-3 text-white"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        stroke="currentColor"
-                                                        strokeWidth={3}
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            d="M5 13l4 4L19 7"
-                                                        />
-                                                    </svg>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-gray-700">
-                                                {t('profile.whatsappOptin')}
-                                            </p>
-                                            <p className="mt-0.5 text-[11px] text-gray-400">
-                                                {t('profile.whatsappOptinDesc')}
-                                            </p>
-                                        </div>
-                                    </label>
                                 </div>
                             </div>
 

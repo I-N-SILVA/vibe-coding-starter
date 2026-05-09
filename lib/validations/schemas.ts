@@ -10,12 +10,8 @@ import { z } from 'zod';
 // ============================================
 
 export const loginSchema = z.object({
-    email: z
-        .string()
-        .email('Please enter a valid email address'),
-    password: z
-        .string()
-        .min(6, 'Password must be at least 6 characters'),
+    email: z.string().email('Please enter a valid email address'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
@@ -30,9 +26,7 @@ export const createCompetitionSchema = z.object({
         .min(3, 'Name must be at least 3 characters')
         .max(50, 'Name must be less than 50 characters'),
     format: z.enum(['league', 'knockout', 'group_knockout']).describe('Please select a format'),
-    startDate: z
-        .string()
-        .min(1, 'Start date is required'),
+    startDate: z.string().min(1, 'Start date is required'),
     endDate: z.string().optional(),
 });
 
@@ -61,27 +55,32 @@ export type CreateTeamFormData = z.infer<typeof createTeamSchema>;
 // MATCH SCHEMAS
 // ============================================
 
-export const scheduleMatchSchema = z.object({
-    homeTeamId: z.string().min(1, 'Please select a home team'),
-    awayTeamId: z.string().min(1, 'Please select an away team'),
-    scheduledDate: z.string().min(1, 'Match date is required'),
-    scheduledTime: z.string().min(1, 'Match time is required'),
-    venue: z.string().optional(),
-}).refine((data) => data.homeTeamId !== data.awayTeamId, {
-    message: 'Home and away teams must be different',
-    path: ['awayTeamId'],
-});
+export const scheduleMatchSchema = z
+    .object({
+        homeTeamId: z.string().min(1, 'Please select a home team'),
+        awayTeamId: z.string().min(1, 'Please select an away team'),
+        scheduledDate: z.string().min(1, 'Match date is required'),
+        scheduledTime: z.string().min(1, 'Match time is required'),
+        venue: z.string().optional(),
+    })
+    .refine((data) => data.homeTeamId !== data.awayTeamId, {
+        message: 'Home and away teams must be different',
+        path: ['awayTeamId'],
+    });
 
-export const scheduleMatchAtSchema = z.object({
-    competition_id: z.string().min(1, 'Please select a competition'),
-    home_team_id: z.string().min(1, 'Please select a home team'),
-    away_team_id: z.string().min(1, 'Please select an away team'),
-    scheduled_at: z.string().min(1, 'Match date and time is required'),
-    venue: z.string().optional(),
-}).refine((data) => data.home_team_id !== data.away_team_id, {
-    message: 'Home and away teams must be different',
-    path: ['away_team_id'],
-});
+export const scheduleMatchAtSchema = z
+    .object({
+        competition_id: z.string().min(1, 'Please select a competition'),
+        home_team_id: z.string().min(1, 'Please select a home team'),
+        away_team_id: z.string().min(1, 'Please select an away team'),
+        scheduled_at: z.string().min(1, 'Match date and time is required'),
+        venue: z.string().optional(),
+        referee_id: z.string().uuid().optional(),
+    })
+    .refine((data) => data.home_team_id !== data.away_team_id, {
+        message: 'Home and away teams must be different',
+        path: ['away_team_id'],
+    });
 
 export type ScheduleMatchFormData = z.infer<typeof scheduleMatchSchema>;
 export type ScheduleMatchAtFormData = z.infer<typeof scheduleMatchAtSchema>;
@@ -103,7 +102,9 @@ export const addPlayerSchema = z.object({
         .number()
         .min(1, 'Jersey number must be at least 1')
         .max(99, 'Jersey number must be 99 or less'),
-    position: z.enum(['GK', 'CB', 'LB', 'RB', 'CDM', 'CM', 'CAM', 'LM', 'RM', 'LW', 'RW', 'ST', 'CF']).describe('Please select a position'),
+    position: z
+        .enum(['GK', 'CB', 'LB', 'RB', 'CDM', 'CM', 'CAM', 'LM', 'RM', 'LW', 'RW', 'ST', 'CF'])
+        .describe('Please select a position'),
 });
 
 export type AddPlayerFormData = z.infer<typeof addPlayerSchema>;
@@ -117,7 +118,7 @@ export type AddPlayerFormData = z.infer<typeof addPlayerSchema>;
  */
 export function validateForm<T>(
     schema: z.ZodSchema<T>,
-    data: unknown
+    data: unknown,
 ): { success: true; data: T } | { success: false; errors: Record<string, string> } {
     const result = schema.safeParse(data);
 

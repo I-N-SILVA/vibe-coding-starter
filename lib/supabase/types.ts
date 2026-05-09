@@ -112,7 +112,20 @@ export type Player = {
     updated_at: string;
 };
 
-export type PlayerPosition = 'GK' | 'CB' | 'LB' | 'RB' | 'CDM' | 'CM' | 'CAM' | 'LM' | 'RM' | 'LW' | 'RW' | 'ST' | 'CF';
+export type PlayerPosition =
+    | 'GK'
+    | 'CB'
+    | 'LB'
+    | 'RB'
+    | 'CDM'
+    | 'CM'
+    | 'CAM'
+    | 'LM'
+    | 'RM'
+    | 'LW'
+    | 'RW'
+    | 'ST'
+    | 'CF';
 
 export type PlayerStats = {
     goals: number;
@@ -154,7 +167,15 @@ export type Match = {
 export type MatchEvent = {
     id: string;
     match_id: string;
-    type: 'goal' | 'own_goal' | 'penalty' | 'yellow_card' | 'red_card' | 'substitution' | 'injury' | 'var_review';
+    type:
+        | 'goal'
+        | 'own_goal'
+        | 'penalty'
+        | 'yellow_card'
+        | 'red_card'
+        | 'substitution'
+        | 'injury'
+        | 'var_review';
     team_id: string | null;
     player_id: string | null;
     player_name: string | null;
@@ -162,6 +183,23 @@ export type MatchEvent = {
     half: '1st' | '2nd' | 'ET1' | 'ET2' | 'penalties' | null;
     details: Record<string, unknown>;
     created_at: string;
+};
+
+export type LineupSelectionStatus = 'starting' | 'bench' | 'not_called';
+
+export type MatchLineup = {
+    id: string;
+    match_id: string;
+    player_id: string;
+    team_id: string;
+    selection_status: LineupSelectionStatus;
+    position_override: string | null;
+    shirt_number: number | null;
+    created_by: string | null;
+    created_at: string;
+    updated_at: string;
+    // Joins
+    player?: Player;
 };
 
 export type StandingsEntry = {
@@ -439,7 +477,10 @@ export type CreateCategoryDto = {
     max_age?: number;
 };
 
-export type CreateChampionshipConfigDto = Omit<ChampionshipConfig, 'id' | 'created_at' | 'updated_at'>;
+export type CreateChampionshipConfigDto = Omit<
+    ChampionshipConfig,
+    'id' | 'created_at' | 'updated_at'
+>;
 
 export type CreateGroupDto = {
     competition_id: string;
@@ -488,12 +529,12 @@ export type Database = {
                 Update: Partial<Organization>;
                 Relationships: [
                     {
-                        foreignKeyName: "organizations_owner_id_fkey";
-                        columns: ["owner_id"];
+                        foreignKeyName: 'organizations_owner_id_fkey';
+                        columns: ['owner_id'];
                         isOneToOne: false;
-                        referencedRelation: "profiles";
-                        referencedColumns: ["id"];
-                    }
+                        referencedRelation: 'profiles';
+                        referencedColumns: ['id'];
+                    },
                 ];
             };
             profiles: {
@@ -517,12 +558,12 @@ export type Database = {
                 Update: Partial<Profile>;
                 Relationships: [
                     {
-                        foreignKeyName: "profiles_organization_id_fkey";
-                        columns: ["organization_id"];
+                        foreignKeyName: 'profiles_organization_id_fkey';
+                        columns: ['organization_id'];
                         isOneToOne: false;
-                        referencedRelation: "organizations";
-                        referencedColumns: ["id"];
-                    }
+                        referencedRelation: 'organizations';
+                        referencedColumns: ['id'];
+                    },
                 ];
             };
             competitions: {
@@ -552,12 +593,12 @@ export type Database = {
                 Update: Partial<Competition>;
                 Relationships: [
                     {
-                        foreignKeyName: "competitions_organization_id_fkey";
-                        columns: ["organization_id"];
+                        foreignKeyName: 'competitions_organization_id_fkey';
+                        columns: ['organization_id'];
                         isOneToOne: false;
-                        referencedRelation: "organizations";
-                        referencedColumns: ["id"];
-                    }
+                        referencedRelation: 'organizations';
+                        referencedColumns: ['id'];
+                    },
                 ];
             };
             teams: {
@@ -601,7 +642,9 @@ export type Database = {
                     created_at?: string;
                     updated_at?: string;
                 };
-                Update: Omit<Partial<Player>, 'stats'> & { stats?: PlayerStats | Record<string, unknown> };
+                Update: Omit<Partial<Player>, 'stats'> & {
+                    stats?: PlayerStats | Record<string, unknown>;
+                };
                 Relationships: [];
             };
             matches: {
@@ -632,19 +675,19 @@ export type Database = {
                 Update: Partial<Match>;
                 Relationships: [
                     {
-                        foreignKeyName: "matches_home_team_id_fkey";
-                        columns: ["home_team_id"];
+                        foreignKeyName: 'matches_home_team_id_fkey';
+                        columns: ['home_team_id'];
                         isOneToOne: false;
-                        referencedRelation: "teams";
-                        referencedColumns: ["id"];
+                        referencedRelation: 'teams';
+                        referencedColumns: ['id'];
                     },
                     {
-                        foreignKeyName: "matches_away_team_id_fkey";
-                        columns: ["away_team_id"];
+                        foreignKeyName: 'matches_away_team_id_fkey';
+                        columns: ['away_team_id'];
                         isOneToOne: false;
-                        referencedRelation: "teams";
-                        referencedColumns: ["id"];
-                    }
+                        referencedRelation: 'teams';
+                        referencedColumns: ['id'];
+                    },
                 ];
             };
             match_events: {
@@ -664,12 +707,12 @@ export type Database = {
                 Update: Partial<MatchEvent>;
                 Relationships: [
                     {
-                        foreignKeyName: "match_events_match_id_fkey";
-                        columns: ["match_id"];
+                        foreignKeyName: 'match_events_match_id_fkey';
+                        columns: ['match_id'];
                         isOneToOne: false;
-                        referencedRelation: "matches";
-                        referencedColumns: ["id"];
-                    }
+                        referencedRelation: 'matches';
+                        referencedColumns: ['id'];
+                    },
                 ];
             };
             standings: {
@@ -869,12 +912,12 @@ export type Database = {
                 Update: Partial<Application>;
                 Relationships: [
                     {
-                        foreignKeyName: "applications_applicant_id_fkey";
-                        columns: ["applicant_id"];
+                        foreignKeyName: 'applications_applicant_id_fkey';
+                        columns: ['applicant_id'];
                         isOneToOne: false;
-                        referencedRelation: "profiles";
-                        referencedColumns: ["id"];
-                    }
+                        referencedRelation: 'profiles';
+                        referencedColumns: ['id'];
+                    },
                 ];
             };
             audit_logs: {

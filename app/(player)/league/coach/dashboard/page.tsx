@@ -105,6 +105,18 @@ export default function CoachDashboard() {
                                     {nextMatch.venue}
                                 </p>
                             )}
+                            <div className="mt-6 flex justify-center">
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() =>
+                                        (window.location.href = `/league/coach/matches/${nextMatch.id}/squad`)
+                                    }
+                                    className="border-white/20 text-white hover:bg-white/10"
+                                >
+                                    Set Squad
+                                </Button>
+                            </div>
                         </div>
                     ) : (
                         <div className="rounded-3xl bg-gray-900 p-8 text-center text-white">
