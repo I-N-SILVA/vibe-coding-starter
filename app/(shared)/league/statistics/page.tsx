@@ -53,7 +53,7 @@ export default function StatisticsPage() {
 
     const { data: competitions } = useCompetitions();
 
-    const statsUrl = `/api/league/players/stats?type=${statType}${selectedComp !== 'all' ? `&competitionId=${selectedComp}` : ''}`;
+    const statsUrl = `/api/league/player-stats?type=${statType}${selectedComp !== 'all' ? `&competitionId=${selectedComp}` : ''}`;
 
     const { data: players, isLoading } = useQuery<PlayerStat[]>({
         queryKey: ['player-stats', statType, selectedComp],

@@ -210,17 +210,22 @@ export default function FixtureScheduler() {
                                     {...register('venue')}
                                 />
 
-                                <Select
-                                    label="Referee (optional)"
-                                    placeholder="Select referee"
-                                    options={referees.map((r) => ({
-                                        value: r.id,
-                                        label: r.full_name || r.email || r.id,
-                                    }))}
-                                    error={errors.referee_id?.message}
-                                    {...register('referee_id')}
-                                    disabled={isLoadingData}
-                                />
+                                {referees.length > 0 && (
+                                    <Select
+                                        label="Referee (optional)"
+                                        placeholder="Select referee"
+                                        options={[
+                                            { value: '', label: 'No referee assigned' },
+                                            ...referees.map((r) => ({
+                                                value: r.id,
+                                                label: r.full_name || r.email || r.id,
+                                            })),
+                                        ]}
+                                        error={errors.referee_id?.message}
+                                        {...register('referee_id')}
+                                        disabled={isLoadingData}
+                                    />
+                                )}
 
                                 <Input
                                     label="Date & Time"
