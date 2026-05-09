@@ -110,7 +110,7 @@ export default function AnalyticsDashboard() {
                             Total goals over time
                         </p>
                     </div>
-                    <div className="h-[300px] w-full">
+                    <div className="h-[200px] w-full md:h-[300px]">
                         {isLoading ? (
                             <div className="h-full w-full animate-pulse rounded-xl bg-gray-50" />
                         ) : (
@@ -170,7 +170,7 @@ export default function AnalyticsDashboard() {
                             Goals Scored vs Conceded
                         </p>
                     </div>
-                    <div className="h-[300px] w-full">
+                    <div className="h-[200px] w-full md:h-[300px]">
                         {isLoading ? (
                             <div className="h-full w-full animate-pulse rounded-xl bg-gray-50" />
                         ) : (

@@ -15,20 +15,15 @@ interface MobileNavProps {
     className?: string;
 }
 
-// Top-5 priority routes for the quick bottom bar
-const PRIORITY_HREFS = ['/league', '/league/matches', '/league/teams', '/league/invites'];
-
 export const MobileNav: React.FC<MobileNavProps> = ({ items = [], navGroups, className }) => {
     const pathname = usePathname();
     const router = useRouter();
     const { signOut } = useAuth();
     const [drawerOpen, setDrawerOpen] = useState(false);
 
-    // Derive priority items from either flat items or groups
+    // Derive priority items from either flat items or groups — first 4 for role-aware bottom bar
     const allItems = navGroups ? navGroups.flatMap((g) => g.items) : items;
-    const priorityItems = PRIORITY_HREFS
-        .map((href) => allItems.find((item) => item.href === href))
-        .filter(Boolean) as NavItem[];
+    const priorityItems = allItems.slice(0, 4);
 
     const isActive = (href: string) =>
         pathname === href || (href !== '/league' && pathname.startsWith(href + '/'));
@@ -38,27 +33,35 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items = [], navGroups, cla
             {/* Bottom Tab Bar */}
             <nav
                 className={cn(
-                    'fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm border-t border-neutral-100 dark:border-neutral-800',
-                    'pb-safe md:hidden',
-                    className
+                    'fixed bottom-0 left-0 right-0 z-50 border-t border-neutral-100 bg-white/95 backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-900/95',
+                    'md:hidden',
+                    className,
                 )}
             >
-                <div className="h-16 flex items-stretch">
+                <div
+                    className="flex items-stretch"
+                    style={{
+                        height: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+                        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+                    }}
+                >
                     {priorityItems.map((item) => (
                         <Link
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                'flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors',
+                                'flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors',
                                 isActive(item.href)
                                     ? 'text-neutral-900 dark:text-white'
-                                    : 'text-neutral-400 dark:text-neutral-500'
+                                    : 'text-neutral-400 dark:text-neutral-500',
                             )}
                         >
-                            <span className={cn('w-5 h-5', isActive(item.href) && 'text-orange-500')}>
+                            <span
+                                className={cn('h-5 w-5', isActive(item.href) && 'text-orange-500')}
+                            >
                                 {item.icon}
                             </span>
-                            <span className="text-[9px] font-semibold tracking-wider uppercase">
+                            <span className="text-[9px] font-semibold uppercase tracking-wider">
                                 {item.label}
                             </span>
                         </Link>
@@ -68,18 +71,29 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items = [], navGroups, cla
                     <button
                         onClick={() => setDrawerOpen(true)}
                         className={cn(
-                            'flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors',
+                            'flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors',
                             drawerOpen
                                 ? 'text-orange-500'
-                                : 'text-neutral-400 dark:text-neutral-500'
+                                : 'text-neutral-400 dark:text-neutral-500',
                         )}
                     >
-                        <span className="w-5 h-5">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        <span className="h-5 w-5">
+                            <svg
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={1.5}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                                />
                             </svg>
                         </span>
-                        <span className="text-[9px] font-semibold tracking-wider uppercase">More</span>
+                        <span className="text-[9px] font-semibold uppercase tracking-wider">
+                            More
+                        </span>
                     </button>
                 </div>
             </nav>
@@ -104,22 +118,27 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items = [], navGroups, cla
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                            className="fixed bottom-0 left-0 right-0 z-[61] bg-white dark:bg-neutral-900 rounded-t-3xl shadow-2xl md:hidden max-h-[85vh] overflow-y-auto"
+                            className="fixed bottom-0 left-0 right-0 z-[61] max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl dark:bg-neutral-900 md:hidden"
                         >
                             {/* Handle */}
-                            <div className="flex justify-center pt-3 pb-2">
-                                <div className="w-10 h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full" />
+                            <div className="flex justify-center pb-2 pt-3">
+                                <div className="h-1 w-10 rounded-full bg-neutral-200 dark:bg-neutral-700" />
                             </div>
 
-                            <div className="px-4 pb-safe pb-8">
-                                <h2 className="text-[10px] font-black tracking-[0.25em] uppercase text-neutral-400 mb-4 px-2">
+                            <div
+                                className="px-4"
+                                style={{
+                                    paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))',
+                                }}
+                            >
+                                <h2 className="mb-4 px-2 text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400">
                                     Navigation
                                 </h2>
 
                                 {navGroups ? (
                                     navGroups.map((group) => (
                                         <div key={group.label} className="mb-5">
-                                            <p className="text-[9px] font-black tracking-[0.2em] uppercase text-neutral-300 dark:text-neutral-600 mb-2 px-2">
+                                            <p className="mb-2 px-2 text-[9px] font-black uppercase tracking-[0.2em] text-neutral-300 dark:text-neutral-600">
                                                 {group.label}
                                             </p>
                                             <div className="space-y-0.5">
@@ -131,16 +150,23 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items = [], navGroups, cla
                                                             href={item.href}
                                                             onClick={() => setDrawerOpen(false)}
                                                             className={cn(
-                                                                'flex items-center gap-3 px-3 py-3 rounded-xl transition-colors',
+                                                                'flex items-center gap-3 rounded-xl px-3 py-3 transition-colors',
                                                                 active
-                                                                    ? 'bg-neutral-900 dark:bg-white/10 text-white'
-                                                                    : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                                                                    ? 'bg-neutral-900 text-white dark:bg-white/10'
+                                                                    : 'text-neutral-600 hover:bg-neutral-50 dark:text-neutral-400 dark:hover:bg-neutral-800',
                                                             )}
                                                         >
-                                                            <span className={cn('w-5 h-5', active && 'text-orange-400')}>
+                                                            <span
+                                                                className={cn(
+                                                                    'h-5 w-5',
+                                                                    active && 'text-orange-400',
+                                                                )}
+                                                            >
                                                                 {item.icon}
                                                             </span>
-                                                            <span className="text-sm font-semibold">{item.label}</span>
+                                                            <span className="text-sm font-semibold">
+                                                                {item.label}
+                                                            </span>
                                                         </Link>
                                                     );
                                                 })}
@@ -157,14 +183,16 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items = [], navGroups, cla
                                                     href={item.href}
                                                     onClick={() => setDrawerOpen(false)}
                                                     className={cn(
-                                                        'flex items-center gap-3 px-3 py-3 rounded-xl transition-colors',
+                                                        'flex items-center gap-3 rounded-xl px-3 py-3 transition-colors',
                                                         active
-                                                            ? 'bg-neutral-900 dark:bg-white/10 text-white'
-                                                            : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                                                            ? 'bg-neutral-900 text-white dark:bg-white/10'
+                                                            : 'text-neutral-600 hover:bg-neutral-50 dark:text-neutral-400 dark:hover:bg-neutral-800',
                                                     )}
                                                 >
-                                                    <span className="w-5 h-5">{item.icon}</span>
-                                                    <span className="text-sm font-semibold">{item.label}</span>
+                                                    <span className="h-5 w-5">{item.icon}</span>
+                                                    <span className="text-sm font-semibold">
+                                                        {item.label}
+                                                    </span>
                                                 </Link>
                                             );
                                         })}
@@ -172,20 +200,27 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items = [], navGroups, cla
                                 )}
 
                                 {/* Fan View + Sign out */}
-                                <div className="mt-4 pt-4 border-t border-neutral-100 dark:border-neutral-800 space-y-0.5">
+                                <div className="mt-4 space-y-0.5 border-t border-neutral-100 pt-4 dark:border-neutral-800">
                                     <Link
                                         href="/league/public"
                                         onClick={() => setDrawerOpen(false)}
-                                        className="flex items-center gap-3 px-3 py-3 rounded-xl text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                                        className="flex items-center gap-3 rounded-xl px-3 py-3 text-neutral-500 transition-colors hover:bg-neutral-50 dark:text-neutral-400 dark:hover:bg-neutral-800"
                                     >
-                                        <span className="w-5 h-5"><NavIcons.Public /></span>
+                                        <span className="h-5 w-5">
+                                            <NavIcons.Public />
+                                        </span>
                                         <span className="text-sm font-semibold">Fan View</span>
                                     </Link>
                                     <button
-                                        onClick={async () => { await signOut(); router.push('/'); }}
-                                        className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                                        onClick={async () => {
+                                            await signOut();
+                                            router.push('/');
+                                        }}
+                                        className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"
                                     >
-                                        <span className="w-5 h-5"><NavIcons.Logout /></span>
+                                        <span className="h-5 w-5">
+                                            <NavIcons.Logout />
+                                        </span>
                                         <span className="text-sm font-semibold">Sign Out</span>
                                     </button>
                                 </div>

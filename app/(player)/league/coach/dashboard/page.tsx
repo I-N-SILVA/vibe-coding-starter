@@ -77,9 +77,9 @@ export default function CoachDashboard() {
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">
                                     {nextMatch.status.toUpperCase()}
                                 </span>
-                                {nextMatch.match_time && (
+                                {nextMatch.scheduled_at && (
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-                                        {new Date(nextMatch.match_time).toLocaleDateString()}
+                                        {new Date(nextMatch.scheduled_at).toLocaleDateString()}
                                     </span>
                                 )}
                             </div>
@@ -195,6 +195,7 @@ export default function CoachDashboard() {
                                     const isHome = match.home_team_id === team?.id;
                                     const ourScore = isHome ? match.home_score : match.away_score;
                                     const theirScore = isHome ? match.away_score : match.home_score;
+                                    const opponent = isHome ? match.away_team : match.home_team;
                                     const result =
                                         ourScore > theirScore
                                             ? 'W'
@@ -219,7 +220,10 @@ export default function CoachDashboard() {
                                             </div>
                                             <div className="flex-1">
                                                 <p className="text-sm font-bold tracking-tight text-gray-900">
-                                                    {isHome ? 'vs Away' : 'vs Home'}
+                                                    vs{' '}
+                                                    {opponent?.short_name ??
+                                                        opponent?.name ??
+                                                        (isHome ? 'Away' : 'Home')}
                                                 </p>
                                             </div>
                                             <p className="text-xl font-black tracking-tight text-gray-900">

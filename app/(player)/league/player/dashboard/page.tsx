@@ -27,9 +27,10 @@ export default function PlayerDashboard() {
     const { profile } = useAuth();
     const router = useRouter();
 
-    const { data: statsData, isLoading: isStatsLoading } = usePlayerProfile(profile?.id);
     const { data: currentPlayer, isLoading: isPlayersLoading } = useCurrentPlayer(profile?.id);
 
+    // Both hooks use the player record ID (not profile/auth ID) to query player_competition_stats
+    const { data: statsData, isLoading: isStatsLoading } = usePlayerProfile(currentPlayer?.id);
     const { data: careerStats } = usePlayerCareerStats(currentPlayer?.id ?? '');
 
     const teamId = currentPlayer?.team_id || '';
@@ -126,7 +127,7 @@ export default function PlayerDashboard() {
                         <Card elevated className="overflow-hidden border-0 bg-gray-900 text-white">
                             <CardContent className="p-0">
                                 <div className="flex flex-col md:flex-row">
-                                    <div className="flex-1 p-8">
+                                    <div className="flex-1 p-5 md:p-8">
                                         <div className="mb-6 flex items-center gap-4">
                                             <div className="flex h-20 w-20 -rotate-3 transform items-center justify-center rounded-2xl bg-orange-600 text-3xl font-black shadow-2xl">
                                                 {profile?.jersey_number || '–'}
@@ -189,7 +190,7 @@ export default function PlayerDashboard() {
                                         )}
                                     </div>
 
-                                    <div className="flex min-w-[120px] items-center justify-center border-l border-white/5 bg-orange-600/10 p-8">
+                                    <div className="flex min-w-[100px] items-center justify-center border-t border-white/5 bg-orange-600/10 p-5 md:border-l md:border-t-0 md:p-8">
                                         {totalStats ? (
                                             <div className="text-center">
                                                 <p className="mb-1 text-4xl font-black">

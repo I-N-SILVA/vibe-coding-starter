@@ -25,9 +25,9 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
             className={cn(
-                'pb-20 md:pb-8',
-                fullWidth ? 'px-0' : 'px-4 md:px-8 py-6 md:py-8 max-w-5xl',
-                className
+                'pb-24 md:pb-8',
+                fullWidth ? 'px-0' : 'max-w-5xl px-4 py-6 md:px-8 md:py-8',
+                className,
             )}
         >
             {children}
