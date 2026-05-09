@@ -33,6 +33,7 @@ const INITIAL_MATCH: MatchUI = {
     startedAt: null,
     endedAt: null,
     notes: null,
+    refereeRating: null,
     createdAt: '',
     updatedAt: '',
 };
