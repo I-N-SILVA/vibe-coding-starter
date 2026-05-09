@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const { data, error } = await supabase
         .from('player_competition_stats')
         .select(
-            'player_id, goals, assists, yellow_cards, red_cards, games_played, players(id, name, position, avatar_url, jersey_number, nationality, team_id)',
+            'player_id, goals, assists, yellow_cards, red_cards, games_played, players(id, name, position, photo_url, jersey_number, nationality, team_id)',
         )
         .in('competition_id', competitionIds);
 
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
 
     type PlayerEntry = {
         player_id: string;
-        name: string;
+        full_name: string;
         position: string | null;
         avatar_url: string | null;
         jersey_number: number | null;
@@ -65,9 +65,9 @@ export async function GET(request: Request) {
         } else {
             playerMap.set(row.player_id, {
                 player_id: row.player_id,
-                name: (p as { name?: string | null }).name ?? 'Unknown',
+                full_name: (p as { name?: string | null }).name ?? 'Unknown',
                 position: (p as { position?: string | null }).position ?? null,
-                avatar_url: (p as { avatar_url?: string | null }).avatar_url ?? null,
+                avatar_url: (p as { photo_url?: string | null }).photo_url ?? null,
                 jersey_number: (p as { jersey_number?: number | null }).jersey_number ?? null,
                 nationality: (p as { nationality?: string | null }).nationality ?? null,
                 team_id: (p as { team_id?: string | null }).team_id ?? null,
