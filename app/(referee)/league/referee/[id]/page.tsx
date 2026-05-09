@@ -3,12 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import {
-    Button,
-    Badge,
-    Modal,
-    PageLayout,
-} from '@/components/plyaz';
+import { Button, Badge, Modal, PageLayout } from '@/components/plyaz';
 import { SignaturePad } from '@/components/plyaz/SignaturePad';
 import { useLiveMatch } from '@/lib/hooks';
 import { leagueApi, teamsApi } from '@/lib/api';
@@ -73,7 +68,7 @@ export default function RefereeController() {
     const [signatures, setSignatures] = useState({
         referee: '',
         homeCoach: '',
-        awayCoach: ''
+        awayCoach: '',
     });
 
     useEffect(() => {
@@ -92,7 +87,7 @@ export default function RefereeController() {
                     const [hPlayers, aPlayers, mEvents] = await Promise.all([
                         teamsApi.getPlayers(homeTeamId),
                         teamsApi.getPlayers(awayTeamId),
-                        leagueApi.getMatchEvents(matchId)
+                        leagueApi.getMatchEvents(matchId),
                     ]);
 
                     setHomePlayers(hPlayers);
@@ -158,21 +153,21 @@ export default function RefereeController() {
                 date: new Date().toLocaleDateString(),
                 venue: match?.venue || 'TBD',
                 competition: 'League Match',
-                events: events.map(e => ({
+                events: events.map((e) => ({
                     minute: e.minute?.toString() || '0',
                     type: e.type,
                     player: e.player_name || 'Unknown',
-                    team: e.team_id === match?.homeTeamId ? 'Home' : 'Away'
+                    team: e.team_id === match?.homeTeamId ? 'Home' : 'Away',
                 })),
                 refereeName: 'Official Referee',
                 refereeSignature: signatures.referee,
                 homeCoachSignature: signatures.homeCoach,
-                awayCoachSignature: signatures.awayCoach
+                awayCoachSignature: signatures.awayCoach,
             });
 
             // 2. Update status in DB
             await leagueApi.endMatch(matchId);
-            
+
             setIsSignatureModalOpen(false);
             router.push('/league');
         } catch (err) {
@@ -202,14 +197,14 @@ export default function RefereeController() {
                 await leagueApi.updateScore({
                     matchId,
                     homeScore: newHome,
-                    awayScore: newAway
+                    awayScore: newAway,
                 });
 
                 if (isHome) setHomeScore(newHome);
                 else setAwayScore(newAway);
             }
 
-            setEvents(prev => [newEvent, ...prev]);
+            setEvents((prev) => [newEvent, ...prev]);
             setIsGoalModalOpen(false);
             setIsCardModalOpen(false);
         } catch (err) {
@@ -217,16 +212,31 @@ export default function RefereeController() {
         }
     };
 
-    if (isLoading) return <div className="min-h-screen bg-black flex items-center justify-center text-white font-black tracking-widest">LOADING...</div>;
+    if (isLoading)
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-black font-black tracking-widest text-white">
+                LOADING...
+            </div>
+        );
 
     const currentMatch = match;
 
     return (
         <PageLayout title="REFEREE">
-            <div className="min-h-screen bg-black text-white -mx-4 -mt-2 px-4 py-6 pb-32">
+            <div className="-mx-4 -mt-2 min-h-screen bg-black px-4 py-6 pb-32 text-white">
+                {/* Score Live CTA */}
+                <div className="mb-6 flex justify-center">
+                    <button
+                        onClick={() => router.push(`/league/referee/live/${matchId}`)}
+                        className="flex items-center gap-3 rounded-2xl bg-orange-500 px-8 py-4 text-sm font-black uppercase tracking-widest text-white transition-all hover:bg-orange-600 active:scale-95"
+                    >
+                        <span className="text-lg">▶</span> Score Live
+                    </button>
+                </div>
+
                 {/* Header Info */}
-                <div className="text-center mb-8">
-                    <p className="text-[10px] font-black tracking-[0.4em] uppercase text-slate-500 mb-2">
+                <div className="mb-8 text-center">
+                    <p className="mb-2 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">
                         Official Match Protocol
                     </p>
                     <div className="flex items-center justify-center gap-4">
@@ -235,34 +245,46 @@ export default function RefereeController() {
                                 {isPaused ? 'PAUSED' : 'LIVE'}
                             </Badge>
                         )}
-                        <span className="text-6xl font-black tracking-tighter tabular-nums">
+                        <span className="text-6xl font-black tabular-nums tracking-tighter">
                             {formatTime(elapsedSeconds)}
                         </span>
                     </div>
-                    <p className="text-[10px] font-black text-orange-500 mt-2 tracking-[0.3em] uppercase">
+                    <p className="mt-2 text-[10px] font-black uppercase tracking-[0.3em] text-orange-500">
                         {currentHalf === 1 ? 'First Half' : 'Second Half'}
                     </p>
                 </div>
 
                 {/* Scoreboard */}
-                <section className="flex items-center justify-center gap-8 mb-12">
+                <section className="mb-12 flex items-center justify-center gap-8">
                     <div className="flex-1 text-right">
-                        <p className="text-xl font-black tracking-tight uppercase">{currentMatch?.homeTeam?.shortName ?? 'HOME'}</p>
-                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Home</p>
+                        <p className="text-xl font-black uppercase tracking-tight">
+                            {currentMatch?.homeTeam?.shortName ?? 'HOME'}
+                        </p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                            Home
+                        </p>
                     </div>
                     <div className="flex items-center gap-6">
-                        <span className="text-8xl font-black tracking-tighter tabular-nums">{homeScore}</span>
+                        <span className="text-8xl font-black tabular-nums tracking-tighter">
+                            {homeScore}
+                        </span>
                         <span className="text-4xl text-slate-800">—</span>
-                        <span className="text-8xl font-black tracking-tighter tabular-nums">{awayScore}</span>
+                        <span className="text-8xl font-black tabular-nums tracking-tighter">
+                            {awayScore}
+                        </span>
                     </div>
                     <div className="flex-1 text-left">
-                        <p className="text-xl font-black tracking-tight uppercase">{currentMatch?.awayTeam?.shortName ?? 'AWAY'}</p>
-                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Away</p>
+                        <p className="text-xl font-black uppercase tracking-tight">
+                            {currentMatch?.awayTeam?.shortName ?? 'AWAY'}
+                        </p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                            Away
+                        </p>
                     </div>
                 </section>
 
                 {/* Match Controls */}
-                <section className="max-w-md mx-auto space-y-4">
+                <section className="mx-auto max-w-md space-y-4">
                     {!isMatchStarted ? (
                         <Button
                             variant="accent"
@@ -278,17 +300,23 @@ export default function RefereeController() {
                             {/* Goals */}
                             <div className="grid grid-cols-2 gap-4">
                                 <button
-                                    onClick={() => { setSelectedTeam('home'); setIsGoalModalOpen(true); }}
-                                    className="h-24 rounded-full bg-white text-black font-black text-xs tracking-widest uppercase active:scale-95 transition-all shadow-xl"
+                                    onClick={() => {
+                                        setSelectedTeam('home');
+                                        setIsGoalModalOpen(true);
+                                    }}
+                                    className="h-24 rounded-full bg-white text-xs font-black uppercase tracking-widest text-black shadow-xl transition-all active:scale-95"
                                 >
-                                    <span className="block text-2xl mb-1">⚽</span>
+                                    <span className="mb-1 block text-2xl">⚽</span>
                                     {currentMatch?.homeTeam?.shortName ?? 'HOME'} GOAL
                                 </button>
                                 <button
-                                    onClick={() => { setSelectedTeam('away'); setIsGoalModalOpen(true); }}
-                                    className="h-24 rounded-full bg-white text-black font-black text-xs tracking-widest uppercase active:scale-95 transition-all shadow-xl"
+                                    onClick={() => {
+                                        setSelectedTeam('away');
+                                        setIsGoalModalOpen(true);
+                                    }}
+                                    className="h-24 rounded-full bg-white text-xs font-black uppercase tracking-widest text-black shadow-xl transition-all active:scale-95"
                                 >
-                                    <span className="block text-2xl mb-1">⚽</span>
+                                    <span className="mb-1 block text-2xl">⚽</span>
                                     {currentMatch?.awayTeam?.shortName ?? 'AWAY'} GOAL
                                 </button>
                             </div>
@@ -296,20 +324,26 @@ export default function RefereeController() {
                             {/* Cards */}
                             <div className="grid grid-cols-3 gap-3">
                                 <button
-                                    onClick={() => { setCardType('yellow_card'); setIsCardModalOpen(true); }}
-                                    className="h-20 rounded-full bg-yellow-400 text-black font-black text-[10px] tracking-widest uppercase active:scale-95 transition-all"
+                                    onClick={() => {
+                                        setCardType('yellow_card');
+                                        setIsCardModalOpen(true);
+                                    }}
+                                    className="h-20 rounded-full bg-yellow-400 text-[10px] font-black uppercase tracking-widest text-black transition-all active:scale-95"
                                 >
                                     YELLOW
                                 </button>
                                 <button
-                                    onClick={() => { setCardType('red_card'); setIsCardModalOpen(true); }}
-                                    className="h-20 rounded-full bg-red-600 text-white font-black text-[10px] tracking-widest uppercase active:scale-95 transition-all"
+                                    onClick={() => {
+                                        setCardType('red_card');
+                                        setIsCardModalOpen(true);
+                                    }}
+                                    className="h-20 rounded-full bg-red-600 text-[10px] font-black uppercase tracking-widest text-white transition-all active:scale-95"
                                 >
                                     RED
                                 </button>
                                 <button
                                     disabled
-                                    className="h-20 rounded-full bg-slate-900 text-slate-700 font-black text-[10px] tracking-widest uppercase cursor-not-allowed border border-slate-800"
+                                    className="h-20 cursor-not-allowed rounded-full border border-slate-800 bg-slate-900 text-[10px] font-black uppercase tracking-widest text-slate-700"
                                 >
                                     SUB
                                 </button>
@@ -342,7 +376,7 @@ export default function RefereeController() {
                                         size="lg"
                                         fullWidth
                                         onClick={() => setIsSignatureModalOpen(true)}
-                                        className="h-16 bg-red-600 text-white font-black"
+                                        className="h-16 bg-red-600 font-black text-white"
                                     >
                                         FINISH
                                     </Button>
@@ -353,20 +387,27 @@ export default function RefereeController() {
                 </section>
 
                 {/* Event Feed */}
-                <section className="max-w-md mx-auto mt-12">
-                    <h2 className="text-[10px] font-black tracking-[0.4em] uppercase text-slate-700 mb-6 flex items-center gap-3">
+                <section className="mx-auto mt-12 max-w-md">
+                    <h2 className="mb-6 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] text-slate-700">
                         Timeline
                         <div className="h-px flex-1 bg-slate-900" />
                     </h2>
                     <div className="space-y-3">
                         {events.length === 0 ? (
-                            <div className="text-center py-12 border-2 border-dashed border-slate-900 rounded-[40px]">
-                                <p className="text-slate-800 text-[10px] font-black uppercase tracking-[0.3em]">Awaiting Events</p>
+                            <div className="rounded-[40px] border-2 border-dashed border-slate-900 py-12 text-center">
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-800">
+                                    Awaiting Events
+                                </p>
                             </div>
                         ) : (
                             events.map((event) => (
-                                <div key={event.id} className="flex items-center gap-4 p-5 bg-slate-900/50 rounded-3xl border border-slate-800">
-                                    <span className="text-xs font-black text-orange-500 w-8">{event.minute}'</span>
+                                <div
+                                    key={event.id}
+                                    className="flex items-center gap-4 rounded-3xl border border-slate-800 bg-slate-900/50 p-5"
+                                >
+                                    <span className="w-8 text-xs font-black text-orange-500">
+                                        {event.minute}'
+                                    </span>
                                     <span className="text-xl">
                                         {event.type === 'goal' && '⚽'}
                                         {event.type === 'yellow_card' && '🟨'}
@@ -374,11 +415,19 @@ export default function RefereeController() {
                                         {event.type === 'substitution' && '🔄'}
                                     </span>
                                     <div className="flex-1">
-                                        <p className="text-[10px] font-black uppercase tracking-widest">{event.type.replace('_', ' ')}</p>
-                                        <p className="text-xs font-bold text-slate-400">{event.player_name}</p>
+                                        <p className="text-[10px] font-black uppercase tracking-widest">
+                                            {event.type.replace('_', ' ')}
+                                        </p>
+                                        <p className="text-xs font-bold text-slate-400">
+                                            {event.player_name}
+                                        </p>
                                     </div>
-                                    <Badge variant="secondary" className="text-[8px] border-slate-800 text-slate-500">
-                                        {event.team_id === (currentMatch?.homeTeam?.id ?? currentMatch?.homeTeamId)
+                                    <Badge
+                                        variant="secondary"
+                                        className="border-slate-800 text-[8px] text-slate-500"
+                                    >
+                                        {event.team_id ===
+                                        (currentMatch?.homeTeam?.id ?? currentMatch?.homeTeamId)
                                             ? (currentMatch?.homeTeam?.shortName ?? 'HOME')
                                             : (currentMatch?.awayTeam?.shortName ?? 'AWAY')}
                                     </Badge>
@@ -390,96 +439,183 @@ export default function RefereeController() {
             </div>
 
             {/* Goal Modal */}
-            <Modal isOpen={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)} title="Record Goal">
+            <Modal
+                isOpen={isGoalModalOpen}
+                onClose={() => setIsGoalModalOpen(false)}
+                title="Record Goal"
+            >
                 <div className="space-y-2">
                     {(selectedTeam === 'home' ? homePlayers : awayPlayers).map((player) => (
                         <button
                             key={player.id}
-                            onClick={() => recordEvent('goal', selectedTeam === 'home' ? (currentMatch?.homeTeam?.id ?? currentMatch?.homeTeamId ?? '') : (currentMatch?.awayTeam?.id ?? currentMatch?.awayTeamId ?? ''), player.id)}
-                            className="w-full py-5 px-5 text-left bg-slate-50 rounded-2xl hover:border-orange-500 border-2 border-transparent transition-all group"
+                            onClick={() =>
+                                recordEvent(
+                                    'goal',
+                                    selectedTeam === 'home'
+                                        ? (currentMatch?.homeTeam?.id ??
+                                              currentMatch?.homeTeamId ??
+                                              '')
+                                        : (currentMatch?.awayTeam?.id ??
+                                              currentMatch?.awayTeamId ??
+                                              ''),
+                                    player.id,
+                                )
+                            }
+                            className="group w-full rounded-2xl border-2 border-transparent bg-slate-50 px-5 py-5 text-left transition-all hover:border-orange-500"
                         >
-                            <span className="inline-block w-8 text-xs font-black text-slate-300 group-hover:text-orange-500">#{player.jersey_number}</span>
-                            <span className="font-bold text-sm tracking-tight text-black">{player.name}</span>
+                            <span className="inline-block w-8 text-xs font-black text-slate-300 group-hover:text-orange-500">
+                                #{player.jersey_number}
+                            </span>
+                            <span className="text-sm font-bold tracking-tight text-black">
+                                {player.name}
+                            </span>
                         </button>
                     ))}
-                    <Button variant="outline" fullWidth onClick={() => recordEvent('goal', selectedTeam === 'home' ? (currentMatch?.homeTeam?.id ?? currentMatch?.homeTeamId ?? '') : (currentMatch?.awayTeam?.id ?? currentMatch?.awayTeamId ?? ''), '')} className="mt-4">
+                    <Button
+                        variant="outline"
+                        fullWidth
+                        onClick={() =>
+                            recordEvent(
+                                'goal',
+                                selectedTeam === 'home'
+                                    ? (currentMatch?.homeTeam?.id ?? currentMatch?.homeTeamId ?? '')
+                                    : (currentMatch?.awayTeam?.id ??
+                                          currentMatch?.awayTeamId ??
+                                          ''),
+                                '',
+                            )
+                        }
+                        className="mt-4"
+                    >
                         Unknown Player
                     </Button>
                 </div>
             </Modal>
 
             {/* Card Modal */}
-            <Modal isOpen={isCardModalOpen} onClose={() => setIsCardModalOpen(false)} title={`${cardType === 'yellow_card' ? 'Yellow' : 'Red'} Card`}>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                    <button onClick={() => setSelectedTeam('home')} className={cn('py-4 rounded-xl border-2 font-bold text-xs tracking-widest flex items-center justify-center gap-2', selectedTeam === 'home' ? 'bg-black text-white border-black' : 'border-slate-100 text-slate-400')}>
+            <Modal
+                isOpen={isCardModalOpen}
+                onClose={() => setIsCardModalOpen(false)}
+                title={`${cardType === 'yellow_card' ? 'Yellow' : 'Red'} Card`}
+            >
+                <div className="mb-6 grid grid-cols-2 gap-4">
+                    <button
+                        onClick={() => setSelectedTeam('home')}
+                        className={cn(
+                            'flex items-center justify-center gap-2 rounded-xl border-2 py-4 text-xs font-bold tracking-widest',
+                            selectedTeam === 'home'
+                                ? 'border-black bg-black text-white'
+                                : 'border-slate-100 text-slate-400',
+                        )}
+                    >
                         {currentMatch?.homeTeam?.shortName ?? 'HOME'}
                     </button>
-                    <button onClick={() => setSelectedTeam('away')} className={cn('py-4 rounded-xl border-2 font-bold text-xs tracking-widest flex items-center justify-center gap-2', selectedTeam === 'away' ? 'bg-black text-white border-black' : 'border-slate-100 text-slate-400')}>
+                    <button
+                        onClick={() => setSelectedTeam('away')}
+                        className={cn(
+                            'flex items-center justify-center gap-2 rounded-xl border-2 py-4 text-xs font-bold tracking-widest',
+                            selectedTeam === 'away'
+                                ? 'border-black bg-black text-white'
+                                : 'border-slate-100 text-slate-400',
+                        )}
+                    >
                         {currentMatch?.awayTeam?.shortName ?? 'AWAY'}
                     </button>
                 </div>
                 <div className="space-y-2">
                     {(selectedTeam === 'home' ? homePlayers : awayPlayers).map((player) => (
-                        <button key={player.id} onClick={() => recordEvent(cardType, selectedTeam === 'home' ? (currentMatch?.homeTeam?.id ?? currentMatch?.homeTeamId ?? '') : (currentMatch?.awayTeam?.id ?? currentMatch?.awayTeamId ?? ''), player.id)} className="w-full py-5 px-5 text-left bg-slate-50 rounded-2xl hover:border-orange-500 border-2 border-transparent transition-all">
-                            <span className="inline-block w-8 text-xs font-black text-slate-300">#{player.jersey_number}</span>
-                            <span className="font-bold text-sm tracking-tight text-black">{player.name}</span>
+                        <button
+                            key={player.id}
+                            onClick={() =>
+                                recordEvent(
+                                    cardType,
+                                    selectedTeam === 'home'
+                                        ? (currentMatch?.homeTeam?.id ??
+                                              currentMatch?.homeTeamId ??
+                                              '')
+                                        : (currentMatch?.awayTeam?.id ??
+                                              currentMatch?.awayTeamId ??
+                                              ''),
+                                    player.id,
+                                )
+                            }
+                            className="w-full rounded-2xl border-2 border-transparent bg-slate-50 px-5 py-5 text-left transition-all hover:border-orange-500"
+                        >
+                            <span className="inline-block w-8 text-xs font-black text-slate-300">
+                                #{player.jersey_number}
+                            </span>
+                            <span className="text-sm font-bold tracking-tight text-black">
+                                {player.name}
+                            </span>
                         </button>
                     ))}
                 </div>
             </Modal>
 
             {/* Official Protocol Signature Modal */}
-            <Modal 
-                isOpen={isSignatureModalOpen} 
-                onClose={() => setIsSignatureModalOpen(false)} 
+            <Modal
+                isOpen={isSignatureModalOpen}
+                onClose={() => setIsSignatureModalOpen(false)}
                 title="Official Match Protocol"
             >
                 <div className="space-y-8 py-4">
-                    <div className="text-center mb-8">
-                        <div className="text-4xl font-black mb-1">{homeScore} — {awayScore}</div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Final Verification</p>
+                    <div className="mb-8 text-center">
+                        <div className="mb-1 text-4xl font-black">
+                            {homeScore} — {awayScore}
+                        </div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                            Final Verification
+                        </p>
                     </div>
 
                     {sigStep === 'referee' && (
-                        <SignaturePad 
+                        <SignaturePad
                             label="Referee Signature"
                             onSave={(sig) => {
-                                setSignatures(s => ({ ...s, referee: sig }));
+                                setSignatures((s) => ({ ...s, referee: sig }));
                                 setSigStep('home');
                             }}
                         />
                     )}
 
                     {sigStep === 'home' && (
-                        <SignaturePad 
+                        <SignaturePad
                             label={`${match?.homeTeam?.shortName || 'Home'} Coach Signature`}
                             onSave={(sig) => {
-                                setSignatures(s => ({ ...s, homeCoach: sig }));
+                                setSignatures((s) => ({ ...s, homeCoach: sig }));
                                 setSigStep('away');
                             }}
                         />
                     )}
 
                     {sigStep === 'away' && (
-                        <SignaturePad 
+                        <SignaturePad
                             label={`${match?.awayTeam?.shortName || 'Away'} Coach Signature`}
                             onSave={(sig) => {
-                                setSignatures(s => ({ ...s, awayCoach: sig }));
+                                setSignatures((s) => ({ ...s, awayCoach: sig }));
                                 setSigStep('done');
                             }}
                         />
                     )}
 
                     {sigStep === 'done' && (
-                        <div className="text-center space-y-6">
-                            <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto">
+                        <div className="space-y-6 text-center">
+                            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50">
                                 <span className="text-4xl">✅</span>
                             </div>
                             <div>
                                 <h3 className="text-lg font-black uppercase">Protocol Ready</h3>
-                                <p className="text-xs text-slate-500 mt-1">All signatures captured. Click below to finalize the match and generate the legal PDF.</p>
+                                <p className="mt-1 text-xs text-slate-500">
+                                    All signatures captured. Click below to finalize the match and
+                                    generate the legal PDF.
+                                </p>
                             </div>
-                            <Button variant="accent" size="lg" fullWidth onClick={handleEndMatchFinal}>
+                            <Button
+                                variant="accent"
+                                size="lg"
+                                fullWidth
+                                onClick={handleEndMatchFinal}
+                            >
                                 Finalize & Sign Protocol
                             </Button>
                         </div>

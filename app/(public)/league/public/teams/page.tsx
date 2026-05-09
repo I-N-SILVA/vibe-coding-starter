@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { PageLayout, PageHeader, Card, CardContent, Badge } from '@/components/plyaz';
 import { stagger, fadeUp } from '@/lib/animations';
@@ -17,6 +18,7 @@ export default function PublicTeams() {
         }>
     >([]);
     const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
         async function fetchTeams() {
@@ -63,7 +65,12 @@ export default function PublicTeams() {
                     className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
                 >
                     {teams.map((team) => (
-                        <motion.div key={team.id} variants={fadeUp}>
+                        <motion.div
+                            key={team.id}
+                            variants={fadeUp}
+                            className="cursor-pointer"
+                            onClick={() => router.push('/league/public/teams/' + team.id)}
+                        >
                             <Card elevated hoverable className="group text-center">
                                 <CardContent className="pb-6 pt-8">
                                     <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-gray-900 text-2xl font-bold text-white transition-all duration-300 group-hover:scale-110 group-hover:bg-orange-600">

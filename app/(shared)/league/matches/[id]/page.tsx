@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import { useParams, usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -377,6 +378,44 @@ const LineupColumn: React.FC<LineupColumnProps> = ({ teamName, players, side }) 
 );
 
 // ─────────────────────────────────────────────
+// Match Tabs
+// ─────────────────────────────────────────────
+
+interface MatchTabsProps {
+    id: string;
+}
+
+const MatchTabs: React.FC<MatchTabsProps> = ({ id }) => {
+    const pathname = usePathname();
+    const tabs = [
+        { label: 'Overview', href: `/league/matches/${id}` },
+        { label: 'Lineup', href: `/league/matches/${id}/lineup` },
+        { label: 'Substitutions', href: `/league/matches/${id}/substitutions` },
+    ];
+
+    return (
+        <div className="mb-6 flex gap-1 rounded-2xl bg-neutral-100 p-1 dark:bg-neutral-800/60">
+            {tabs.map((tab) => {
+                const isActive = pathname === tab.href;
+                return (
+                    <Link
+                        key={tab.href}
+                        href={tab.href}
+                        className={`flex-1 rounded-xl py-2.5 text-center text-[10px] font-black uppercase tracking-widest transition-all ${
+                            isActive
+                                ? 'bg-black text-white shadow-md dark:bg-orange-500'
+                                : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200'
+                        }`}
+                    >
+                        {tab.label}
+                    </Link>
+                );
+            })}
+        </div>
+    );
+};
+
+// ─────────────────────────────────────────────
 // Main Match Detail Page
 // ─────────────────────────────────────────────
 
@@ -503,6 +542,9 @@ export default function MatchDetailPage() {
             <motion.div variants={fadeUp} initial="hidden" animate="show">
                 <Scoreboard match={match} liveScore={liveScore} matchTime={matchTime} />
             </motion.div>
+
+            {/* Tab Navigation */}
+            <MatchTabs id={id} />
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {/* Event Timeline */}
