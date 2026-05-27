@@ -1,0 +1,1856 @@
+[
+  {
+    "id": "TC001",
+    "title": "Sign in with valid credentials",
+    "description": "A user can sign in successfully and reach the authenticated area.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an authenticated area is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Record match events and end the match",
+    "description": "This verifies that a referee can record goals, cards, and substitutions during live scoring and then end the match with an updated result.",
+    "category": "Referee Match Operations",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to a referee live match page"
+      },
+      {
+        "type": "action",
+        "description": "Record a goal event"
+      },
+      {
+        "type": "action",
+        "description": "Record a card event"
+      },
+      {
+        "type": "action",
+        "description": "Record a substitution event"
+      },
+      {
+        "type": "action",
+        "description": "End the match"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the final score and completed match state are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Complete organizer onboarding and create a league",
+    "description": "This verifies that a new organizer can finish onboarding and create a new league from the app.",
+    "category": "Organizer Onboarding and League Setup",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Complete onboarding with organizer details"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to league creation"
+      },
+      {
+        "type": "action",
+        "description": "Create a new league"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new league is created"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Create a new league",
+    "description": "An organizer can create a league and see it available for management afterward.",
+    "category": "Organization and League Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to create a new league"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the league name field with a new league name"
+      },
+      {
+        "type": "action",
+        "description": "Submit the league creation form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new league is available for management"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Complete a match with live events",
+    "description": "A referee can start a match, record live events, and end the match with the final score shown.",
+    "category": "Match Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/matches"
+      },
+      {
+        "type": "action",
+        "description": "Open a match"
+      },
+      {
+        "type": "action",
+        "description": "Start the match"
+      },
+      {
+        "type": "action",
+        "description": "Record a goal event"
+      },
+      {
+        "type": "action",
+        "description": "Record a card event"
+      },
+      {
+        "type": "action",
+        "description": "End the match"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the match is marked completed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the final score is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Check an assigned referee match and open live scoring",
+    "description": "This verifies that a referee can open an assigned match and enter the live scoring workspace.",
+    "category": "Referee Match Operations",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/referee"
+      },
+      {
+        "type": "action",
+        "description": "Open an assigned match"
+      },
+      {
+        "type": "action",
+        "description": "Start live scoring"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the live match workspace is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Record referee live events and close the match",
+    "description": "A referee can record live match events and close the match from the live scoring view.",
+    "category": "Referee Tools",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/referee/live/[id]"
+      },
+      {
+        "type": "action",
+        "description": "Record a goal event"
+      },
+      {
+        "type": "action",
+        "description": "Record a card event"
+      },
+      {
+        "type": "action",
+        "description": "End the match"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the match is closed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated score is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Configure a competition and review registrations and standings",
+    "description": "This verifies that a manager can configure a competition and then review its registrations and standings.",
+    "category": "Competition Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to a competition configuration page"
+      },
+      {
+        "type": "action",
+        "description": "Update the competition settings"
+      },
+      {
+        "type": "action",
+        "description": "Open the competition registrations view"
+      },
+      {
+        "type": "action",
+        "description": "Open the standings view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify competition registrations and standings are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "Complete onboarding with a selected role",
+    "description": "A new authenticated user can choose a role, complete profile details, and proceed to the next setup stage.",
+    "category": "Onboarding",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /onboarding"
+      },
+      {
+        "type": "action",
+        "description": "Select a role"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the profile details"
+      },
+      {
+        "type": "action",
+        "description": "Submit the onboarding form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the next stage of account setup is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Configure a competition successfully",
+    "description": "An organizer can update competition settings and see the saved configuration reflected on the page.",
+    "category": "Competition Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/competitions/[id]/config"
+      },
+      {
+        "type": "action",
+        "description": "Update the competition settings"
+      },
+      {
+        "type": "action",
+        "description": "Save the changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated competition configuration is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "Accept an invite and gain access",
+    "description": "This verifies that an invited user can open an invite link, accept it, and reach granted access for the organization.",
+    "category": "Invite System",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /invites/accept"
+      },
+      {
+        "type": "action",
+        "description": "Open a valid invite link or enter a valid invite token"
+      },
+      {
+        "type": "action",
+        "description": "Accept the invitation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access to the invited organization is granted"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "Manage league venues and categories",
+    "description": "This verifies that a manager can add venue and category data and see both lists updated in league settings.",
+    "category": "League Administration",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/venues"
+      },
+      {
+        "type": "action",
+        "description": "Add a new venue"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/categories"
+      },
+      {
+        "type": "action",
+        "description": "Add a new category"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify both the venue and category are listed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC013",
+    "title": "Run a competition draw successfully",
+    "description": "An organizer can generate a competition draw and review the resulting assignments on the draw page.",
+    "category": "Competition Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/competitions/[id]/draw"
+      },
+      {
+        "type": "action",
+        "description": "Run the competition draw"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the generated assignments"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the draw result is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC014",
+    "title": "Run a competition draw and view generated pairings",
+    "description": "This verifies that a manager can run the competition draw and see generated match pairings afterward.",
+    "category": "Competition Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to a competition draw page"
+      },
+      {
+        "type": "action",
+        "description": "Run the draw"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify generated draw pairings are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC015",
+    "title": "Update league settings",
+    "description": "An organizer can change league settings and see the updated configuration saved.",
+    "category": "Organization and League Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open league settings"
+      },
+      {
+        "type": "action",
+        "description": "Update a league setting value"
+      },
+      {
+        "type": "action",
+        "description": "Save the league settings"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated league configuration is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC016",
+    "title": "Schedule a new match",
+    "description": "An authorized user can create a match schedule entry and see it listed afterward.",
+    "category": "Match Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/matches/schedule"
+      },
+      {
+        "type": "action",
+        "description": "Create a new match schedule entry"
+      },
+      {
+        "type": "action",
+        "description": "Save the match"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the scheduled match is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC017",
+    "title": "Create and share an invite for a teammate",
+    "description": "This verifies that a manager can create an invite for a player or referee and see a shareable invite link.",
+    "category": "Invite System",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/invites"
+      },
+      {
+        "type": "action",
+        "description": "Create a new invite for a player or referee"
+      },
+      {
+        "type": "action",
+        "description": "Copy the invite link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the invite link is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC018",
+    "title": "Complete a Stripe checkout and open billing portal",
+    "description": "An authenticated subscriber can complete checkout and access the billing portal from the app.",
+    "category": "Billing and Subscription",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /pricing"
+      },
+      {
+        "type": "action",
+        "description": "Start the subscription checkout"
+      },
+      {
+        "type": "action",
+        "description": "Open the billing portal"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the billing portal is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC019",
+    "title": "Review assigned referee matches",
+    "description": "A referee can open the assigned matches list and see the matches available for review.",
+    "category": "Referee Tools",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/referee"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify assigned matches are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC020",
+    "title": "Subscribe from the pricing page and reach checkout",
+    "description": "This verifies that an authenticated subscriber can start a Stripe subscription flow from pricing and continue to checkout.",
+    "category": "Stripe Payments",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /pricing"
+      },
+      {
+        "type": "action",
+        "description": "Choose a subscription plan"
+      },
+      {
+        "type": "action",
+        "description": "Continue to checkout"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the checkout flow is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC021",
+    "title": "Add a venue to the league",
+    "description": "An organizer can add a venue and see it included in the venue list.",
+    "category": "Organization and League Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open venue management"
+      },
+      {
+        "type": "action",
+        "description": "Add a new venue with valid details"
+      },
+      {
+        "type": "action",
+        "description": "Submit the venue form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new venue appears in the venue list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC022",
+    "title": "Approve a team registration",
+    "description": "An organizer can approve a pending team registration and see the registration status update.",
+    "category": "Competition Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/competitions/[id]/registrations"
+      },
+      {
+        "type": "action",
+        "description": "Approve a pending team registration"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the registration status is updated"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC023",
+    "title": "View manager league dashboard and navigation",
+    "description": "This verifies that a manager can open the league dashboard and access core administration areas from it.",
+    "category": "League Dashboard",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the league dashboard is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC024",
+    "title": "Add a category to the league",
+    "description": "An organizer can add a category and see it included in the category list.",
+    "category": "Organization and League Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open category management"
+      },
+      {
+        "type": "action",
+        "description": "Add a new category with valid details"
+      },
+      {
+        "type": "action",
+        "description": "Submit the category form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new category appears in the category list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC025",
+    "title": "Set a match lineup successfully",
+    "description": "An authorized user can save a match lineup and see the lineup confirmed on the lineup page.",
+    "category": "Match Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/matches/[id]/lineup"
+      },
+      {
+        "type": "action",
+        "description": "Set the match lineup"
+      },
+      {
+        "type": "action",
+        "description": "Save the lineup"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the lineup confirmation is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC026",
+    "title": "View player convocations and register for a competition",
+    "description": "This verifies that a player can review convocations and complete competition registration from the player portal.",
+    "category": "Player Portal",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/player/convocation"
+      },
+      {
+        "type": "action",
+        "description": "Review match convocations"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/player/registration"
+      },
+      {
+        "type": "action",
+        "description": "Register for a competition"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the competition registration is displayed as submitted"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC027",
+    "title": "Edit player profile and save changes",
+    "description": "This verifies that a player can update profile information and see the saved changes reflected in the profile view.",
+    "category": "Player Portal",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/player/profile"
+      },
+      {
+        "type": "action",
+        "description": "Update the player profile details"
+      },
+      {
+        "type": "action",
+        "description": "Save the profile changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated player profile is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC028",
+    "title": "Edit and save player profile details",
+    "description": "A player can update profile information from the dashboard and see the saved changes reflected in the profile area.",
+    "category": "Player Portal",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials for a player account with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the player dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Open the profile area"
+      },
+      {
+        "type": "action",
+        "description": "Update profile details with valid information"
+      },
+      {
+        "type": "action",
+        "description": "Save the profile changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated profile information is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the profile save confirmation is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC029",
+    "title": "Open the billing portal from pricing",
+    "description": "This verifies that an authenticated subscriber can open billing access and reach the billing portal interface.",
+    "category": "Stripe Payments",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /pricing"
+      },
+      {
+        "type": "action",
+        "description": "Open billing access"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the billing portal is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC030",
+    "title": "Reject a team registration",
+    "description": "An organizer can reject a pending team registration and see the registration status update.",
+    "category": "Competition Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/competitions/[id]/registrations"
+      },
+      {
+        "type": "action",
+        "description": "Reject a pending team registration"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the registration status is updated"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC031",
+    "title": "Review coach roster and remove a player",
+    "description": "This verifies that a coach or team manager can open the roster, remove a player, and see the team membership update.",
+    "category": "Coach Team Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/coach/roster"
+      },
+      {
+        "type": "action",
+        "description": "Remove a player from the roster"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the roster updates without the removed player"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC032",
+    "title": "View public standings",
+    "description": "A visitor can open the public standings page and compare team positions.",
+    "category": "Public League Pages",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the public standings page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the standings table is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify team positions are visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC033",
+    "title": "View the player dashboard",
+    "description": "A player can open the dashboard and see their personal league overview.",
+    "category": "Player Portal",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/player/dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the player dashboard is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC034",
+    "title": "Register for a competition as a player",
+    "description": "A player can submit a competition registration and see it recorded afterward.",
+    "category": "Player Portal",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials for a player account with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the player competition registration page"
+      },
+      {
+        "type": "action",
+        "description": "Submit a competition registration with valid details"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the registration is recorded"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a registration confirmation is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC035",
+    "title": "View player dashboard and digital card",
+    "description": "This verifies that a player can open the dashboard and view their digital ID card.",
+    "category": "Player Portal",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/player/dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Open the digital card view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the player dashboard and digital card are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC036",
+    "title": "Record a substitution during a match",
+    "description": "An authorized user can record a substitution and see it reflected in the match record.",
+    "category": "Match Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/matches/[id]/substitutions"
+      },
+      {
+        "type": "action",
+        "description": "Record a substitution"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the substitution is displayed in the match record"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC037",
+    "title": "See an invalid login message",
+    "description": "A user who enters incorrect credentials sees an invalid credentials message.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with fake-user@example.com"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with invalid-password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an invalid credentials message is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC038",
+    "title": "Search and open a league from discovery",
+    "description": "This verifies that a visitor can search discovery results, narrow them by competition type, and open a public league page.",
+    "category": "Discover Leagues",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /discover"
+      },
+      {
+        "type": "action",
+        "description": "Search for leagues using a relevant name"
+      },
+      {
+        "type": "action",
+        "description": "Apply a competition type filter"
+      },
+      {
+        "type": "action",
+        "description": "Open a league from the results"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the public league page is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC039",
+    "title": "Browse the public league overview",
+    "description": "A visitor can open the public league page and view the league overview and related public results.",
+    "category": "Public League Pages",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the public league overview"
+      },
+      {
+        "type": "action",
+        "description": "Open the public matches page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify public league information is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify public match results are visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC040",
+    "title": "Review public league pages for results and rankings",
+    "description": "This verifies that a visitor can browse the public league overview, matches, standings, scoreboard, teams, and player profiles.",
+    "category": "Public League Pages",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /league/public"
+      },
+      {
+        "type": "action",
+        "description": "Open the public matches page"
+      },
+      {
+        "type": "action",
+        "description": "Open the public standings page"
+      },
+      {
+        "type": "action",
+        "description": "Open the public scoreboard page"
+      },
+      {
+        "type": "action",
+        "description": "Open the public teams page"
+      },
+      {
+        "type": "action",
+        "description": "Open a public player profile"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify public league content and profiles are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC041",
+    "title": "Browse public league sections",
+    "description": "A public visitor can move through the public league pages and view standings, scoreboard, teams, and player profiles.",
+    "category": "Public League Pages",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /league/public"
+      },
+      {
+        "type": "action",
+        "description": "Open the public standings page"
+      },
+      {
+        "type": "action",
+        "description": "Open the public scoreboard page"
+      },
+      {
+        "type": "action",
+        "description": "Open the public teams page"
+      },
+      {
+        "type": "action",
+        "description": "Open a public team profile"
+      },
+      {
+        "type": "action",
+        "description": "Open a public player profile from the team page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the public league sections are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC042",
+    "title": "View the public live scoreboard",
+    "description": "A visitor can open the public scoreboard and observe live match updates.",
+    "category": "Public League Pages",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the public scoreboard page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the live scoreboard is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify current match updates are visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC043",
+    "title": "Review league standings",
+    "description": "A manager can view the standings table and compare teams by points and goal difference.",
+    "category": "Competition Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/standings"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the standings table is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify team ranking data is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC044",
+    "title": "Browse discovery and open a team profile",
+    "description": "This verifies that a visitor can browse competition results, open a team listing, and view the public team information.",
+    "category": "Discover Leagues",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /discover"
+      },
+      {
+        "type": "action",
+        "description": "Browse the competition results"
+      },
+      {
+        "type": "action",
+        "description": "Open a team listing from the results"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the public team profile is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC045",
+    "title": "Remove a player from the roster",
+    "description": "A coach or manager can remove a player from the roster and see the roster update.",
+    "category": "Coach Roster Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials for a coach account with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the roster management page"
+      },
+      {
+        "type": "action",
+        "description": "Remove a player from the roster"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the roster is updated"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the removed player no longer appears"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC046",
+    "title": "Discover a league and open its public overview",
+    "description": "A public visitor can find a league from discovery and open its public overview page.",
+    "category": "Public League Pages",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /discover"
+      },
+      {
+        "type": "action",
+        "description": "Open a league from the discovery list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the public league overview is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC047",
+    "title": "Check match convocations",
+    "description": "A player can open convocations and see upcoming match call-ups or an empty state when none are available.",
+    "category": "Player Portal",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/player/convocation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify convocations are displayed or an empty state is shown"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC048",
+    "title": "Review player convocations",
+    "description": "A player can open the convocations page and see match assignment and availability details.",
+    "category": "Player Portal",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials for a player account with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the player convocations page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify convocations are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify assignment and availability details are visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC049",
+    "title": "View the coach team dashboard",
+    "description": "A coach or manager can open the team dashboard and review their team information.",
+    "category": "Coach Roster Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the username field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /league/coach/dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the coach dashboard is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC050",
+    "title": "View coach dashboard roster summary",
+    "description": "A coach or manager can open the dashboard and review roster and team statistics.",
+    "category": "Coach Roster Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credentials for a coach account with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the coach dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the team roster is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify team statistics are visible"
+      }
+    ],
+    "priority": "Medium"
+  }
+]

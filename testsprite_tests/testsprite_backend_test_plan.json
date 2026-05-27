@@ -1,0 +1,7 @@
+[
+  {
+    "id": "TC001",
+    "title": "patch api profile update authenticated user profile",
+    "description": "Verify that PATCH /api/profile with a valid authenticated session cookie returns 200 and updates the user profile, and that the user remains authenticated for subsequent protected calls."
+  }
+]
