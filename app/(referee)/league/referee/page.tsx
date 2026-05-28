@@ -163,6 +163,13 @@ export default function RefereeDashboard() {
 
     const isLoading = liveLoading || scheduledLoading || upcomingLoading || completedLoading;
 
+    // Every match assigned to this referee, across all statuses.
+    const totalMatches =
+        liveMatches.length +
+        scheduledMatches.length +
+        upcomingMatches.length +
+        completedMatches.length;
+
     // Group matches
     const { todayMatches, futureMatches, pastMatches } = useMemo(() => {
         const allScheduled = [...scheduledMatches, ...upcomingMatches];
@@ -206,7 +213,7 @@ export default function RefereeDashboard() {
             <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
                 <StatCard
                     title="Total Matches"
-                    value={completedMatches.length.toString()}
+                    value={totalMatches.toString()}
                     icon={<NavIcons.Whistle />}
                 />
                 <StatCard

@@ -57,5 +57,6 @@ yarn-error.log*
 playwright-report/
 test-results/
 blob-report/
+e2e/.auth/
 .env
 .claude/worktrees/

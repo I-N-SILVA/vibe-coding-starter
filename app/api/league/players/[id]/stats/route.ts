@@ -14,7 +14,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
         .from('player_competition_stats')
         .select('*, competitions(name)')
         .eq('player_id', id)
-        .order('created_at', { ascending: false });
+        .order('updated_at', { ascending: false });
 
     if (error) {
         return apiError(error.message, 500);

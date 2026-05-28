@@ -12,7 +12,9 @@
         "pretty": "prettier --write .",
         "appinfo": "node ./scripts/generateAppInfo.mjs",
         "test:e2e": "playwright test",
-        "test:e2e:ui": "playwright test --ui"
+        "test:e2e:ui": "playwright test --ui",
+        "test:e2e:prod": "PLAYWRIGHT_BASE_URL=https://vibe-coding-starter-black.vercel.app playwright test",
+        "seed:test-users": "node ./scripts/seed-test-users.js"
     },
     "dependencies": {
         "@emotion/is-prop-valid": "^1.4.0",

@@ -12,7 +12,7 @@ const ContentSecurityPolicy = `
   style-src-elem 'self' 'unsafe-inline' https://api.fontshare.com https://fonts.googleapis.com;
   img-src 'self' https://*.supabase.co https://*.vercel.com blob: data:;
   media-src 'self' https://*.s3.amazonaws.com https://*.shipixen.com;
-  connect-src 'self' https://*.supabase.co https://*.vercel-analytics.com https://*.vercel-scripts.com https://vercel.live https://*.vercel.com https://api.fontshare.com https://fonts.googleapis.com https://cdn.fontshare.com;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel-analytics.com https://*.vercel-scripts.com https://vercel.live https://*.vercel.com https://api.fontshare.com https://fonts.googleapis.com https://cdn.fontshare.com;
   font-src 'self' data: https://fonts.gstatic.com https://cdn.fontshare.com https://api.fontshare.com https://r2cdn.perplexity.ai https://vercel.live;
   frame-src 'self' https://vercel.live https://vercel.live/ https://*.vercel.com;
 `

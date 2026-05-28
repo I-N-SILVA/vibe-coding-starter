@@ -11,7 +11,9 @@ function createMockClient(): SupabaseClient {
             getUser: async () => ({ data: { user: null }, error: { message: 'Not configured' } }),
         },
         from: () => ({
-            select: () => ({ eq: () => ({ single: async () => noData, order: async () => noData }) }),
+            select: () => ({
+                eq: () => ({ single: async () => noData, order: async () => noData }),
+            }),
             insert: () => ({ select: () => ({ single: async () => noData }) }),
             update: () => ({ eq: () => ({ select: () => ({ single: async () => noData }) }) }),
             delete: () => ({ eq: () => ({ error: null }) }),
@@ -21,8 +23,8 @@ function createMockClient(): SupabaseClient {
 }
 
 export async function createClient() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
     if (!supabaseUrl || !supabaseAnonKey) {
         return createMockClient();
@@ -38,7 +40,7 @@ export async function createClient() {
             setAll(cookiesToSet) {
                 try {
                     cookiesToSet.forEach(({ name, value, options }) =>
-                        cookieStore.set(name, value, options)
+                        cookieStore.set(name, value, options),
                     );
                 } catch {
                     // The `setAll` method was called from a Server Component.
@@ -55,8 +57,8 @@ export async function createClient() {
  * This should ONLY be used in server-side contexts that require bypassing RLS.
  */
 export function createAdminClient() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
     if (!supabaseUrl || !supabaseServiceRoleKey) {
         throw new Error('Missing Supabase admin configuration');

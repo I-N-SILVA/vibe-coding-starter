@@ -30,47 +30,62 @@ type StandingsRow = {
 
 export default function PublicStandings() {
     const searchParams = useSearchParams();
-    const competitionId = searchParams.get('competitionId');
+    const competitionIdParam = searchParams.get('competitionId');
     const [format, setFormat] = useState<'league' | 'knockout'>('league');
     const [standings, setStandings] = useState<StandingsRow[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [effectiveCompetitionId, setEffectiveCompetitionId] = useState<string | null>(
+        competitionIdParam,
+    );
+    const [resolvingCompetition, setResolvingCompetition] = useState(!competitionIdParam);
 
-    // Determine competition format
+    // Resolve which competition to show: the one in the URL, otherwise the active (or first) public competition.
     useEffect(() => {
-        if (!competitionId) {
-            setFormat('league');
-            return;
-        }
-        async function fetchCompetition() {
+        let cancelled = false;
+        async function resolveCompetition() {
+            setResolvingCompetition(true);
             try {
                 const res = await fetch(`/api/league/public/competitions`);
-                if (res.ok) {
-                    const data: Array<{ id: string; type: string }> = await res.json();
-                    const comp = data.find((c) => c.id === competitionId);
-                    if (comp?.type === 'knockout' || comp?.type === 'group_knockout')
-                        setFormat('knockout');
-                    else setFormat('league');
-                }
+                const list: Array<{ id: string; type: string; status?: string }> = res.ok
+                    ? await res.json()
+                    : [];
+                if (cancelled) return;
+                const selected =
+                    (competitionIdParam && list.find((c) => c.id === competitionIdParam)) ||
+                    list.find((c) => c.status === 'active') ||
+                    list[0] ||
+                    null;
+                setEffectiveCompetitionId(selected?.id ?? competitionIdParam ?? null);
+                setFormat(
+                    selected?.type === 'knockout' || selected?.type === 'group_knockout'
+                        ? 'knockout'
+                        : 'league',
+                );
             } catch (err) {
-                console.error('Failed to fetch format', err);
+                console.error('Failed to resolve competition', err);
+            } finally {
+                if (!cancelled) setResolvingCompetition(false);
             }
         }
-        fetchCompetition();
-    }, [competitionId]);
+        resolveCompetition();
+        return () => {
+            cancelled = true;
+        };
+    }, [competitionIdParam]);
 
-    // Fetch real standings from the public standings API
+    // Fetch real standings for the resolved competition from the public standings API.
     useEffect(() => {
-        if (!competitionId) {
+        if (!effectiveCompetitionId) {
             setStandings([]);
             return;
         }
         setIsLoading(true);
-        fetch(`/api/league/public/standings?competitionId=${competitionId}`)
+        fetch(`/api/league/public/standings?competitionId=${effectiveCompetitionId}`)
             .then((res) => (res.ok ? res.json() : []))
             .then((data: StandingsRow[]) => setStandings(Array.isArray(data) ? data : []))
             .catch(() => setStandings([]))
             .finally(() => setIsLoading(false));
-    }, [competitionId]);
+    }, [effectiveCompetitionId]);
 
     return (
         <PageLayout title="PLYAZ PULSE">
@@ -117,7 +132,7 @@ export default function PublicStandings() {
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.3 }}
                     >
-                        {isLoading ? (
+                        {isLoading || resolvingCompetition ? (
                             <Card className="overflow-hidden border-neutral-100 !p-0 dark:border-neutral-700/50">
                                 <div className="p-12 text-center text-sm text-neutral-400 dark:text-neutral-500">
                                     Loading standings…
@@ -126,9 +141,9 @@ export default function PublicStandings() {
                         ) : standings.length === 0 ? (
                             <Card className="overflow-hidden border-neutral-100 !p-0 dark:border-neutral-700/50">
                                 <div className="p-12 text-center text-sm text-neutral-400 dark:text-neutral-500">
-                                    {competitionId
+                                    {effectiveCompetitionId
                                         ? 'No standings yet — matches are in progress.'
-                                        : 'Select a competition to view standings.'}
+                                        : 'No competitions available yet.'}
                                 </div>
                             </Card>
                         ) : (
@@ -262,7 +277,7 @@ export default function PublicStandings() {
                             </div>
                             <div className="text-sm font-black tracking-tight">
                                 Real-time standings are active for{' '}
-                                {competitionId ? 'this league' : 'all leagues'}.
+                                {effectiveCompetitionId ? 'this league' : 'all leagues'}.
                             </div>
                         </div>
                     </div>
@@ -281,8 +296,11 @@ export default function PublicStandings() {
 
 function EmbedScoreboardSnippet() {
     const [copied, setCopied] = useState(false);
-    const origin =
-        typeof window !== 'undefined' ? window.location.origin : 'https://your-app.vercel.app';
+    // Read the real origin only after mount so SSR and first client render match (avoids hydration #418).
+    const [origin, setOrigin] = useState('https://your-app.vercel.app');
+    useEffect(() => {
+        setOrigin(window.location.origin);
+    }, []);
     const snippet = `<iframe src="${origin}/league/public/embed/scoreboard" width="400" height="300" frameborder="0"></iframe>`;
 
     const handleCopy = useCallback(() => {
