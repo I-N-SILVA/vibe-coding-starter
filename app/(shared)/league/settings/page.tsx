@@ -84,9 +84,10 @@ export default function AdminSettings() {
                 window.location.href = url;
                 return;
             }
-            // 400 = org has no Stripe subscription yet (free/seeded org). Inform, don't alarm.
+            // 400 = org has no Stripe subscription yet (free/seeded org). Route to pricing.
             if (res.status === 400) {
-                warning(error || 'No active subscription to manage yet.');
+                warning('Choose a plan to start a subscription.');
+                router.push('/pricing');
                 return;
             }
             throw new Error(error || 'Failed to open billing portal');

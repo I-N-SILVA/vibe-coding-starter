@@ -44,7 +44,10 @@ function SetupChecklist({ competitionId }: { competitionId: string | null }) {
 
     const handleGenerateInvite = async () => {
         try {
-            const result = await createInvite.mutateAsync({ type: 'player_join', role: 'player' }) as { token: string };
+            const result = (await createInvite.mutateAsync({
+                type: 'player_join',
+                role: 'player',
+            })) as { token: string };
             setFreshLink(`${window.location.origin}/invites/accept?token=${result.token}`);
         } catch {
             toast.error('Failed to generate invite link');
@@ -65,28 +68,36 @@ function SetupChecklist({ competitionId }: { competitionId: string | null }) {
             <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-2xl bg-neutral-900 dark:bg-neutral-800 p-5 md:p-6 text-white"
+                className="rounded-2xl bg-neutral-900 p-5 text-white dark:bg-neutral-800 md:p-6"
             >
-                <div className="flex items-start justify-between mb-4 gap-3">
+                <div className="mb-4 flex items-start justify-between gap-3">
                     <div>
-                        <p className="text-[10px] font-black tracking-[0.25em] uppercase text-neutral-400 mb-1">Setup Progress</p>
-                        <h2 className="text-xl md:text-2xl font-black leading-tight">
-                            {percentage < 50 ? "Let's build your league" : percentage < 100 ? 'Almost ready to launch' : 'League is live!'}
+                        <p className="mb-1 text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400">
+                            Setup Progress
+                        </p>
+                        <h2 className="text-xl font-black leading-tight md:text-2xl">
+                            {percentage < 50
+                                ? "Let's build your league"
+                                : percentage < 100
+                                  ? 'Almost ready to launch'
+                                  : 'League is live!'}
                         </h2>
-                        <p className="text-sm text-neutral-400 mt-1">{completed} of {total} steps complete</p>
+                        <p className="mt-1 text-sm text-neutral-400">
+                            {completed} of {total} steps complete
+                        </p>
                     </div>
-                    <div className="flex-shrink-0 w-14 h-14 rounded-full bg-white/10 flex items-center justify-center">
+                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-white/10">
                         <span className="text-lg font-black text-white">{percentage}%</span>
                     </div>
                 </div>
 
                 {/* Progress bar */}
-                <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
                     <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${percentage}%` }}
                         transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
-                        className="h-full bg-orange-500 rounded-full"
+                        className="h-full rounded-full bg-orange-500"
                     />
                 </div>
 
@@ -96,11 +107,11 @@ function SetupChecklist({ competitionId }: { competitionId: string | null }) {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.4 }}
                         onClick={() => nextStep.href && router.push(nextStep.href)}
-                        className="mt-4 flex items-center gap-2 text-sm font-bold text-orange-400 hover:text-orange-300 transition-colors"
+                        className="mt-4 flex items-center gap-2 text-sm font-bold text-orange-400 transition-colors hover:text-orange-300"
                     >
-                        <Zap className="w-4 h-4" />
+                        <Zap className="h-4 w-4" />
                         Next: {nextStep.cta}
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <ArrowRight className="h-3.5 w-3.5" />
                     </motion.button>
                 )}
             </motion.div>
@@ -112,7 +123,7 @@ function SetupChecklist({ competitionId }: { competitionId: string | null }) {
                 transition={{ delay: 0.1 }}
             >
                 <Card>
-                    <CardContent className="p-0 divide-y divide-neutral-50 dark:divide-neutral-800">
+                    <CardContent className="divide-y divide-neutral-50 p-0 dark:divide-neutral-800">
                         {steps.map((step, i) => (
                             <motion.div
                                 key={step.id}
@@ -123,25 +134,31 @@ function SetupChecklist({ competitionId }: { competitionId: string | null }) {
                                 <button
                                     onClick={() => step.href && router.push(step.href)}
                                     disabled={!step.href || step.done}
-                                    className={`w-full flex items-center gap-3 px-4 py-3.5 transition-colors text-left ${
+                                    className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors ${
                                         step.done
                                             ? 'opacity-60'
                                             : step.href
-                                            ? 'hover:bg-neutral-50 dark:hover:bg-neutral-800/50 cursor-pointer'
-                                            : 'cursor-default'
+                                              ? 'cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
+                                              : 'cursor-default'
                                     }`}
                                 >
-                                    <span className={`flex-shrink-0 ${step.done ? 'text-green-500' : 'text-neutral-300 dark:text-neutral-600'}`}>
-                                        {step.done
-                                            ? <CheckCircle2 className="w-5 h-5" />
-                                            : <Circle className="w-5 h-5" />}
+                                    <span
+                                        className={`flex-shrink-0 ${step.done ? 'text-green-500' : 'text-neutral-300 dark:text-neutral-600'}`}
+                                    >
+                                        {step.done ? (
+                                            <CheckCircle2 className="h-5 w-5" />
+                                        ) : (
+                                            <Circle className="h-5 w-5" />
+                                        )}
                                     </span>
-                                    <span className={`flex-1 text-sm font-semibold ${step.done ? 'line-through text-neutral-400' : 'text-neutral-900 dark:text-white'}`}>
+                                    <span
+                                        className={`flex-1 text-sm font-semibold ${step.done ? 'text-neutral-400 line-through' : 'text-neutral-900 dark:text-white'}`}
+                                    >
                                         {step.label}
                                     </span>
                                     {!step.done && step.href && (
-                                        <span className="flex-shrink-0 text-[10px] font-bold tracking-wider uppercase text-orange-500 flex items-center gap-1">
-                                            {step.cta} <ArrowRight className="w-3 h-3" />
+                                        <span className="flex flex-shrink-0 items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-orange-500">
+                                            {step.cta} <ArrowRight className="h-3 w-3" />
                                         </span>
                                     )}
                                 </button>
@@ -157,24 +174,37 @@ function SetupChecklist({ competitionId }: { competitionId: string | null }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25 }}
             >
-                <h3 className="text-[10px] font-black tracking-[0.25em] uppercase text-neutral-400 mb-3">Quick Invite</h3>
+                <h3 className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400">
+                    Quick Invite
+                </h3>
                 <Card className="border-dashed">
                     <CardContent className="p-4">
                         {freshLink ? (
                             <div>
-                                <p className="text-xs font-bold text-green-600 dark:text-green-400 mb-2">Invite link ready</p>
-                                <div className="flex items-center gap-2 bg-neutral-50 dark:bg-neutral-800 rounded-xl px-3 py-2.5">
-                                    <p className="flex-1 text-[11px] font-mono text-neutral-600 dark:text-neutral-300 truncate">{freshLink}</p>
+                                <p className="mb-2 text-xs font-bold text-green-600 dark:text-green-400">
+                                    Invite link ready
+                                </p>
+                                <div className="flex items-center gap-2 rounded-xl bg-neutral-50 px-3 py-2.5 dark:bg-neutral-800">
+                                    <p className="flex-1 truncate font-mono text-[11px] text-neutral-600 dark:text-neutral-300">
+                                        {freshLink}
+                                    </p>
                                     <button
                                         onClick={handleCopy}
-                                        className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 rounded-lg text-[10px] font-bold uppercase tracking-widest"
+                                        className="flex flex-shrink-0 items-center gap-1.5 rounded-lg bg-neutral-900 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white dark:bg-white dark:text-neutral-900"
                                     >
-                                        {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                        {copied ? (
+                                            <Check className="h-3 w-3" />
+                                        ) : (
+                                            <Copy className="h-3 w-3" />
+                                        )}
                                         {copied ? 'Copied' : 'Copy'}
                                     </button>
                                 </div>
-                                <div className="flex justify-end mt-2">
-                                    <button onClick={() => router.push('/league/invites')} className="text-[10px] text-neutral-400 hover:text-neutral-700 underline underline-offset-2">
+                                <div className="mt-2 flex justify-end">
+                                    <button
+                                        onClick={() => router.push('/league/invites')}
+                                        className="text-[10px] text-neutral-400 underline underline-offset-2 hover:text-neutral-700"
+                                    >
                                         Manage all invites
                                     </button>
                                 </div>
@@ -182,15 +212,29 @@ function SetupChecklist({ competitionId }: { competitionId: string | null }) {
                         ) : (
                             <div className="flex items-center justify-between gap-3">
                                 <div>
-                                    <p className="text-sm font-bold text-neutral-800 dark:text-white">Invite a team or player</p>
-                                    <p className="text-xs text-neutral-400 mt-0.5">Share a link — no email required.</p>
+                                    <p className="text-sm font-bold text-neutral-800 dark:text-white">
+                                        Invite a team or player
+                                    </p>
+                                    <p className="mt-0.5 text-xs text-neutral-400">
+                                        Share a link — no email required.
+                                    </p>
                                 </div>
-                                <div className="flex gap-2 flex-shrink-0">
-                                    <Button size="sm" variant="secondary" onClick={handleGenerateInvite} disabled={createInvite.isPending} isLoading={createInvite.isPending}>
-                                        <Link2 className="w-3.5 h-3.5 mr-1.5" />
+                                <div className="flex flex-shrink-0 gap-2">
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={handleGenerateInvite}
+                                        disabled={createInvite.isPending}
+                                        isLoading={createInvite.isPending}
+                                    >
+                                        <Link2 className="mr-1.5 h-3.5 w-3.5" />
                                         Get Link
                                     </Button>
-                                    <Button size="sm" variant="ghost" onClick={() => router.push('/league/invites')}>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => router.push('/league/invites')}
+                                    >
                                         All Invites
                                     </Button>
                                 </div>
@@ -225,15 +269,21 @@ function KpiCard({ label, value, sub, accent = 'neutral', onClick, loading }: Kp
         <button
             onClick={onClick}
             disabled={!onClick}
-            className={`w-full text-left bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-4 transition-all ${onClick ? 'hover:shadow-md hover:border-neutral-200 dark:hover:border-neutral-700 active:scale-[0.98]' : ''}`}
+            className={`w-full rounded-2xl border border-neutral-100 bg-white p-4 text-left transition-all dark:border-neutral-800 dark:bg-neutral-900 ${onClick ? 'hover:border-neutral-200 hover:shadow-md active:scale-[0.98] dark:hover:border-neutral-700' : ''}`}
         >
-            <p className="text-[9px] font-black tracking-[0.2em] uppercase text-neutral-400 mb-2">{label}</p>
+            <p className="mb-2 text-[9px] font-black uppercase tracking-[0.2em] text-neutral-400">
+                {label}
+            </p>
             {loading ? (
-                <div className="h-7 w-10 bg-neutral-100 dark:bg-neutral-800 rounded animate-pulse" />
+                <div className="h-7 w-10 animate-pulse rounded bg-neutral-100 dark:bg-neutral-800" />
             ) : (
-                <p className={`text-2xl font-black leading-none ${accentClasses[accent]}`}>{value}</p>
+                <p className={`text-2xl font-black leading-none ${accentClasses[accent]}`}>
+                    {value}
+                </p>
             )}
-            {sub && !loading && <p className="text-[10px] text-neutral-400 mt-1 leading-snug">{sub}</p>}
+            {sub && !loading && (
+                <p className="mt-1 text-[10px] leading-snug text-neutral-400">{sub}</p>
+            )}
         </button>
     );
 }
@@ -251,12 +301,14 @@ interface RichEmptyProps {
 function RichEmpty({ icon, title, hint, cta, onCta }: RichEmptyProps) {
     return (
         <div className="flex flex-col items-center justify-center py-10 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-neutral-50 dark:bg-neutral-800 flex items-center justify-center text-neutral-300 dark:text-neutral-600 mb-3">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-neutral-50 text-neutral-300 dark:bg-neutral-800 dark:text-neutral-600">
                 {icon}
             </div>
             <p className="text-sm font-bold text-neutral-600 dark:text-neutral-300">{title}</p>
-            <p className="text-xs text-neutral-400 mt-1 max-w-xs leading-snug">{hint}</p>
-            <Button variant="secondary" size="sm" className="mt-4" onClick={onCta}>{cta}</Button>
+            <p className="mt-1 max-w-xs text-xs leading-snug text-neutral-400">{hint}</p>
+            <Button variant="secondary" size="sm" className="mt-4" onClick={onCta}>
+                {cta}
+            </Button>
         </div>
     );
 }
@@ -291,21 +343,32 @@ function OperationsDashboard({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
                     >
-                        <h2 className="text-[10px] font-black tracking-[0.25em] uppercase text-neutral-400 mb-3 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-orange-400" />
+                        <h2 className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400">
+                            <span className="h-2 w-2 rounded-full bg-orange-400" />
                             Needs Attention
                         </h2>
                         <div className="space-y-2">
                             {draftComps.map((comp) => (
                                 <div
                                     key={comp.id}
-                                    className="flex items-center justify-between p-4 rounded-2xl bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20"
+                                    className="flex items-center justify-between rounded-2xl border border-orange-100 bg-orange-50 p-4 dark:border-orange-500/20 dark:bg-orange-500/10"
                                 >
                                     <div>
-                                        <p className="text-sm font-bold text-neutral-900 dark:text-white">{comp.name}</p>
-                                        <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest mt-0.5">Draft — not published</p>
+                                        <p className="text-sm font-bold text-neutral-900 dark:text-white">
+                                            {comp.name}
+                                        </p>
+                                        <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-orange-500">
+                                            Draft — not published
+                                        </p>
                                     </div>
-                                    <Button variant="ghost" size="sm" className="text-orange-500" onClick={() => router.push(`/league/competitions/${comp.id}`)}>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-orange-500"
+                                        onClick={() =>
+                                            router.push(`/league/competitions/${comp.id}`)
+                                        }
+                                    >
                                         Set Up →
                                     </Button>
                                 </div>
@@ -317,20 +380,28 @@ function OperationsDashboard({
 
             {/* KPIs */}
             <motion.section variants={fadeUp} initial="hidden" animate="show">
-                <h2 className="text-[10px] font-black tracking-[0.25em] uppercase text-neutral-400 mb-3">Overview</h2>
+                <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400">
+                    Overview
+                </h2>
                 <div className="grid grid-cols-2 gap-3">
                     <KpiCard
                         label="Leagues"
                         value={competitions.length}
                         sub={`${competitions.filter((c) => c.status === 'active').length} active`}
-                        accent={competitions.filter((c) => c.status === 'active').length > 0 ? 'green' : 'neutral'}
+                        accent={
+                            competitions.filter((c) => c.status === 'active').length > 0
+                                ? 'green'
+                                : 'neutral'
+                        }
                         onClick={() => router.push('/league')}
                         loading={isLoading}
                     />
                     <KpiCard
                         label="Teams"
                         value={(teams as unknown[]).length}
-                        sub={(teams as unknown[]).length === 0 ? 'Add your first team' : 'registered'}
+                        sub={
+                            (teams as unknown[]).length === 0 ? 'Add your first team' : 'registered'
+                        }
                         accent={(teams as unknown[]).length === 0 ? 'orange' : 'neutral'}
                         onClick={() => router.push('/league/teams')}
                         loading={isLoading}
@@ -346,7 +417,11 @@ function OperationsDashboard({
                     <KpiCard
                         label="Live Now"
                         value={(liveMatches as unknown[]).length}
-                        sub={(liveMatches as unknown[]).length > 0 ? 'matches in progress' : 'No active matches'}
+                        sub={
+                            (liveMatches as unknown[]).length > 0
+                                ? 'matches in progress'
+                                : 'No active matches'
+                        }
                         accent={(liveMatches as unknown[]).length > 0 ? 'green' : 'neutral'}
                         onClick={() => router.push('/league/matches')}
                         loading={isLoading}
@@ -355,42 +430,66 @@ function OperationsDashboard({
             </motion.section>
 
             {/* Live Matches */}
-            <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-                <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-[10px] font-black tracking-[0.25em] uppercase text-neutral-400 flex items-center gap-2">
+            <motion.section
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+            >
+                <div className="mb-3 flex items-center justify-between">
+                    <h2 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400">
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400/40" />
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400/40" />
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500" />
                         </span>
                         Live
                     </h2>
-                    <button onClick={() => router.push('/league/matches')} className="text-[10px] font-bold text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 uppercase tracking-wider">
+                    <button
+                        onClick={() => router.push('/league/matches')}
+                        className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
+                    >
                         All →
                     </button>
                 </div>
                 {isLoading ? (
-                    <div className="space-y-3"><SkeletonMatchCard /><SkeletonMatchCard /></div>
+                    <div className="space-y-3">
+                        <SkeletonMatchCard />
+                        <SkeletonMatchCard />
+                    </div>
                 ) : (liveMatches as unknown[]).length > 0 ? (
                     <div className="space-y-3">
-                        {(liveMatches as Parameters<typeof MatchCard>[0]['homeTeam'][]).slice(0, 3).map((match) => {
-                            const m = match as unknown as Record<string, unknown>;
-                            return (
-                                <MatchCard
-                                    key={m.id as string}
-                                    homeTeam={(m.home_team as { id: string; name: string }) ?? { id: m.home_team_id as string ?? '', name: 'Home' }}
-                                    awayTeam={(m.away_team as { id: string; name: string }) ?? { id: m.away_team_id as string ?? '', name: 'Away' }}
-                                    homeScore={m.home_score as number}
-                                    awayScore={m.away_score as number}
-                                    status={m.status as MatchStatus}
-                                    matchTime={m.match_time as string ?? undefined}
-                                    onPress={() => router.push(`/league/referee/live/${m.id as string}`)}
-                                />
-                            );
-                        })}
+                        {(liveMatches as Parameters<typeof MatchCard>[0]['homeTeam'][])
+                            .slice(0, 3)
+                            .map((match) => {
+                                const m = match as unknown as Record<string, unknown>;
+                                return (
+                                    <MatchCard
+                                        key={m.id as string}
+                                        homeTeam={
+                                            (m.home_team as { id: string; name: string }) ?? {
+                                                id: (m.home_team_id as string) ?? '',
+                                                name: 'Home',
+                                            }
+                                        }
+                                        awayTeam={
+                                            (m.away_team as { id: string; name: string }) ?? {
+                                                id: (m.away_team_id as string) ?? '',
+                                                name: 'Away',
+                                            }
+                                        }
+                                        homeScore={m.home_score as number}
+                                        awayScore={m.away_score as number}
+                                        status={m.status as MatchStatus}
+                                        matchTime={(m.match_time as string) ?? undefined}
+                                        onPress={() =>
+                                            router.push(`/league/referee/live/${m.id as string}`)
+                                        }
+                                    />
+                                );
+                            })}
                     </div>
                 ) : (
                     <RichEmpty
-                        icon={<NavIcons.Matches className="w-6 h-6" />}
+                        icon={<NavIcons.Matches className="h-6 w-6" />}
                         title="No matches live yet"
                         hint="Start a match from the schedule when your teams are ready."
                         cta="View Fixtures"
@@ -404,30 +503,55 @@ function OperationsDashboard({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="grid md:grid-cols-2 gap-6"
+                className="grid gap-6 md:grid-cols-2"
             >
                 {/* Upcoming */}
                 <section>
-                    <h2 className="text-[10px] font-black tracking-[0.25em] uppercase text-neutral-400 mb-3">Upcoming</h2>
+                    <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400">
+                        Upcoming
+                    </h2>
                     {isLoading ? (
-                        <div className="space-y-3"><SkeletonMatchCard /></div>
+                        <div className="space-y-3">
+                            <SkeletonMatchCard />
+                        </div>
                     ) : (upcomingMatches as unknown[]).length > 0 ? (
                         <div className="space-y-3">
-                            {(upcomingMatches as Record<string, unknown>[]).slice(0, 3).map((match) => (
-                                <MatchCard
-                                    key={match.id as string}
-                                    homeTeam={(match.home_team as { id: string; name: string }) ?? { id: match.home_team_id as string ?? '', name: 'Home' }}
-                                    awayTeam={(match.away_team as { id: string; name: string }) ?? { id: match.away_team_id as string ?? '', name: 'Away' }}
-                                    status={match.status as MatchStatus}
-                                    matchTime={match.match_time as string ?? undefined}
-                                    date={match.scheduled_at ? new Date(match.scheduled_at as string).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'TBD'}
-                                    venue={match.venue as string ?? undefined}
-                                />
-                            ))}
+                            {(upcomingMatches as Record<string, unknown>[])
+                                .slice(0, 3)
+                                .map((match) => (
+                                    <MatchCard
+                                        key={match.id as string}
+                                        homeTeam={
+                                            (match.home_team as { id: string; name: string }) ?? {
+                                                id: (match.home_team_id as string) ?? '',
+                                                name: 'Home',
+                                            }
+                                        }
+                                        awayTeam={
+                                            (match.away_team as { id: string; name: string }) ?? {
+                                                id: (match.away_team_id as string) ?? '',
+                                                name: 'Away',
+                                            }
+                                        }
+                                        status={match.status as MatchStatus}
+                                        matchTime={(match.match_time as string) ?? undefined}
+                                        date={
+                                            match.scheduled_at
+                                                ? new Date(
+                                                      match.scheduled_at as string,
+                                                  ).toLocaleDateString('en-GB', {
+                                                      day: 'numeric',
+                                                      month: 'short',
+                                                  })
+                                                : 'TBD'
+                                        }
+                                        venue={(match.venue as string) ?? undefined}
+                                    />
+                                ))}
                         </div>
                     ) : (
                         <RichEmpty
-                            icon={<NavIcons.Calendar className="w-6 h-6" />}
+                            icon={<NavIcons.Calendar className="h-6 w-6" />}
                             title="Nothing scheduled yet"
                             hint="Build your fixture list to prepare for the season."
                             cta="Schedule a Match"
@@ -438,21 +562,48 @@ function OperationsDashboard({
 
                 {/* Quick Actions */}
                 <section>
-                    <h2 className="text-[10px] font-black tracking-[0.25em] uppercase text-neutral-400 mb-3">Quick Actions</h2>
+                    <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400">
+                        Quick Actions
+                    </h2>
                     <div className="grid grid-cols-2 gap-2">
                         {[
-                            { label: 'Add Team', icon: <NavIcons.Teams className="w-4 h-4" />, href: '/league/teams' },
-                            { label: 'Send Invite', icon: <NavIcons.Public className="w-4 h-4" />, href: '/league/invites' },
-                            { label: 'Schedule', icon: <NavIcons.Calendar className="w-4 h-4" />, href: '/league/matches/schedule' },
-                            { label: 'Standings', icon: <NavIcons.Standings className="w-4 h-4" />, href: '/league/standings' },
+                            {
+                                label: 'Add Team',
+                                icon: <NavIcons.Teams className="h-4 w-4" />,
+                                href: '/league/teams',
+                            },
+                            {
+                                label: 'Send Invite',
+                                icon: <NavIcons.Public className="h-4 w-4" />,
+                                href: '/league/invites',
+                            },
+                            {
+                                label: 'Schedule',
+                                icon: <NavIcons.Calendar className="h-4 w-4" />,
+                                href: '/league/matches/schedule',
+                            },
+                            {
+                                label: 'Standings',
+                                icon: <NavIcons.Standings className="h-4 w-4" />,
+                                href: '/league/standings',
+                            },
+                            {
+                                label: 'Registrations',
+                                icon: <NavIcons.Matches className="h-4 w-4" />,
+                                href: '/league/competitions',
+                            },
                         ].map((action) => (
                             <button
                                 key={action.href}
                                 onClick={() => router.push(action.href)}
-                                className="flex items-center gap-2.5 p-3.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/60 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-neutral-100 dark:border-neutral-700/50 transition-colors text-left"
+                                className="flex items-center gap-2.5 rounded-xl border border-neutral-100 bg-neutral-50 p-3.5 text-left transition-colors hover:bg-neutral-100 dark:border-neutral-700/50 dark:bg-neutral-800/60 dark:hover:bg-neutral-800"
                             >
-                                <span className="text-neutral-500 dark:text-neutral-400">{action.icon}</span>
-                                <span className="text-xs font-bold text-neutral-700 dark:text-neutral-300">{action.label}</span>
+                                <span className="text-neutral-500 dark:text-neutral-400">
+                                    {action.icon}
+                                </span>
+                                <span className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
+                                    {action.label}
+                                </span>
                             </button>
                         ))}
                     </div>
@@ -474,7 +625,9 @@ export default function AdminDashboard() {
 
     const { data: competitions = [], isLoading: compsLoading } = useCompetitions();
     const { data: liveMatches = [], isLoading: liveLoading } = useLiveMatches();
-    const { data: upcomingMatches = [], isLoading: upcomingLoading } = useMatches({ status: 'upcoming' });
+    const { data: upcomingMatches = [], isLoading: upcomingLoading } = useMatches({
+        status: 'upcoming',
+    });
     const { data: teams = [], isLoading: teamsLoading } = useTeams();
     const { data: invites = [] } = useInvites();
     const { data: org } = useOrganization();
@@ -488,7 +641,7 @@ export default function AdminDashboard() {
     const isSetupMode = !hasActive;
 
     const pendingInvites = (Array.isArray(invites) ? invites : []).filter(
-        (inv) => (inv as { status: string }).status === 'pending'
+        (inv) => (inv as { status: string }).status === 'pending',
     ).length;
 
     const handleCreateLeague = async () => {
@@ -523,21 +676,23 @@ export default function AdminDashboard() {
     return (
         <PageLayout title="PLYAZ">
             {/* Header row */}
-            <div className="flex items-center justify-between mb-6 md:mb-8 gap-3">
+            <div className="mb-6 flex items-center justify-between gap-3 md:mb-8">
                 <div>
-                    <p className="text-[10px] font-black tracking-[0.25em] uppercase text-neutral-400">Dashboard</p>
-                    <h1 className="text-xl md:text-2xl font-black text-neutral-900 dark:text-white mt-0.5">
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400">
+                        Dashboard
+                    </p>
+                    <h1 className="mt-0.5 text-xl font-black text-neutral-900 dark:text-white md:text-2xl">
                         {org?.name ?? 'Your League'}
                     </h1>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex flex-shrink-0 items-center gap-2">
                     {/* Pro banner condensed to a small badge */}
                     {!isLoading && org?.plan === 'free' && (
                         <button
                             onClick={() => router.push('/pricing')}
-                            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 text-orange-600 dark:text-orange-400 text-[10px] font-bold uppercase tracking-widest hover:bg-orange-100 transition-colors"
+                            className="hidden items-center gap-1.5 rounded-xl border border-orange-200 bg-orange-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-orange-600 transition-colors hover:bg-orange-100 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-400 sm:flex"
                         >
-                            <NavIcons.Trophy className="w-3.5 h-3.5" />
+                            <NavIcons.Trophy className="h-3.5 w-3.5" />
                             Upgrade
                         </button>
                     )}
@@ -551,7 +706,10 @@ export default function AdminDashboard() {
             {compsLoading && (
                 <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-20 bg-neutral-100 dark:bg-neutral-800 rounded-2xl animate-pulse" />
+                        <div
+                            key={i}
+                            className="h-20 animate-pulse rounded-2xl bg-neutral-100 dark:bg-neutral-800"
+                        />
                     ))}
                 </div>
             )}
@@ -563,11 +721,15 @@ export default function AdminDashboard() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="flex flex-col items-center justify-center py-20 text-center"
                 >
-                    <div className="w-16 h-16 rounded-3xl bg-neutral-50 dark:bg-neutral-800 flex items-center justify-center text-neutral-300 mb-4">
-                        <NavIcons.Trophy className="w-8 h-8" />
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-neutral-50 text-neutral-300 dark:bg-neutral-800">
+                        <NavIcons.Trophy className="h-8 w-8" />
                     </div>
-                    <h2 className="text-lg font-black text-neutral-900 dark:text-white">Create your first league</h2>
-                    <p className="text-sm text-neutral-400 mt-2 max-w-xs">Set up competitions, add teams, and manage everything in one place.</p>
+                    <h2 className="text-lg font-black text-neutral-900 dark:text-white">
+                        Create your first league
+                    </h2>
+                    <p className="mt-2 max-w-xs text-sm text-neutral-400">
+                        Set up competitions, add teams, and manage everything in one place.
+                    </p>
                     <Button className="mt-6" onClick={() => setIsCreateLeagueOpen(true)}>
                         Create League
                     </Button>
@@ -622,8 +784,14 @@ export default function AdminDashboard() {
                         onChange={(e) => setNewLeague({ ...newLeague, startDate: e.target.value })}
                     />
                     <div className="flex justify-end gap-3 pt-2">
-                        <Button variant="secondary" onClick={() => setIsCreateLeagueOpen(false)}>Cancel</Button>
-                        <Button onClick={handleCreateLeague} disabled={!newLeague.name.trim() || isCreating} isLoading={isCreating}>
+                        <Button variant="secondary" onClick={() => setIsCreateLeagueOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleCreateLeague}
+                            disabled={!newLeague.name.trim() || isCreating}
+                            isLoading={isCreating}
+                        >
                             Create
                         </Button>
                     </div>
