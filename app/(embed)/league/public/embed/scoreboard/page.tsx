@@ -6,14 +6,30 @@ export default function EmbedScoreboard() {
     const [matches, setMatches] = useState<Match[]>([]);
 
     useEffect(() => {
+        const competitionId =
+            typeof window !== 'undefined'
+                ? new URLSearchParams(window.location.search).get('competitionId')
+                : null;
+        const compParam = competitionId ? `&competitionId=${competitionId}` : '';
+
         async function load() {
-            const [live, upcoming] = await Promise.all([
-                fetch('/api/league/public/matches?status=live').then((r) => (r.ok ? r.json() : [])),
-                fetch('/api/league/public/matches?status=scheduled').then((r) =>
+            const [live, completed, upcoming] = await Promise.all([
+                fetch(`/api/league/public/matches?status=live${compParam}`).then((r) =>
+                    r.ok ? r.json() : [],
+                ),
+                fetch(`/api/league/public/matches?status=completed${compParam}`).then((r) =>
+                    r.ok ? r.json() : [],
+                ),
+                fetch(`/api/league/public/matches?status=scheduled${compParam}`).then((r) =>
                     r.ok ? r.json() : [],
                 ),
             ]);
-            setMatches([...(live as Match[]), ...(upcoming as Match[])].slice(0, 10));
+            setMatches(
+                [...(live as Match[]), ...(completed as Match[]), ...(upcoming as Match[])].slice(
+                    0,
+                    10,
+                ),
+            );
         }
         void load();
         const interval = setInterval(() => {

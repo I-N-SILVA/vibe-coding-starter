@@ -60,3 +60,6 @@ blob-report/
 e2e/.auth/
 .env
 .claude/worktrees/
+
+# TestSprite run artifacts (logs, configs) — keep reports, ignore tmp
+testsprite_tests/tmp/
