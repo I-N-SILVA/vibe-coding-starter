@@ -5,7 +5,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import { queryKeys } from './query-keys';
-import type { CreateGroupDto, CreateRegistrationDto } from '@/types';
+import type { CreateGroupDto } from '@/types';
 
 // ============================================
 // GROUP HOOKS
@@ -59,22 +59,5 @@ export function useRegistrations(competitionId: string) {
         queryKey: queryKeys.registrations(competitionId),
         queryFn: () => apiClient.get(`/api/league/competitions/${competitionId}/registrations`),
         enabled: !!competitionId,
-    });
-}
-
-export function useCreateRegistration() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (data: CreateRegistrationDto) =>
-            apiClient.post(`/api/league/competitions/${data.competitionId}/registrations`, data),
-        onSuccess: (_, variables) => {
-            const competitionId = variables.competitionId || variables.competition_id || '';
-            if (competitionId) {
-                queryClient.invalidateQueries({
-                    queryKey: queryKeys.registrations(competitionId),
-                });
-            }
-        },
     });
 }

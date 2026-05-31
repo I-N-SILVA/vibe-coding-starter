@@ -1,76 +1,50 @@
 import { NextResponse } from 'next/server';
-import { log } from '@/lib/logger';
+import { z } from 'zod';
+import { createClient } from '@/lib/supabase/server';
+import { getAuthUser, apiError, parseBody } from '@/lib/api/helpers';
+import { rateLimit } from '@/lib/api/rate-limit';
+import { sendWhatsAppNotification } from '@/lib/notifications/whatsapp';
 
-export type WhatsAppNotificationType = 'match_start' | 'goal' | 'full_time';
+const whatsappSchema = z.object({
+    matchId: z.string().uuid(),
+    type: z.enum(['match_start', 'goal', 'full_time']),
+    recipientPhone: z
+        .string()
+        .min(6)
+        .max(20)
+        .regex(/^\+?[0-9]+$/, 'Invalid phone number'),
+    message: z.string().min(1).max(1000),
+});
 
-interface WhatsAppPayload {
-    matchId: string;
-    type: WhatsAppNotificationType;
-    recipientPhone: string;
-    message: string;
-}
-
+/**
+ * POST /api/notifications/whatsapp
+ *
+ * Authenticated + rate-limited. Internal callers (e.g. match-end) use the
+ * `sendWhatsAppNotification` lib function directly instead of this route, so
+ * this endpoint no longer exposes unauthenticated outbound messaging.
+ */
 export async function POST(request: Request) {
-    let body: WhatsAppPayload;
-    try {
-        body = (await request.json()) as WhatsAppPayload;
-    } catch {
-        return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-    }
+    const limited = await rateLimit(request, 10, 60_000);
+    if (limited) return limited;
 
-    const { matchId, type, recipientPhone, message } = body;
+    const supabase = await createClient();
+    const auth = await getAuthUser(supabase);
+    if (auth.error) return auth.error;
 
-    if (!matchId || !type || !recipientPhone || !message) {
-        return NextResponse.json(
-            { error: 'Missing required fields: matchId, type, recipientPhone, message' },
-            { status: 400 },
-        );
-    }
+    const { data, error } = await parseBody(request, whatsappSchema);
+    if (error) return error;
 
-    const apiKey = process.env.CALLMEBOT_API_KEY;
+    const result = await sendWhatsAppNotification(data);
 
-    if (!apiKey) {
-        log.info('[WhatsApp] No CALLMEBOT_API_KEY configured — notification queued', {
-            matchId,
-            type,
-            recipientPhone: recipientPhone.slice(0, 6) + '****',
-        });
-        return NextResponse.json({ queued: true, reason: 'no_provider_configured' });
-    }
-
-    try {
-        const encoded = encodeURIComponent(message);
-        const url = `https://api.callmebot.com/whatsapp.php?phone=${recipientPhone}&text=${encoded}&apikey=${apiKey}`;
-
-        const resp = await fetch(url, { method: 'GET' });
-
-        if (!resp.ok) {
-            const text = await resp.text();
-            log.warn('[WhatsApp] CallMeBot returned non-OK status', {
-                status: resp.status,
-                body: text,
-                matchId,
-                type,
-            });
-            return NextResponse.json(
-                { sent: false, reason: 'provider_error', detail: text },
-                { status: 502 },
-            );
+    if (!result.sent) {
+        if (result.reason === 'no_provider_configured') {
+            return NextResponse.json({ queued: true, reason: result.reason });
         }
-
-        log.info('[WhatsApp] Notification sent', {
-            matchId,
-            type,
-            recipientPhone: recipientPhone.slice(0, 6) + '****',
-        });
-
-        return NextResponse.json({ sent: true });
-    } catch (err) {
-        log.error('[WhatsApp] Failed to call CallMeBot', {
-            error: err instanceof Error ? err.message : String(err),
-            matchId,
-            type,
-        });
-        return NextResponse.json({ error: 'Notification delivery failed' }, { status: 500 });
+        if (result.reason === 'provider_error') {
+            return NextResponse.json({ sent: false, reason: result.reason }, { status: 502 });
+        }
+        return apiError('Notification delivery failed', 500);
     }
+
+    return NextResponse.json({ sent: true });
 }

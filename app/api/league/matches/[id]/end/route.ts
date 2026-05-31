@@ -4,6 +4,8 @@ import { getUserOrgId, apiError } from '@/lib/api/helpers';
 import { log } from '@/lib/logger';
 import { sendEmail, APP_URL } from '@/lib/email/send';
 import { matchResultEmail } from '@/lib/email/templates';
+import { recalculateCompetitionStandings } from '@/lib/standings/recalculate';
+import { sendWhatsAppNotification } from '@/lib/notifications/whatsapp';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -12,7 +14,6 @@ async function fireWhatsAppNotifications(
     orgId: string,
     type: 'match_start' | 'full_time',
     message: string,
-    baseUrl: string,
 ) {
     try {
         const supabase = await createClient();
@@ -25,26 +26,19 @@ async function fireWhatsAppNotifications(
 
         if (error || !profiles?.length) return;
 
-        for (const profile of profiles) {
-            if (!profile.phone) continue;
-
-            fetch(`${baseUrl}/api/notifications/whatsapp`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    matchId,
-                    type,
-                    recipientPhone: profile.phone,
-                    message,
-                }),
-            }).catch((err: unknown) => {
-                log.warn('[WhatsApp] Fire-and-forget notification failed', {
-                    error: err instanceof Error ? err.message : String(err),
-                    matchId,
-                    type,
-                });
-            });
-        }
+        // Send directly in-process — no unauthenticated HTTP self-call.
+        await Promise.allSettled(
+            profiles
+                .filter((p) => p.phone)
+                .map((p) =>
+                    sendWhatsAppNotification({
+                        matchId,
+                        type,
+                        recipientPhone: p.phone as string,
+                        message,
+                    }),
+                ),
+        );
     } catch (err) {
         log.warn('[WhatsApp] Failed to query profiles for notifications', {
             error: err instanceof Error ? err.message : String(err),
@@ -53,7 +47,7 @@ async function fireWhatsAppNotifications(
     }
 }
 
-export async function POST(request: Request, { params }: RouteParams) {
+export async function POST(_request: Request, { params }: RouteParams) {
     const { id } = await params;
     const supabase = await createClient();
     const auth = await getUserOrgId(supabase);
@@ -175,26 +169,26 @@ export async function POST(request: Request, { params }: RouteParams) {
     })();
 
     // Fire WhatsApp notifications in the background (non-blocking)
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
-    fireWhatsAppNotifications(
+    void fireWhatsAppNotifications(
         id,
         auth.orgId!,
         'full_time',
         'Full time! The match has ended. Check the app for results. 🏁',
-        baseUrl,
     );
 
-    // Recalculate standings in the background (non-blocking) for this competition
-    fetch(`${baseUrl}/api/league/standings/recalculate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ competitionId: data.competition_id }),
-    }).catch((err: unknown) => {
-        log.warn('[Standings] Background recalculation failed', {
-            error: err instanceof Error ? err.message : String(err),
-            matchId: id,
-        });
-    });
+    // Recalculate standings in-process (non-blocking) for this competition.
+    // Uses the service-role client directly — no public HTTP recalculation route.
+    void (async () => {
+        try {
+            const { createAdminClient } = await import('@/lib/supabase/server');
+            await recalculateCompetitionStandings(createAdminClient(), data.competition_id);
+        } catch (err) {
+            log.warn('[Standings] Background recalculation failed', {
+                error: err instanceof Error ? err.message : String(err),
+                matchId: id,
+            });
+        }
+    })();
 
     return NextResponse.json(data);
 }

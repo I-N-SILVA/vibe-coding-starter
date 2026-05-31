@@ -1,15 +1,25 @@
-import { createAdminClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { apiError } from '@/lib/api/helpers';
+import { getUserOrgId, apiError } from '@/lib/api/helpers';
 
 /**
  * POST /api/admin/enable-demo-recruiting
  *
  * Sets is_recruiting_players = true on all teams belonging to the
  * 'plyaz-demo-league' organisation so they surface in Discovery.
- * Uses the service-role client to bypass RLS.
+ * Requires an authenticated admin/organizer (was previously unauthenticated).
+ * Uses the service-role client to bypass RLS for the write.
  */
 export async function POST() {
+    const authClient = await createClient();
+    const auth = await getUserOrgId(authClient);
+    if (auth.error) return auth.error;
+
+    const role = (auth.user as { role?: string } | null)?.role;
+    if (role !== 'admin' && role !== 'organizer') {
+        return apiError('Forbidden: admin or organizer role required', 403);
+    }
+
     let supabase;
     try {
         supabase = createAdminClient();

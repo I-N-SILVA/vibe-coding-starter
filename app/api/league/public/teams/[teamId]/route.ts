@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { apiError } from '@/lib/api/helpers';
 
 type RouteParams = { params: Promise<{ teamId: string }> };
@@ -11,6 +12,12 @@ type RouteParams = { params: Promise<{ teamId: string }> };
 export async function GET(_request: Request, { params }: RouteParams) {
     const { teamId } = await params;
 
+    // Validate the UUID before it reaches the PostgREST `.or()` filter below —
+    // an unvalidated value would allow filter-clause injection on the admin client.
+    if (!z.string().uuid().safeParse(teamId).success) {
+        return apiError('Invalid team id', 400);
+    }
+
     let supabase;
     try {
         supabase = createAdminClient();
@@ -19,11 +26,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
     }
 
     const [teamResult, playersResult, matchesResult] = await Promise.all([
-        supabase
-            .from('teams')
-            .select('*')
-            .eq('id', teamId)
-            .single(),
+        supabase.from('teams').select('*').eq('id', teamId).single(),
         supabase
             .from('players')
             .select('*')
@@ -31,11 +34,13 @@ export async function GET(_request: Request, { params }: RouteParams) {
             .order('jersey_number', { ascending: true }),
         supabase
             .from('matches')
-            .select(`
+            .select(
+                `
                 *,
                 home_team:teams!home_team_id(id, name, short_name, logo_url),
                 away_team:teams!away_team_id(id, name, short_name, logo_url)
-            `)
+            `,
+            )
             .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
             .not('status', 'in', '("cancelled","postponed")')
             .order('scheduled_at', { ascending: true })

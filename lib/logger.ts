@@ -15,6 +15,26 @@ interface LogEntry {
 
 const isDev = process.env.NODE_ENV === 'development';
 
+/**
+ * Optional error-reporting hook (e.g. Sentry). Registered at runtime from
+ * `instrumentation.ts` so the logger has no build-time dependency on any
+ * monitoring SDK — `log.error` forwards here when a reporter is present.
+ * See docs/observability.md for the Sentry wiring.
+ */
+type ErrorReporter = (message: string, meta?: Record<string, unknown>) => void;
+declare global {
+     
+    var __plyazErrorReporter: ErrorReporter | undefined;
+}
+
+function reportError(message: string, meta?: Record<string, unknown>) {
+    try {
+        globalThis.__plyazErrorReporter?.(message, meta);
+    } catch {
+        // never let error reporting throw inside the logger
+    }
+}
+
 function emit(level: LogLevel, message: string, meta?: Record<string, unknown>) {
     const entry: LogEntry = {
         level,
@@ -26,12 +46,19 @@ function emit(level: LogLevel, message: string, meta?: Record<string, unknown>) 
     if (isDev) {
         const prefix = `[${level.toUpperCase()}]`;
         const metaStr = meta ? ` ${JSON.stringify(meta)}` : '';
-        const fn = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log;
+        const fn =
+            level === 'error' ? console.error : level === 'warn' ? console.warn : console.log;
         fn(`${prefix} ${message}${metaStr}`);
     } else {
         // Structured JSON for production log aggregators
-        const fn = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log;
+        const fn =
+            level === 'error' ? console.error : level === 'warn' ? console.warn : console.log;
         fn(JSON.stringify(entry));
+    }
+
+    // Forward errors to the registered monitoring reporter (Sentry, etc.), if any.
+    if (level === 'error') {
+        reportError(message, meta);
     }
 }
 

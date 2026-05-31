@@ -68,3 +68,7 @@ testsprite_tests/tmp/config.json
 
 # build artifacts
 tsconfig.tsbuildinfo
+
+# QA report inputs (binaries)
+codeleague.pdf
+*.pdf
