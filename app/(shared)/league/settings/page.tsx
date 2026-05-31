@@ -21,7 +21,7 @@ import { stagger, fadeUp } from '@/lib/animations';
 import { useRouter } from 'next/navigation';
 
 export default function AdminSettings() {
-    const { success, error: toastError } = useToast();
+    const { success, error: toastError, warning } = useToast();
     const { data: org } = useOrganization();
     const router = useRouter();
     const [isPortalLoading, setIsPortalLoading] = useState(false);
@@ -80,8 +80,16 @@ export default function AdminSettings() {
             setIsPortalLoading(true);
             const res = await fetch('/api/stripe/portal', { method: 'POST' });
             const { url, error } = await res.json();
-            if (url) window.location.href = url;
-            else throw new Error(error || 'Failed to open billing portal');
+            if (url) {
+                window.location.href = url;
+                return;
+            }
+            // 400 = org has no Stripe subscription yet (free/seeded org). Inform, don't alarm.
+            if (res.status === 400) {
+                warning(error || 'No active subscription to manage yet.');
+                return;
+            }
+            throw new Error(error || 'Failed to open billing portal');
         } catch (err) {
             toastError(err instanceof Error ? err.message : 'Something went wrong');
         } finally {

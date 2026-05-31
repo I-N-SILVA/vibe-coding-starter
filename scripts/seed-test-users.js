@@ -71,28 +71,60 @@ async function ensureUser(u) {
         id = data.user.id;
     }
     // Upsert profile (works whether or not a DB trigger pre-created it)
-    const { error: pErr } = await db
-        .from('profiles')
-        .upsert(
-            {
-                id,
-                email: u.email,
-                full_name: u.fullName,
-                role: u.role,
-                approval_status: 'approved',
-            },
-            { onConflict: 'id' },
-        );
+    const { error: pErr } = await db.from('profiles').upsert(
+        {
+            id,
+            email: u.email,
+            full_name: u.fullName,
+            role: u.role,
+            approval_status: 'approved',
+        },
+        { onConflict: 'id' },
+    );
     if (pErr) throw new Error(`profile upsert ${u.email}: ${pErr.message}`);
     return id;
 }
 
 async function wipeSeedOrg() {
-    const { data } = await db.from('organizations').select('id').eq('slug', ORG_SLUG);
+    const { data, error: selErr } = await db
+        .from('organizations')
+        .select('id')
+        .eq('slug', ORG_SLUG);
+    if (selErr) throw new Error(`wipe: select org failed: ${selErr.message}`);
+
     for (const o of data || []) {
-        // Detach profiles pointing at this org, then cascade-delete the org
-        await db.from('profiles').update({ organization_id: null }).eq('organization_id', o.id);
-        await db.from('organizations').delete().eq('id', o.id); // cascades to competitions/teams/etc.
+        // Deleting the org via cascade fails: competitions cascade tries to SET NULL on
+        // player_competition_stats.competition_id, which is NOT NULL (Postgres 23502). Delete
+        // the competitions explicitly first (clearing pcs defensively) to avoid the bad
+        // cascade ordering, then detach profiles, then delete the org. Errors are checked —
+        // the original swallowed the failure, so a stale org silently survived and the next
+        // run collided on the unique slug.
+        const { data: comps } = await db
+            .from('competitions')
+            .select('id')
+            .eq('organization_id', o.id);
+        const compIds = (comps || []).map((c) => c.id);
+
+        if (compIds.length) {
+            const { error: pcsErr } = await db
+                .from('player_competition_stats')
+                .delete()
+                .in('competition_id', compIds);
+            if (pcsErr && pcsErr.code !== '42P01')
+                throw new Error(`wipe: clear player_competition_stats failed: ${pcsErr.message}`);
+
+            const { error: compErr } = await db.from('competitions').delete().in('id', compIds);
+            if (compErr) throw new Error(`wipe: delete competitions failed: ${compErr.message}`);
+        }
+
+        const { error: detachErr } = await db
+            .from('profiles')
+            .update({ organization_id: null })
+            .eq('organization_id', o.id);
+        if (detachErr) throw new Error(`wipe: detach profiles failed: ${detachErr.message}`);
+
+        const { error: delErr } = await db.from('organizations').delete().eq('id', o.id);
+        if (delErr) throw new Error(`wipe: delete org failed: ${delErr.message}`);
     }
 }
 

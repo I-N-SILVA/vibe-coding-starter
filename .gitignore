@@ -63,3 +63,5 @@ e2e/.auth/
 
 # TestSprite run artifacts (logs, configs) — keep reports, ignore tmp
 testsprite_tests/tmp/
+
+testsprite_tests/tmp/config.json
